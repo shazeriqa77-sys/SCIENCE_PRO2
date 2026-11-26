@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Form 2 Exploration Portal</title>
+    
+    <style>
+        /* Base & Layout Settings */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Header Styling */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC); 
+            border-bottom: 4px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
+            text-align: center;
+        }
+
+        .header-container img { transition: transform 0.3s ease; }
+        .header-container img:hover { transform: scale(1.05); }
+
+        /* Navigation Bar (Uniform 42px) */
+        .navbar {
+            background-color: #1a2a6c;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0; 
+            z-index: 100;
+        }
+
+        .navbar a {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 0 16px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .navbar a:hover {
+            background-color: #00c6ff;
+            color: #0d1b2a;
+        }
+
+        .navbar a.active-link {
+            background-color: #00c6ff !important;
+            color: #0d1b2a !important;
+            border-radius: 8px !important;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Dropdown Menu Sub-bab */
+        .dropdown { display: inline-flex; align-items: center; position: relative; }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #ffffff;
+            min-width: 280px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 101;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            max-height: 400px;
+            overflow-y: auto; 
+        }
+
+        .dropdown-content a {
+            color: #333333;
+            padding: 12px 16px;
+            display: block;
+            font-size: 14px;
+            border-bottom: 1px solid #eeeeee;
+            font-weight: normal;
+            text-align: left;
+            height: auto;
+            border-radius: 0;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #e3f2fd;
+            padding-left: 24px; 
+            color: #0052D4;
+            font-weight: bold;
+        }
+
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* Kedudukan Butang Profil & Dropdown Penjuru Kanan Navbar */
+        .nav-right-user {
+            margin-left: auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-btn-pandai {
+            background: linear-gradient(135deg, #00c6ff, #0052D4);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 25px;
+            padding: 4px 14px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .avatar-btn-pandai:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0, 198, 255, 0.4);
+        }
+
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 115%;
+            right: 0;
+            background: #ffffff;
+            min-width: 230px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 1000;
+            border: 1px solid #e2e8f0;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .user-dropdown-menu.show { display: block; }
+
+        .user-dropdown-header {
+            background: linear-gradient(135deg, #1a2a6c, #0052D4);
+            color: white;
+            padding: 14px;
+            font-size: 13px;
+        }
+
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333333;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .user-dropdown-item:hover {
+            background-color: #e3f2fd;
+            color: #0052D4;
+        }
+
+        .user-dropdown-divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 4px 0;
+        }
+
+        /* Main Content Container */
+        .main-content {
+            padding: 40px 20px;
+            text-align: center;
+            flex: 1; 
+            background-color: #ffffff;
+            margin: 30px auto; 
+            max-width: 1050px;
+            width: 90%;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Profile Card Styling */
+        .profile-card-pandai {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 0 auto 30px auto;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        /* Shortcut Cards */
+        .card-shortcut {
+            text-decoration: none; 
+            color: inherit; 
+            width: 220px; 
+            padding: 25px; 
+            border-radius: 15px; 
+            display: block; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card-shortcut:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Quote Section */
+        .quote-container {
+            background-color: #e1f5fe; 
+            border-left: 8px solid #03a9f4; 
+            padding: 20px; 
+            border-radius: 8px; 
+            max-width: 650px; 
+            margin: 0 auto 40px auto; 
+            text-align: left;
+        }
+
+        /* Footer & Visitor Counter */
+        .footer {
+            background-color: #0d1b2a;
+            color: #cccccc;
+            text-align: center;
+            padding: 25px 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-top: auto;
+        }
+
+        .footer span.highlight { color: #00c6ff; font-weight: bold; }
+        
+        .visitor-counter {
+            display: inline-block;
+            background-color: #00c6ff;
+            color: #0d1b2a;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            box-shadow: 0 0 15px rgba(0, 198, 255, 0.5);
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-msg {
+            background-color: #ffffff;
+            color: #333333;
+            padding: 14px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            min-width: 280px;
+            opacity: 0;
+            transform: translateX(100%);
+            animation: slideIn 0.3s forwards;
+            border-left: 5px solid #00c6ff;
+        }
+
+        .toast-msg.success { border-left-color: #28a745; }
+        .toast-msg.error { border-left-color: #dc3545; }
+        .toast-msg.info { border-left-color: #0052D4; }
+        .toast-msg span.icon { font-size: 18px; margin-right: 10px; }
+
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Mod Gelap Styles */
+        body.dark-mode { background-color: #0f172a !important; color: #f1f5f9 !important; }
+        body.dark-mode .main-content { background-color: #1e293b !important; color: #f1f5f9 !important; box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
+
+        body.dark-mode .main-content h1, 
+        body.dark-mode .main-content h2, 
+        body.dark-mode .main-content h3, 
+        body.dark-mode .main-content h4, 
+        body.dark-mode .panel-kawan h3, 
+        body.dark-mode .panel-kawan h4, 
+        body.dark-mode .panel-kawan label, 
+        body.dark-mode .quiz-panel h3, 
+        body.dark-mode .quiz-panel h4, 
+        body.dark-mode .leaderboard-panel h3, 
+        body.dark-mode .quest-panel h3, 
+        body.dark-mode .flashcard-panel h3, 
+        body.dark-mode .shop-panel h3 { color: #38bdf8 !important; }
+
+        body.dark-mode .main-content p, body.dark-mode .quote-text { color: #cbd5e1 !important; }
+        
+        body.dark-mode .panel-kawan, 
+        body.dark-mode .leaderboard-panel, 
+        body.dark-mode .quest-panel, 
+        body.dark-mode .flashcard-panel, 
+        body.dark-mode .shop-panel,
+        body.dark-mode .profile-card-pandai {
+            background: #0f172a !important; 
+            border-color: #334155 !important; 
+            color: #f1f5f9 !important;
+        }
+
+        body.dark-mode .profile-card-pandai div[style*="background: #f8fbff"],
+        body.dark-mode .profile-card-pandai div[style*="background: #f1f5f9"] {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+        }
+
+        body.dark-mode .profile-card-pandai h2,
+        body.dark-mode #statSkor,
+        body.dark-mode #statTotalKuiz,
+        body.dark-mode #statStreak {
+            color: #38bdf8 !important;
+        }
+
+        body.dark-mode .senarai-box, body.dark-mode .leaderboard-item, body.dark-mode .shop-item, body.dark-mode .quest-item {
+            background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important;
+        }
+
+        body.dark-mode .nama-kawan-text { color: #38bdf8 !important; }
+        body.dark-mode input[type="text"], body.dark-mode select { background: #0f172a !important; color: #ffffff !important; border-color: #334155 !important; }
+        body.dark-mode .card-shortcut { background-color: #0f172a !important; border-color: #334155 !important; }
+        body.dark-mode .quote-container { background-color: #0f172a !important; border-left-color: #00c6ff !important; }
+
+        body.dark-mode .user-dropdown-menu {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+        }
+        body.dark-mode .user-dropdown-item {
+            color: #f1f5f9 !important;
+            border-color: #334155 !important;
+        }
+        body.dark-mode .user-dropdown-item:hover {
+            background-color: #334155 !important;
+            color: #38bdf8 !important;
+        }
+
+        .btn-dark-toggle {
+            background-color: #334155;
+            color: #ffffff;
+            border: 2px solid #00c6ff;
+            height: 42px;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        .btn-dark-toggle:hover { background-color: #00c6ff; color: #0d1b2a; }
+
+        /* Panel Standard Box */
+        .panel-box {
+            max-width: 500px; margin: 30px auto; background: #ffffff; padding: 25px;
+            border-radius: 15px; border: 2px solid #e2e8f0; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: background 0.3s, border-color 0.3s;
+        }
+
+        /* Quiz Panel & XP */
+        .quiz-panel {
+            max-width: 500px; margin: 30px auto; background: #fff8e1; padding: 25px;
+            border-radius: 15px; border: 2px solid #ffe082; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: background 0.3s, border-color 0.3s;
+        }
+
+        .badge-pill {
+            display: inline-block; background: #e0f2f1; color: #004d40; padding: 4px 12px;
+            border-radius: 20px; font-size: 12px; font-weight: bold; margin-right: 5px; margin-top: 5px;
+        }
+        body.dark-mode .badge-pill { background: #334155 !important; color: #38bdf8 !important; }
+
+        .quiz-opt-btn {
+            display: block; width: 100%; text-align: left; background: #ffffff; border: 1px solid #ffe082;
+            padding: 10px 14px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: 0.2s; font-weight: 500;
+        }
+        .quiz-opt-btn:hover { background: #fff3e0; border-color: #ffb300; }
+        body.dark-mode .quiz-opt-btn { background: #0f172a !important; color: #f1f5f9 !important; border-color: #334155 !important; }
+        body.dark-mode .quiz-opt-btn:hover { background: #334155 !important; border-color: #38bdf8 !important; }
+
+        /* XP Progress Bar */
+        .xp-bar-bg { width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 12px; overflow: hidden; margin-top: 6px; margin-bottom: 12px; }
+        .xp-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #ffb300, #ff8f00); transition: width 0.4s ease-in-out; }
+
+        /* Avatar Selector */
+        .avatar-badge { font-size: 20px; vertical-align: middle; margin-right: 6px; }
+        .avatar-opt-btn {
+            background: #e3f2fd; border: 1px solid #90caf9; border-radius: 50%;
+            width: 32px; height: 32px; font-size: 16px; cursor: pointer; transition: 0.2s;
+        }
+        .avatar-opt-btn:hover { transform: scale(1.2); background: #00c6ff; }
+
+        /* Bingkai Avatar */
+        .frame-none { border: none; }
+        .frame-gold { border: 3px solid #ffd700 !important; box-shadow: 0 0 10px #ffd700; border-radius: 50%; padding: 2px; }
+        .frame-neon { border: 3px solid #00e5ff !important; box-shadow: 0 0 10px #00e5ff; border-radius: 50%; padding: 2px; }
+
+        /* FLASHCARD 3D FLIP */
+        .flashcard-container { perspective: 1000px; width: 100%; height: 160px; margin: 15px 0; cursor: pointer; }
+        .flashcard-inner {
+            position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s;
+            transform-style: preserve-3d; border-radius: 12px; background: #e3f2fd; border: 2px solid #90caf9; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .flashcard-container.flipped .flashcard-inner { transform: rotateY(180deg); }
+        .flashcard-front, .flashcard-back {
+            position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden;
+            backface-visibility: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px;
+        }
+        .flashcard-back { background: #e8f5e9; border-radius: 12px; transform: rotateY(180deg); color: #1b5e20; }
+        body.dark-mode .flashcard-inner { background: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.dark-mode .flashcard-back { background: #1e293b !important; color: #4ade80 !important; }
+
+        /* Mini Chat Popup */
+        #kotakSembangPopup {
+            position: fixed; bottom: 20px; left: 20px; width: 320px; height: 420px;
+            background-color: #ffffff; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.2); z-index: 999;
+            display: none; flex-direction: column; overflow: hidden; border: 2px solid #00c6ff; transition: background 0.3s;
+        }
+        body.dark-mode #kotakSembangPopup { background-color: #1e293b !important; border-color: #38bdf8 !important; }
+        .chat-header {
+            background: linear-gradient(135deg, #1a2a6c, #0052D4); color: #ffffff;
+            padding: 12px 15px; font-weight: bold; font-size: 14px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; background: #f8fbff; }
+        body.dark-mode .chat-messages { background: #0f172a !important; }
+        .chat-bubble { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 13px; line-height: 1.4; word-wrap: break-word; }
+        .chat-bubble.me { align-self: flex-end; background-color: #0052D4; color: #ffffff; border-bottom-right-radius: 2px; }
+        .chat-bubble.them { align-self: flex-start; background-color: #e2e8f0; color: #1e293b; border-bottom-left-radius: 2px; }
+        body.dark-mode .chat-bubble.them { background-color: #334155 !important; color: #f1f5f9 !important; }
+        .chat-time { font-size: 10px; opacity: 0.7; margin-top: 3px; text-align: right; }
+        .chat-input-box { display: flex; padding: 8px; background: #ffffff; border-top: 1px solid #dddddd; gap: 6px; }
+        body.dark-mode .chat-input-box { background: #1e293b !important; border-color: #334155 !important; }
+
+        /* Leaderboard Panel */
+        .leaderboard-panel {
+            max-width: 500px; margin: 30px auto; background: #f3e5f5; padding: 25px;
+            border-radius: 15px; border: 2px solid #ce93d8; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: background 0.3s, border-color 0.3s;
+        }
+        .leaderboard-item {
+            background: #ffffff; padding: 10px 14px; margin-bottom: 8px; border-radius: 8px;
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid #e1bee7; font-weight: bold; font-size: 14px;
+        }
+
+        /* CETAK SIJIL (@media print) */
+        @media print {
+            body { background: white !important; color: black !important; }
+            .header-container, .navbar, .main-content, .footer, 
+            #kotakSembangPopup, #modalNama, #modalQuizBattle, #toast-container {
+                display: none !important;
+            }
+            #modalSijil {
+                display: flex !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            #modalSijil > div {
+                border: 6px solid #d4af37 !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                page-break-inside: avoid;
+            }
+            #modalSijil button { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header-container">
+        <img src="logosains.png" style="height: 150px; width: auto; margin-right: 20px;" alt="Science Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2083/2083285.png'; this.style.height='100px';">
+        <h1 style="color: white; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); font-size: 45px;">SCIENCE PORTAL</h1>
+    </div>
+
+    <!-- Navigation Bar (Uniform 42px) -->
+    <nav class="navbar">
+        <a href="index.html" class="active-link">Main Lab</a>
+        <a href="ruang_ilmu.html">Ruang Ilmu 📚</a>
+        <a href="videos.html" onclick="rekodTontonVideo()">Student Videos 📹</a>
+        
+        <div class="dropdown">
+            <a href="#">Science Form 2 ▼</a>
+            <div class="dropdown-content">
+                <a href="science_chap1.html">Chapter 1: Biodiversity</a>
+                <a href="science_chap2.html">Chapter 2: Ecosystem</a>
+                <a href="science_chap3.html">Chapter 3: Nutrition</a>
+                <a href="science_chap4.html">Chapter 4: Human Health</a>
+                <a href="science_chap5.html">Chapter 5: Water and Solution</a>
+                <a href="science_chap6.html">Chapter 6: Acids and Alkalis</a>
+                <a href="science_chap7.html">Chapter 7: Electricity and Magnetism</a>
+                <a href="science_chap8.html">Chapter 8: Force and Motion</a>
+                <a href="science_chap9.html">Chapter 9: Speed</a>
+                <a href="science_chap10.html">Chapter 10: Sound Waves</a>
+                <a href="science_chap11.html">Chapter 11: Stars and Galaxies</a>
+                <a href="science_chap12.html">Chapter 12: The Solar System</a>
+                <a href="science_chap13.html">Chapter 13: Meteoroid, Asteroid and Comet</a>
+            </div>
+        </div>
+
+        <a href="interactive_lab.html">Interactive Lab</a>
+        <a href="performance.html">Scientist Analytics</a>
+        <a href="contact.html">Ask a Teacher</a>
+
+        <button onclick="toggleDarkMode()" class="btn-dark-toggle" id="btnDarkMode">🌙 Mod Gelap</button>
+
+        <!-- BUTANG AVATAR DROPDOWN PENJURU KANAN NAVBAR -->
+        <div class="nav-right-user">
+            <button class="avatar-btn-pandai" onclick="toggleUserDropdown(event)">
+                <span id="navUserAvatar" style="font-size: 16px;">🔬</span>
+                <span id="navUserName">Saintis</span>
+                <span style="font-size: 10px;">▼</span>
+            </button>
+
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+                <div class="user-dropdown-header">
+                    <div style="font-weight: bold; font-size: 14px;" id="dropHeaderNama">SAINTIS ZEP</div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-top: 2px;" id="dropHeaderXP">⭐ 0 XP</div>
+                </div>
+                
+                <!-- Pautan ke halaman profil khas -->
+                <a href="profile.html" class="user-dropdown-item" onclick="tutupDropdownUser()">
+                    <span>👤</span> My Profile (Profil Saya)
+                </a>
+                
+                <!-- Pautan ke halaman tugasan & streak -->
+                <a href="badge.html" class="user-dropdown-item" onclick="tutupDropdownUser()">
+                    <span>🔥</span> Badges & XP
+                </a>
+                
+                <!-- Pautan ke halaman sijil digital -->
+                <a href="certificate.html" class="user-dropdown-item" onclick="tutupDropdownUser()">
+                    <span>📜</span> Sijil Digital ZEP
+                </a>
+                
+                <div class="user-dropdown-divider"></div>
+                
+                <!-- Bekas Dinamik Auth (Log Masuk / Log Keluar) -->
+                <div id="bekasStatusAuth">
+                    <a href="login.html" class="user-dropdown-item" style="color: #28a745;" onclick="tutupDropdownUser();">
+                        <span>🔑</span> Log Masuk / Daftar Akaun
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+
+        <h1 style="font-size: 36px; margin-bottom: 10px; margin-top: 0;">
+            🔬 Welcome to the SCIENCE EXPLORATION Portal!
+        </h1>
+        <p style="font-size: 18px; margin-bottom: 40px;">
+            Discover the wonders of biodiversity, human biology, and chemical reactions through interactive simulations and virtual ZEP zones.
+        </p>
+
+        <!-- KAD PROFIL SAINTIS PANDAI -->
+        <div id="profil-section" class="profile-card-pandai">
+            <div style="font-size: 48px; margin-bottom: 10px;">
+                <span id="profilAvatarGempak" class="frame-gold">🔬</span>
+            </div>
+            <h2 id="pNamaPelajar" style="margin: 0; color: #0052D4; font-size: 24px;">SAINTIS ZEP</h2>
+            <div id="pHandle" style="font-size: 13px; color: #777; margin-bottom: 12px;">@saintis</div>
+            
+            <div style="display: flex; justify-content: center; gap: 15px; font-size: 13px; margin-bottom: 15px;">
+                <div>🏫 <span id="pSekolah">SMK Matang Jaya</span></div>
+                <div>📍 <span id="pLokasi">Sarawak, Malaysia</span></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-around; background: #f8fbff; padding: 12px; border-radius: 10px; border: 1px solid #bce0fd;">
+                <div>
+                    <div style="font-size: 11px; color: #555; font-weight: bold;">SKOR XP</div>
+                    <div id="statSkor" style="font-size: 18px; font-weight: bold; color: #0052D4;">0</div>
+                </div>
+                <div>
+                    <div style="font-size: 11px; color: #555; font-weight: bold;">BADGES & XP</div>
+                    <div id="statStreak" style="font-size: 18px; font-weight: bold; color: #e65100;">0 days</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shortcut Cards -->
+        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; margin-bottom: 50px;">
+            <a href="science_chap1.html" class="card-shortcut" style="background-color: #e3f2fd; border: 2px solid #90caf9;">
+                <h1 style="font-size: 45px; margin: 0;">🧬</h1>
+                <h3 style="margin: 15px 0 10px 0;">Scientific Notes</h3>
+                <p style="font-size: 14px; line-height: 1.5;">Quick references from Biodiversity to Acids & Alkalis.</p>
+            </a>
+
+            <a href="interactive_lab.html" class="card-shortcut" style="background-color: #f3e5f5; border: 2px solid #ce93d8;">
+                <h1 style="font-size: 45px; margin: 0;">🚀</h1>
+                <h3 style="margin: 15px 0 10px 0;">ZEP Mission</h3>
+                <p style="font-size: 14px; line-height: 1.5;">Control your avatar to collect knowledge molecules in the open world!</p>
+            </a>
+
+            <a href="contact.html" class="card-shortcut" style="background-color: #e0f2f1; border: 2px solid #80cbc4;">
+                <h1 style="font-size: 45px; margin: 0;">💡</h1>
+                <h3 style="margin: 15px 0 10px 0;">Ask a Scientist</h3>
+                <p style="font-size: 14px; line-height: 1.5;">Stuck on an experiment? Drop your questions here.</p>
+            </a>
+        </div>
+
+        <!-- Quote -->
+        <div class="quote-container">
+            <p class="quote-text" style="margin: 0; font-size: 16px; font-style: italic; line-height: 1.6;">
+                "Science is a way of thinking much more than it is a body of knowledge." <br> 
+                <span style="font-weight: bold; font-style: normal; margin-top: 10px; display: inline-block;">— Carl Sagan (Astronomer)</span>
+            </p>
+        </div>
+
+        <!-- MISI HARIAN & DAILY STREAK PANEL -->
+        <div id="quest-panel" class="panel-box quest-panel" style="background: #fff8e1; border-color: #ffe082;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffb300; padding-bottom: 8px;">
+                <h3 style="margin: 0; color: #b78103;">🔥 Daily Streak & Quests</h3>
+                <span id="paparanStreak" style="background: #ffecb3; color: #e65100; font-weight: bold; padding: 4px 12px; border-radius: 20px; font-size: 13px;">
+                    🔥 Loading...
+                </span>
+            </div>
+            <div style="margin-top: 12px; font-size: 13px;">
+                <div class="quest-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: white; padding: 8px; border-radius: 6px; border: 1px solid #ffe082;">
+                    <span>1. Jawab 1 Kuiz Sains (+20 XP)</span>
+                    <button id="btnQuest1" onclick="tuntutQuest(1)" style="background: #28a745; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Claim</button>
+                </div>
+                <div class="quest-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; background: white; padding: 8px; border-radius: 6px; border: 1px solid #ffe082;">
+                    <span>2. Semak 1 Kad Imbasan DLP (+15 XP)</span>
+                    <button id="btnQuest2" onclick="tuntutQuest(2)" style="background: #28a745; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Claim</button>
+                </div>
+                <div class="quest-item" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: white; padding: 8px; border-radius: 6px; border: 1px solid #ffe082;">
+                    <span>3. Tonton 1 Video Sub-Bab (+10 XP)</span>
+                    <button id="btnQuest3" onclick="tuntutQuest(3)" style="background: #28a745; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Claim</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KAD IMBASAN DLP INTERAKTIF (3D FLASHCARDS) -->
+        <div class="panel-box flashcard-panel" style="background: #e8f5e9; border-color: #a5d6a7;">
+            <h3 style="margin-top: 0; color: #2e7d32; border-bottom: 2px solid #81c784; padding-bottom: 6px;">🃏 Kad Imbasan DLP (Flashcards)</h3>
+            <p style="font-size: 12px; color: #555; margin-bottom: 5px;">Klik kad untuk melihat definisi/istilah Bahasa Melayu!</p>
+            
+            <div class="flashcard-container" id="cardDLPContainer" onclick="window.telahFlipKadHariIni = true; this.classList.toggle('flipped')">
+                <div class="flashcard-inner">
+                    <div class="flashcard-front">
+                        <h2 id="fcTajukEn" style="margin: 0; color: #0d47a1;">Poikilothermic</h2>
+                        <span style="font-size: 11px; color: #777; margin-top: 8px;">(Click to flip 🔄)</span>
+                    </div>
+                    <div class="flashcard-back">
+                        <h3 id="fcMaksudBm" style="margin: 0;">Poikiloterma</h3>
+                        <p id="fcPenerangan" style="font-size: 12px; margin-top: 6px; line-height: 1.4;">Organisma yang mempunyai suhu badan yang berubah-ubah mengikut suhu persekitaran.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <button onclick="kadSeterusnya(-1)" style="background: #2e7d32; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">⬅️ Sebelum</button>
+                <span id="fcNombor" style="font-size: 12px; font-weight: bold; color: #1b5e20;">1 / 4</span>
+                <button onclick="kadSeterusnya(1)" style="background: #2e7d32; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: bold;">Seterusnya ➡️</button>
+            </div>
+        </div>
+
+        <!-- Leaderboard Panel -->
+        <div class="leaderboard-panel">
+            <h3 style="margin-top: 0; color: #6a1b9a; border-bottom: 2px solid #ab47bc; padding-bottom: 8px;">🏆 Top 5 Scientists Leaderboard</h3>
+            
+            <div style="background: #ffffff; padding: 10px; border-radius: 8px; border: 1px solid #e1bee7; margin-bottom: 12px; text-align: center;">
+                <span style="font-size: 11px; font-weight: bold; color: #8e24aa;">👑 SAINTIS TERUNGGUL MINGGU INI</span>
+                <div id="hallOfFameSpotlight" style="font-weight: bold; font-size: 14px; color: #4a148c; margin-top: 4px;">🏆 Loading Top Scientist...</div>
+            </div>
+
+            <div id="senaraiLeaderboard" style="min-height: 50px; font-size: 13px;">
+                <div style="text-align: center; color: #888888; padding: 10px;">Memuatkan carta kedudukan...</div>
+            </div>
+        </div>
+
+        <!-- Quiz & XP Panel -->
+        <div class="quiz-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffb300; padding-bottom: 8px; margin-bottom: 12px;">
+                <h3 style="margin: 0; color: #b78103;">🧪 Kuiz Mini & Status XP</h3>
+                <span id="paparanXP" style="background: #ffecb3; color: #b78103; font-weight: bold; padding: 4px 12px; border-radius: 20px; font-size: 14px;">⭐ 0 XP</span>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 10px;">
+                <button id="btnBukaSijil" onclick="window.bukaSijilDigital()" style="display: none; background: linear-gradient(135deg, #ffb300, #e65100); color: white; border: none; padding: 8px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; box-shadow: 0 0 12px rgba(255,179,0,0.6);">
+                    📜 Muat Turun Sijil ZEP Scientist 🏆
+                </button>
+            </div>
+
+            <div style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                <label style="font-size: 12px; font-weight: bold; color: #b78103;">Pilih Bab:</label>
+                <select id="pilihBabKuiz" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #ffb300; font-size: 12px; flex: 1;">
+                    <option value="semua">Semua Bab (Mix)</option>
+                    <option value="1">Bab 1: Biodiversity</option>
+                    <option value="2">Bab 2: Ecosystem</option>
+                    <option value="3">Bab 3: Nutrition</option>
+                    <option value="4">Bab 4: Human Health</option>
+                    <option value="5">Bab 5: Water & Solution</option>
+                    <option value="6">Bab 6: Acid & Alkali</option>
+                    <option value="7">Bab 7: Electricity & Magnetism</option>
+                    <option value="8">Bab 8: Force & Motion</option>
+                    <option value="9">Bab 9: Heat</option>
+                    <option value="10">Bab 10: Sound Waves</option>
+                    <option value="11">Bab 11: Stars & Galaxies</option>
+                    <option value="12">Bab 12: Solar System</option>
+                    <option value="13">Bab 13: Meteoroid, Asteroid, Comet</option>
+                </select>
+            </div>
+
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; color: #888888;">
+                    <span>Kemajuan Lencana</span>
+                    <span id="teksPeratusXP">0%</span>
+                </div>
+                <div class="xp-bar-bg">
+                    <div id="xpBarFill" class="xp-bar-fill"></div>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <span style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 5px;">🎖️ Lencana Pencapaian:</span>
+                <div id="bekasLencana">
+                    <span style="font-size: 12px; color: #888888;">Selesaikan kuiz untuk membuka lencana!</span>
+                </div>
+            </div>
+
+            <div id="kotakSoalanKuiz">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                    <h4 id="teksSoalan" style="margin: 10px 0; font-size: 15px; flex: 1;">Memuatkan soalan harian...</h4>
+                    <button onclick="sebutSoalan()" title="Dengar sebutan DLP" style="background: #e0f2f1; border: 1px solid #80cbc4; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 14px; margin-top: 6px;">🔊</button>
+                </div>
+                <div id="bekasPilihan"></div>
+            </div>
+        </div>
+
+        <!-- KEDAI XP -->
+        <div class="panel-box shop-panel" style="background: #e0f7fa; border-color: #80deea;">
+            <h3 style="margin-top: 0; color: #00838f; border-bottom: 2px solid #4dd0e1; padding-bottom: 6px;">🛍️ Kedai XP (Gelaran & Bingkai)</h3>
+            <p style="font-size: 12px; color: #555; margin-bottom: 10px;">Gunakan XP untuk membuka gelaran khas & bingkai avatar!</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+                <div class="shop-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #b2ebf2;">
+                    <span>🏷️ Gelaran: <b>Pakar Ekosistem</b> (100 XP)</span>
+                    <button onclick="beliGelaran('Pakar Ekosistem', 100)" style="background: #00838f; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Tebus</button>
+                </div>
+                <div class="shop-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #b2ebf2;">
+                    <span>✨ Bingkai: <b>Gold Glow Frame</b> (150 XP)</span>
+                    <button onclick="beliBingkai('frame-gold', 150)" style="background: #00838f; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Tebus</button>
+                </div>
+                <div class="shop-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 8px; border-radius: 6px; border: 1px solid #b2ebf2;">
+                    <span>⚡ Bingkai: <b>Neon Cyber Border</b> (200 XP)</span>
+                    <button onclick="beliBingkai('frame-neon', 200)" style="background: #00838f; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">Tebus</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Friend System Panel -->
+        <div class="panel-kawan" style="max-width: 500px; margin: 0 auto; background: #f8fbff; padding: 25px; border-radius: 15px; border: 2px solid #bce0fd; text-align: left; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+            <h3 style="margin-top: 0; border-bottom: 2px solid #00c6ff; padding-bottom: 8px;">👥 Scientist Friend System</h3>
+            
+            <div id="statusProfilSaya" style="font-size: 13px; font-weight: bold; margin-bottom: 10px; padding: 10px 14px; background: #e3f2fd; border-radius: 8px; border: 1px solid #90caf9; color: #0052D4;">
+                👤 Profil Saya: <b>Memuatkan...</b>
+            </div>
+
+            <div style="margin-bottom: 15px; padding: 8px; background: #ffffff; border-radius: 8px; border: 1px dashed #bce0fd;">
+                <span style="font-size: 11px; font-weight: bold; color: #555555; display: block; margin-bottom: 5px;">Pilih Avatar Saintis Kitak:</span>
+                <div style="display: flex; gap: 6px; justify-content: center;">
+                    <button class="avatar-opt-btn" onclick="tukarAvatarPemain('🔬')">🔬</button>
+                    <button class="avatar-opt-btn" onclick="tukarAvatarPemain('🚀')">🚀</button>
+                    <button class="avatar-opt-btn" onclick="tukarAvatarPemain('🧬')">🧬</button>
+                    <button class="avatar-opt-btn" onclick="tukarAvatarPemain('🧪')">🧪</button>
+                    <button class="avatar-opt-btn" onclick="tukarAvatarPemain('⚛️')">⚛️</button>
+                    <button class="avatar-opt-btn" onclick="tukarAvatarPemain('🧫')">🧫</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="font-size: 13px; font-weight: bold; display: block; margin-bottom: 5px;">Add Friend by Name:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="cariNamaKawan" placeholder="E.g: Fatimah" onkeypress="if(event.key==='Enter') hantarJemputanKawan()" style="flex: 1; padding: 10px; border: 1px solid #bce0fd; border-radius: 6px; font-size: 14px;">
+                    <button onclick="hantarJemputanKawan()" style="background-color: #0052D4; color: white; border: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px;">Add +</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <h4 style="font-size: 14px; margin-bottom: 5px;">📥 Friend Requests:</h4>
+                <div id="senaraiJemputan" class="senarai-box" style="font-size: 13px; background: white; padding: 10px; border-radius: 6px; border: 1px solid #eeeeee; min-height: 35px;">No pending requests</div>
+            </div>
+
+            <div>
+                <h4 style="font-size: 14px; margin-bottom: 5px;">🌟 My Friends List:</h4>
+                <div id="senaraiKawanContainer" style="font-size: 13px; min-height: 35px;">No friends added yet.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL ARENA QUIZ BATTLE 1-LAWAN-1 -->
+    <div id="modalQuizBattle" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:15px; max-width:500px; width:90%; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.5); border: 4px solid #ff9800;">
+            <h2 style="color:#e65100; margin-top:0; font-size: 26px;">⚔️ QUIZ BATTLE ARENA ⚔️</h2>
+            
+            <div style="display:flex; justify-content:space-around; background:#fff3e0; padding:12px; border-radius:10px; margin-bottom:15px; font-weight:bold; border: 1px solid #ffe082;">
+                <div id="skorSayaBattle" style="color: #0052D4; font-size: 15px;">Kitak: 0 pts</div>
+                <div style="color:#d32f2f; font-size: 18px;">VS</div>
+                <div id="skorLawanBattle" style="color: #c62828; font-size: 15px;">Lawan: 0 pts</div>
+            </div>
+
+            <h4 id="soalanBattleTeks" style="font-size: 16px; margin: 20px 0; min-height: 50px; text-align: left;">Memuatkan soalan...</h4>
+            <div id="pilihanBattleContainer"></div>
+
+            <button onclick="keluarBattle()" style="margin-top:20px; background:#757575; color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer;">Keluar Battle 🚪</button>
+        </div>
+    </div>
+
+    <!-- MODAL SIJIL DIGITAL ZEP SCIENTIST -->
+    <div id="modalSijil" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10001; justify-content: center; align-items: center;">
+        <div style="background: #ffffff; padding: 30px; border-radius: 15px; border: 8px solid #ffb300; width: 90%; max-width: 650px; text-align: center; color: #1a2a6c; position: relative; box-shadow: 0 0 30px rgba(255,215,0,0.8);">
+            <button onclick="window.tutupSijilDigital()" style="position: absolute; top: 12px; right: 18px; background: none; border: none; font-size: 24px; cursor: pointer; color: #333;">✖</button>
+            
+            <div style="border: 2px dashed #ffb300; padding: 25px; border-radius: 10px;">
+                <h1 style="margin: 0; color: #d4af37; font-size: 28px; font-family: 'Georgia', serif;">SIJIL PENCAPAIAN DIGITAL</h1>
+                <p style="margin: 5px 0 20px 0; font-size: 13px; letter-spacing: 2px; color: #555; font-weight: bold;">SCIENCE FORM 2 EXPLORATION PORTAL</p>
+                
+                <p style="font-size: 14px; color: #444;">Dengan ini dianugerahkan kepada:</p>
+                <h2 id="namaPemegangSijil" style="font-size: 32px; color: #0052D4; margin: 10px 0; font-family: 'Arial', sans-serif; text-decoration: underline;">NAMA PELAJAR</h2>
+                
+                <p style="font-size: 14px; line-height: 1.6; color: #444;">
+                    Kerana telah berjaya mengumpul <b id="xpSijil" style="color: #e65100; font-size: 16px;">500 XP</b> dan mencapai tahap keberanian serta kecemerlangan tertinggi sebagai:
+                </p>
+                
+                <h3 style="background: linear-gradient(135deg, #ffb300, #e65100); color: white; display: inline-block; padding: 10px 25px; border-radius: 25px; margin: 15px 0; font-size: 18px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);">
+                    🏆 ELITE ZEP SCIENTIST
+                </h3>
+
+                <div style="display: flex; justify-content: space-between; margin-top: 30px; font-size: 12px; color: #666; border-top: 1px solid #eee; padding-top: 15px;">
+                    <div>Tarikh: <b id="tarikhSijil">--/--/----</b></div>
+                    <div>Pengesahan: <b>Portal Sains KSSM</b></div>
+                </div>
+            </div>
+
+            <button onclick="window.print()" style="margin-top: 20px; background: #0052D4; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 14px;">
+                🖨️ Cetak / Simpan Sijil (PDF)
+            </button>
+        </div>
+    </div>
+
+    <!-- POPUP LOG MASUK & PENDAFTARAN SAINTIS ZEP -->
+    <div class="modal-latar" id="modalNama" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center;">
+        <div class="modal-kandungan" style="background: white; padding: 25px; border-radius: 16px; width: 92%; max-width: 430px; box-shadow: 0 10px 30px rgba(0,0,0,0.35); text-align: center; color: #333;">
+            
+            <!-- Tab Penukar Mod -->
+            <div style="display: flex; background: #f1f5f9; padding: 4px; border-radius: 10px; margin-bottom: 18px; gap: 4px;">
+                <button id="tabBtnLogin" onclick="tukarTabModal('login')" style="flex: 1; padding: 9px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: #0052D4; color: white; transition: 0.2s;">
+                    🔑 Log Masuk Akaun
+                </button>
+                <button id="tabBtnGuest" onclick="tukarTabModal('guest')" style="flex: 1; padding: 9px; border: none; border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; background: transparent; color: #475569; transition: 0.2s;">
+                    ⚡ Masuk Pantas (Guest)
+                </button>
+            </div>
+
+            <!-- PANEL 1: LOG MASUK AKAUN SEDIA ADA -->
+            <div id="panelTabLogin">
+                <h2 style="color: #0052D4; margin: 0 0 6px 0; font-size: 22px;">👋 Selamat Kembali!</h2>
+                <p style="font-size: 12px; color: #64748b; margin: 0 0 15px 0;">Log masuk untuk menyambung XP, lencana & senarai rakan anda.</p>
+
+                <input type="email" id="loginEmailModal" placeholder="E-mel Akaun ZEP" style="width: 100%; padding: 11px; margin-bottom: 10px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                <input type="password" id="loginPassModal" placeholder="Kata Laluan" onkeypress="if(event.key==='Enter') logMasukDariModal()" style="width: 100%; padding: 11px; margin-bottom: 14px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+
+                <button id="btnSubmitLoginModal" onclick="logMasukDariModal()" style="background-color: #0052D4; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; width: 100%;">
+                    Log Masuk Sekarang 🚀
+                </button>
+
+                <div style="margin-top: 12px; font-size: 12px; color: #475569;">
+                    Belum ada akaun rasmi? <a href="login.html" style="color: #0052D4; font-weight: bold; text-decoration: underline;">Daftar Akaun Penuh di sini</a>
+                </div>
+            </div>
+
+            <!-- PANEL 2: PENDAFTARAN PANTAS (GUEST) -->
+            <div id="panelTabGuest" style="display: none;">
+                <h2 style="color: #0052D4; margin: 0 0 6px 0; font-size: 22px;">👨‍🔬 Pendaftaran Pantas</h2>
+                <p style="font-size: 12px; color: #64748b; margin: 0 0 12px 0;">Terus teroka portal tanpa kata laluan (simpanan sementara).</p>
+                
+                <input type="text" id="inputNamaPelajar" placeholder="Nama / Nickname (Cth: Fatimah)" style="width: 100%; padding: 10px; margin-bottom: 8px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                <input type="text" id="inputSekolah" placeholder="Nama Sekolah (Cth: SMK Matang Jaya)" style="width: 100%; padding: 10px; margin-bottom: 8px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                
+                <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                    <input type="text" id="inputDaerah" placeholder="Daerah (Cth: Kuching)" style="flex: 1; min-width: 0; width: 100%; padding: 10px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    <input type="text" id="inputNegeri" placeholder="Negeri (Cth: Sarawak)" style="flex: 1; min-width: 0; width: 100%; padding: 10px; border: 2px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                </div>
+
+                <button onclick="sahkanNamaDanMula()" style="background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: bold; width: 100%;">
+                    Enter ZEP Mission 🚀
+                </button>
+            </div>
+
+            <button onclick="batalIsiNama()" style="background-color: #f1f5f9; color: #475569; padding: 9px; border: 1px solid #cbd5e1; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; width: 100%; margin-top: 10px;">
+                Teroka Dahulu (Cancel)
+            </button>
+        </div>
+    </div>
+
+    <!-- Mini Popup Chat Box -->
+    <div id="kotakSembangPopup">
+        <div class="chat-header">
+            <span id="tajukRakanChat">💬 Sembang</span>
+            <button onclick="tutupKotakChat()" style="background:none; border:none; color:white; font-size:16px; cursor:pointer; font-weight:bold;">✖</button>
+        </div>
+        <div class="chat-messages" id="bekasMesejChat">
+            <div style="text-align: center; color: #888888; font-size: 12px; margin-top: 20px;">Sedia untuk bersembang!</div>
+        </div>
+        <div class="chat-input-box">
+            <input type="text" id="inputMesejChat" placeholder="Tulis mesej..." style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px;" onkeypress="jikaTekanEnter(event)">
+            <button onclick="hantarMesejChat()" style="background: #0052D4; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">Hantar</button>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer class="footer">
+        <div class="visitor-counter">
+            📡 Visitor Scan Data: <span id="angkaPelawat">Loading...</span>
+        </div>
+        <br>
+        All rights reserved © <span class="highlight">Virtual Lab 2026</span>
+        <br>
+        <span style="font-size: 12px; color: #777777;">Core System: gramalab</span>
+
+        <div id="toast-container"></div>
+    </footer>
+
+    <!-- Firebase Realtime Database & System Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, ref, onValue, get, set, remove, push, onDisconnect, update, off, runTransaction } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAtbX6wmdNwmXkgUvewnfRRXRTfyq5IZ8",
+            authDomain: "jejak-sejarah-tingkatan-2.firebaseapp.com",
+            databaseURL: "https://jejak-sejarah-tingkatan-2-default-rtdb.firebaseio.com",
+            projectId: "jejak-sejarah-tingkatan-2",
+            storageBucket: "jejak-sejarah-tingkatan-2.firebasestorage.app",
+            messagingSenderId: "92872994798",
+            appId: "1:92872994798:web:9c205538a5eb8f388e68ff",
+            measurementId: "G-8RZ21D4FXY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app); 
+
+        function escapeHTML(str) {
+            if (!str) return "";
+            const div = document.createElement("div");
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+
+        /* FUNGSI DROPDOWN AVATAR PANDAI (PENJURU KANAN NAVBAR) */
+        window.toggleUserDropdown = function(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById("userDropdownMenu");
+            if (menu) menu.classList.toggle("show");
+        };
+
+        window.tutupDropdownUser = function() {
+            const menu = document.getElementById("userDropdownMenu");
+            if (menu) menu.classList.remove("show");
+        };
+
+        window.addEventListener("click", function() {
+            window.tutupDropdownUser();
+        });
+
+        window.kemaskiniNavbarAvatar = function(nama, avatar, xp) {
+            const elemAvatar = document.getElementById("navUserAvatar");
+            const elemNama = document.getElementById("navUserName");
+            const dropNama = document.getElementById("dropHeaderNama");
+            const dropXP = document.getElementById("dropHeaderXP");
+
+            if (elemAvatar) elemAvatar.innerText = avatar || "🔬";
+            if (elemNama) elemNama.innerText = nama || "Saintis ZEP";
+            if (dropNama) dropNama.innerText = (nama || "Saintis ZEP").toUpperCase();
+            if (dropXP) dropXP.innerText = `⭐ ${xp || 0} XP`;
+        };
+
+        // Fungsi mengemaskini paparan butang Auth mengikut status pengguna
+        window.kemaskiniMenuAuth = function(sudahLogMasuk) {
+            const bekas = document.getElementById("bekasStatusAuth");
+            if (!bekas) return;
+
+            if (sudahLogMasuk) {
+                bekas.innerHTML = `
+                    <a href="javascript:void(0);" class="user-dropdown-item" style="color: #dc3545;" onclick="tutupDropdownUser(); logOutUser();">
+                        <span>🚪</span> Log Keluar (Logout)
+                    </a>`;
+            } else {
+                bekas.innerHTML = `
+                    <a href="login.html" class="user-dropdown-item" style="color: #28a745;" onclick="tutupDropdownUser();">
+                        <span>🔑</span> Log Masuk / Daftar Akaun
+                    </a>`;
+            }
+        };
+
+        window.logOutUser = function() {
+            if (confirm("Adakah anda pasti mahu log keluar?")) {
+                const safeKey = window.safeKeySaya || sessionStorage.getItem("saintis_key");
+                if (safeKey) {
+                    set(ref(db, "kawan_sistem_v2/" + safeKey + "/status_online"), false);
+                }
+                signOut(auth).then(() => {
+                    sessionStorage.clear();
+                    showToast("Berjaya log keluar!", "success");
+                    setTimeout(() => { window.location.href = "login.html"; }, 800);
+                }).catch(() => {
+                    sessionStorage.clear();
+                    window.location.href = "login.html";
+                });
+            }
+        };
+
+        // Standardkan Kunci Nickname
+        function getSafeKey(nama) {
+            if (!nama) return "guest";
+            return nama.trim().toLowerCase().replace(/[.#$\[\]\/ ]/g, "_");
+        }
+
+        /* Sound Effects */
+        window.playSFX = function(type) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.setValueAtTime(160, ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.35);
+                } else if (type === 'chat') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.1);
+                }
+            } catch(e) {}
+        };
+
+        /* Mod Gelap Toggle */
+        window.toggleDarkMode = function() {
+            document.body.classList.toggle("dark-mode");
+            const isDark = document.body.classList.contains("dark-mode");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            const btn = document.getElementById("btnDarkMode");
+            if (btn) btn.innerText = isDark ? "☀️ Mod Terang" : "🌙 Mod Gelap";
+        };
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-mode");
+            const btn = document.getElementById("btnDarkMode");
+            if (btn) btn.innerText = "☀️ Mod Terang";
+        }
+
+        /* Toast System */
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById("toast-container");
+            if (!container) return;
+            const toast = document.createElement("div");
+            toast.className = `toast-msg ${type}`;
+            
+            let icon = "ℹ️";
+            if (type === "success") icon = "✅";
+            if (type === "error") icon = "❌";
+            
+            toast.innerHTML = `<span class="icon">${icon}</span> <span>${escapeHTML(message)}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = "fadeOut 0.4s forwards";
+                setTimeout(() => { toast.remove(); }, 400);
+            }, 3000);
+        };
+
+        /* SISTEM VISITOR COUNTER: KIRA BILANGAN SEBENAR AKAUN UNIK YANG SIGN IN */
+        const rujukanRekodPelawat = ref(db, "statistik_sains/rekod_pelawat_akaun");
+        const rujukanPelawat = ref(db, "statistik_sains/jumlah_pelawat");
+
+        function rekodPelawatSignIn(user) {
+            if (!user || !user.uid) return;
+
+            const rujukanUserUnik = ref(db, "statistik_sains/rekod_pelawat_akaun/" + user.uid);
+            get(rujukanUserUnik).then((snap) => {
+                if (!snap.exists()) {
+                    set(rujukanUserUnik, {
+                        email: user.email || "pelajar",
+                        kali_pertama: new Date().toISOString()
+                    });
+                }
+            }).catch((err) => {
+                console.warn("Tidak dapat rekod pelawat sign-in:", err.code);
+            });
+        }
+
+        // Papar jumlah sebenar akaun unik (bukan tambah +1 manual)
+        onValue(rujukanRekodPelawat, (snapshot) => {
+            const elem = document.getElementById("angkaPelawat");
+            if (!elem) return;
+
+            const data = snapshot.val();
+            const jumlahUnik = data ? Object.keys(data).length : 0;
+            elem.innerText = jumlahUnik.toLocaleString();
+
+            // Segerakkan semula jumlah_pelawat di Firebase
+            set(rujukanPelawat, jumlahUnik).catch(() => {});
+        }, (error) => {
+            const elem = document.getElementById("angkaPelawat");
+            if (elem) elem.innerText = "Offline (" + error.code + ")";
+            console.error("Ralat bacaan Visitor Counter:", error);
+        });
+
+        /* Flashcards Data & 3D Flip */
+        const dataFlashcards = [
+            { en: "Poikilothermic", bm: "Poikiloterma", desc: "Organisma yang mempunyai suhu badan yang berubah-ubah mengikut suhu persekitaran." },
+            { en: "Homeothermic", bm: "Homeoterma", desc: "Organisma yang mempunyai suhu badan yang tetap dan bebas daripada pengaruh suhu persekitaran." },
+            { en: "Neutralisation", bm: "Peneutralan", desc: "Tindak balas antara asid dan alkali untuk menghasilkan garam dan air." },
+            { en: "Pathogen", bm: "Patogen", desc: "Mikroorganisma berbahaya yang menyebabkan penyakit." }
+        ];
+
+        let fcIndex = 0;
+        window.kadSeterusnya = function(dir) {
+            window.telahFlipKadHariIni = true;
+            fcIndex = (fcIndex + dir + dataFlashcards.length) % dataFlashcards.length;
+            const container = document.getElementById("cardDLPContainer");
+            if (container) container.classList.remove('flipped');
+            
+            setTimeout(() => {
+                document.getElementById("fcTajukEn").innerText = dataFlashcards[fcIndex].en;
+                document.getElementById("fcMaksudBm").innerText = dataFlashcards[fcIndex].bm;
+                document.getElementById("fcPenerangan").innerText = dataFlashcards[fcIndex].desc;
+                document.getElementById("fcNombor").innerText = `${fcIndex + 1} / ${dataFlashcards.length}`;
+            }, 200);
+        };
+
+        window.telahJawabKuizHariIni = false;
+        window.telahFlipKadHariIni = false;
+
+        /* Quests Harian (Versi Selamat & Realtime Sync) */
+        function getTarikhHariIni() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        window.rekodTontonVideo = function() {
+            localStorage.setItem("telahTontonVideo_" + getTarikhHariIni(), "true");
+        };
+
+        function muatStatusQuestHarian(safeKey) {
+            const tarikh = getTarikhHariIni();
+            const rujukanQuest = ref(db, `kawan_sistem_v2/${safeKey}/quest_harian/${tarikh}`);
+
+            onValue(rujukanQuest, (snap) => {
+                const data = snap.val() || {};
+                
+                for (let i = 1; i <= 3; i++) {
+                    const btn = document.getElementById(`btnQuest${i}`);
+                    if (btn) {
+                        if (data[`q${i}`] === true) {
+                            btn.disabled = true;
+                            btn.innerText = "Done ✅";
+                            btn.style.background = "#aaa";
+                            btn.style.cursor = "default";
+                        } else {
+                            btn.disabled = false;
+                            btn.innerText = "Claim";
+                            btn.style.background = "#28a745";
+                            btn.style.cursor = "pointer";
+                        }
+                    }
+                }
+            });
+        }
+
+        window.tuntutQuest = function(qId) {
+            if (!window.namaPemainSaya) {
+                showToast("Sila mendaftar / log masuk akaun dahulu!", "error");
+                return;
+            }
+
+            const safeKey = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+            const tarikh = getTarikhHariIni();
+            let reward = 15;
+            if (qId === 1) reward = 20;
+            if (qId === 3) reward = 10;
+
+            const rujukanMisi = ref(db, `kawan_sistem_v2/${safeKey}/quest_harian/${tarikh}/q${qId}`);
+
+            get(rujukanMisi).then((snap) => {
+                if (snap.exists() && snap.val() === true) {
+                    showToast(`Misi ${qId} sudah pun dituntut hari ini!`, "info");
+                    return;
+                }
+
+                let layak = false;
+                if (qId === 1 && window.telahJawabKuizHariIni) layak = true;
+                if (qId === 2 && window.telahFlipKadHariIni) layak = true;
+                if (qId === 3) {
+                    const telahTonton = localStorage.getItem("telahTontonVideo_" + tarikh);
+                    if (telahTonton === "true") layak = true;
+                }
+
+                if (!layak) {
+                    let mesej = "";
+                    if (qId === 1) mesej = "⚠️ Kitak perlu jawab sekurang-kurangnya 1 soalan kuiz dahulu!";
+                    else if (qId === 2) mesej = "⚠️ Kitak perlu klik & semak sekurang-kurangnya 1 Kad Imbasan DLP dahulu!";
+                    else if (qId === 3) mesej = "⚠️ Kitak belum menonton video sub-bab hari ini! Pergi ke Student Videos 📹 dahulu.";
+                    
+                    showToast(mesej, "error");
+                    return;
+                }
+
+                const btn = document.getElementById(`btnQuest${qId}`);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = "Claiming...";
+                }
+
+                set(rujukanMisi, true).then(() => {
+                    tambahXPPemain(safeKey, reward);
+                    showToast(`Misi ${qId} Diselesaikan! +${reward} XP 🎉`, "success");
+                });
+            });
+        };
+
+        /* LOGIK SIJIL DIGITAL (XP >= 500) */
+        window.xpSemasaGlobal = 0;
+
+        window.bukaSijilDigital = function() {
+            document.getElementById("namaPemegangSijil").innerText = window.namaPemainSaya || "Saintis ZEP";
+            document.getElementById("xpSijil").innerText = (window.xpSemasaGlobal || 500) + " XP";
+            
+            const d = new Date();
+            document.getElementById("tarikhSijil").innerText = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+            document.getElementById("modalSijil").style.display = "flex";
+        };
+
+        window.tutupSijilDigital = function() {
+            document.getElementById("modalSijil").style.display = "none";
+        };
+
+        /* BANK 100 SOALAN SAINS TINGKATAN 2 (KSSM DLP) MERANGKUMI BAB 1 HINGGA 13 */
+        const senaraiSoalan = [
+            // BAB 1: BIODIVERSITY
+            { bab: 1, soalan: "1. Which of the following is an example of a poikilothermic vertebrate?", pilihan: ["A) Cat", "B) Frog", "C) Eagle", "D) Whale"], jawapan: 1 },
+            { bab: 1, soalan: "2. What is the importance of biodiversity to humans?", pilihan: ["A) Providing food sources", "B) Reducing species diversity", "C) Increasing pollution", "D) Eliminating an ecosystem"], jawapan: 0 },
+            { bab: 1, soalan: "3. Which group of animals are warm-blooded and possess feathers?", pilihan: ["A) Reptiles", "B) Amphibians", "C) Birds", "D) Mammals"], jawapan: 2 },
+            { bab: 1, soalan: "4. Which organism is classified as an invertebrate with segmented legs?", pilihan: ["A) Earthworm", "B) Butterfly", "C) Snail", "D) Jellyfish"], jawapan: 1 },
+            { bab: 1, soalan: "5. Which of the following is an endemic species in Malaysia?", pilihan: ["A) Malayan Tiger", "B) Polar Bear", "C) Kangaroo", "D) Penguin"], jawapan: 0 },
+            { bab: 1, soalan: "6. Non-flowering plants that produce spores and possess vascular systems are:", pilihan: ["A) Mosses", "B) Ferns", "C) Algae", "D) Fungi"], jawapan: 1 },
+            { bab: 1, soalan: "7. Which animal is a homeothermic vertebrate that gives birth to live young?", pilihan: ["A) Crocodile", "B) Penguin", "C) Turtle", "D) Whale"], jawapan: 3 },
+            { bab: 1, soalan: "8. Dichotomous keys are constructed by scientists to:", pilihan: ["A) Calculate species population", "B) Measure growth rate", "C) Identify and classify organisms", "D) Estimate body temperature"], jawapan: 2 },
+
+            // BAB 2: ECOSYSTEM
+            { bab: 2, soalan: "9. Which interaction benefits one organism while the other is neither harmed nor benefited?", pilihan: ["A) Mutualism", "B) Commensalism", "C) Parasitism", "D) Competition"], jawapan: 1 },
+            { bab: 2, soalan: "10. What is the primary source of energy in any natural food chain?", pilihan: ["A) Sun", "B) Water", "C) Soil", "D) Green plants"], jawapan: 0 },
+            { bab: 2, soalan: "11. An interaction where both organisms benefit mutually from each other is called:", pilihan: ["A) Prey-Predator", "B) Parasitism", "C) Mutualism", "D) Commensalism"], jawapan: 2 },
+            { bab: 2, soalan: "12. Which organism acts as a producer in a freshwater pond ecosystem?", pilihan: ["A) Green algae", "B) Tadpole", "C) Dragonfly nymph", "D) Small fish"], jawapan: 0 },
+            { bab: 2, soalan: "13. Which process returns carbon dioxide gas into the atmosphere?", pilihan: ["A) Photosynthesis", "B) Respiration", "C) Transpiration", "D) Condensation"], jawapan: 1 },
+            { bab: 2, soalan: "14. What is the main role of decomposers in an ecosystem?", pilihan: ["A) Produce glucose", "B) Consume primary consumers", "C) Break down dead matter into nutrients", "D) Fix atmospheric nitrogen"], jawapan: 2 },
+            { bab: 2, soalan: "15. Tapeworms living inside human intestines is an example of:", pilihan: ["A) Commensalism", "B) Mutualism", "C) Competition", "D) Parasitism"], jawapan: 3 },
+            { bab: 2, soalan: "16. Biological control involves using:", pilihan: ["A) Chemical pesticides", "B) Natural predators to control pests", "C) Genetically modified crops", "D) Synthetic fertilisers"], jawapan: 1 },
+
+            // BAB 3: NUTRITION
+            { bab: 3, soalan: "17. Which enzyme is secreted in the stomach to digest proteins?", pilihan: ["A) Amylase", "B) Lipase", "C) Pepsin", "D) Maltase"], jawapan: 2 },
+            { bab: 3, soalan: "18. Which nutrient class is essential for growth and repair of damaged body tissues?", pilihan: ["A) Protein", "B) Carbohydrate", "C) Fat", "D) Fibre"], jawapan: 0 },
+            { bab: 3, soalan: "19. A deficiency of Vitamin C in human diet causes which medical condition?", pilihan: ["A) Rickets", "B) Scurvy", "C) Night blindness", "D) Anaemia"], jawapan: 1 },
+            { bab: 3, soalan: "20. Where does the absorption of digested food nutrients mainly take place?", pilihan: ["A) Stomach", "B) Oesophagus", "C) Small intestine", "D) Large intestine"], jawapan: 2 },
+            { bab: 3, soalan: "21. Which reagent turns dark blue or black when tested on starch?", pilihan: ["A) Iodine solution", "B) Benedict solution", "C) Biuret reagent", "D) Ethanol"], jawapan: 0 },
+            { bab: 3, soalan: "22. Peristalsis is best described as:", pilihan: ["A) Chemical breakdown of starch", "B) Wave-like muscular contractions of alimentary canal", "C) Absorption of water in colon", "D) Emulsification of fats"], jawapan: 1 },
+            { bab: 3, soalan: "23. Which organ produces bile to emulsify fats?", pilihan: ["A) Pancreas", "B) Gallbladder", "C) Liver", "D) Stomach"], jawapan: 2 },
+            { bab: 3, soalan: "24. Lack of iodine element in human diet can lead to:", pilihan: ["A) Osteoporosis", "B) Scurvy", "C) Beriberi", "D) Goitre"], jawapan: 3 },
+
+            // BAB 4: HUMAN HEALTH
+            { bab: 4, soalan: "25. Which structure acts as the body's first line of defence against pathogens?", pilihan: ["A) White blood cells", "B) Skin and mucous membranes", "C) Antibodies", "D) Red blood cells"], jawapan: 1 },
+            { bab: 4, soalan: "26. Which of the following diseases is classified as a non-infectious disease?", pilihan: ["A) Dengue fever", "B) Tuberculosis", "C) Diabetes", "D) Influenza"], jawapan: 2 },
+            { bab: 4, soalan: "27. Immunity acquired naturally after recovering from an infection is known as:", pilihan: ["A) Natural active immunity", "B) Artificial active immunity", "C) Natural passive immunity", "D) Artificial passive immunity"], jawapan: 0 },
+            { bab: 4, soalan: "28. Vaccination introduces what substance into the body to stimulate antibody production?", pilihan: ["A) Antibiotics", "B) Dead or weakened pathogens", "C) Pure blood plasma", "D) Antiserum"], jawapan: 1 },
+            { bab: 4, soalan: "29. Dengue fever is transmitted by which disease vector?", pilihan: ["A) Anopheles mosquito", "B) Housefly", "C) Aedes mosquito", "D) Rat flea"], jawapan: 2 },
+            { bab: 4, soalan: "30. White blood cells defend the human body against pathogens by:", pilihan: ["A) Producing antibodies & phagocytosis", "B) Transporting oxygen gas", "C) Forming blood clots", "D) Regulating body temperature"], jawapan: 0 },
+            { bab: 4, soalan: "31. Which of the following is an airborne infectious disease?", pilihan: ["A) Malaria", "B) Tuberculosis", "C) Cholera", "D) Dengue"], jawapan: 1 },
+            { bab: 4, soalan: "32. What type of immunity is gained by an infant through mother's breast milk?", pilihan: ["A) Artificial active immunity", "B) Artificial passive immunity", "C) Natural passive immunity", "D) Natural active immunity"], jawapan: 2 },
+
+            // BAB 5: WATER AND SOLUTION
+            { bab: 5, soalan: "33. What is the pH value of a neutral solution such as pure water?", pilihan: ["A) pH 2", "B) pH 7", "C) pH 11", "D) pH 14"], jawapan: 1 },
+            { bab: 5, soalan: "34. What is the universal solvent commonly used to dissolve ionic and polar substances?", pilihan: ["A) Alcohol", "B) Kerosene", "C) Water", "D) Acetone"], jawapan: 2 },
+            { bab: 5, soalan: "35. Separating water into hydrogen and oxygen gases using electric current is called:", pilihan: ["A) Electrolysis", "B) Evaporation", "C) Distillation", "D) Filtration"], jawapan: 0 },
+            { bab: 5, soalan: "36. Which factor increases the solubility of a solid solute in water?", pilihan: ["A) Decreasing temperature", "B) Increasing temperature", "C) Using larger solute particles", "D) Decreasing stirring rate"], jawapan: 1 },
+            { bab: 5, soalan: "37. A solution containing maximum amount of dissolved solute at a given temperature is:", pilihan: ["A) Dilute solution", "B) Concentrated solution", "C) Saturated solution", "D) Suspended solution"], jawapan: 2 },
+            { bab: 5, soalan: "38. Colloids differ from true solutions because colloids:", pilihan: ["A) Are fully transparent", "B) Scatter beams of light (Tyndall effect)", "C) Form heavy sediments quickly", "D) Cannot pass through filter paper"], jawapan: 1 },
+            { bab: 5, soalan: "39. Which water purification method kills microorganisms but leaves dissolved mineral salts?", pilihan: ["A) Chlorination", "B) Distillation", "C) Filtration", "D) Sedimentation"], jawapan: 0 },
+            { bab: 5, soalan: "40. Evaporation of water occurs at:", pilihan: ["A) Exactly 100°C only", "B) Above 100°C only", "C) 0°C only", "D) Any temperature below boiling point"], jawapan: 3 },
+
+            // BAB 6: ACID AND ALKALI
+            { bab: 6, soalan: "41. What color does blue litmus paper turn when dipped into an acidic solution?", pilihan: ["A) Red", "B) Yellow", "C) Green", "D) Remains Blue"], jawapan: 0 },
+            { bab: 6, soalan: "42. What reaction occurs when an acid reacts with an alkali?", pilihan: ["A) Evaporation", "B) Neutralisation", "C) Condensation", "D) Oxidation"], jawapan: 1 },
+            { bab: 6, soalan: "43. What gas is produced when an acid reacts with a reactive metal like zinc?", pilihan: ["A) Oxygen gas", "B) Carbon dioxide gas", "C) Hydrogen gas", "D) Nitrogen gas"], jawapan: 2 },
+            { bab: 6, soalan: "44. Which household substance is an example of an alkali?", pilihan: ["A) Vinegar", "B) Soap solution", "C) Lemon juice", "D) Fizzy drink"], jawapan: 1 },
+            { bab: 6, soalan: "45. Phenolphthalein indicator turns what color when added into an alkaline solution?", pilihan: ["A) Pink", "B) Colorless", "C) Yellow", "D) Red"], jawapan: 0 },
+            { bab: 6, soalan: "46. What products are formed during a complete neutralisation reaction?", pilihan: ["A) Acid and salt", "B) Alkali and water", "C) Salt and water", "D) Hydrogen and salt"], jawapan: 2 },
+            { bab: 6, soalan: "47. Agriculture soil that is too acidic can be neutralised by adding:", pilihan: ["A) Sulphuric acid", "B) Slaked lime (calcium hydroxide)", "C) Common salt", "D) Ammonium nitrate"], jawapan: 1 },
+            { bab: 6, soalan: "48. What is the pH range for acidic substances?", pilihan: ["A) pH less than 7", "B) pH equal to 7", "C) pH greater than 7", "D) pH 14 only"], jawapan: 0 },
+
+            // BAB 7: ELECTRICITY AND MAGNETISM
+            { bab: 7, soalan: "49. What is the S.I. unit for measuring electric current?", pilihan: ["A) Volt (V)", "B) Ampere (A)", "C) Ohm (Ω)", "D) Watt (W)"], jawapan: 1 },
+            { bab: 7, soalan: "50. Electrostatic charges are produced on two different insulators when they are:", pilihan: ["A) Rubbed together", "B) Cooled in water", "C) Connected to a magnet", "D) Heated strongly"], jawapan: 0 },
+            { bab: 7, soalan: "51. Which instrument is used to measure the voltage across a component in a circuit?", pilihan: ["A) Ammeter", "B) Voltmeter", "C) Galvanometer", "D) Barometer"], jawapan: 1 },
+            { bab: 7, soalan: "52. According to Ohm's Law, the formula relating voltage (V), current (I) and resistance (R) is:", pilihan: ["A) V = I / R", "B) V = I × R", "C) R = V × I", "D) I = V × R"], jawapan: 1 },
+            { bab: 7, soalan: "53. What happens to the other bulbs in a parallel circuit if one bulb burns out?", pilihan: ["A) All bulbs go out immediately", "B) The remaining bulbs stay lit", "C) The battery explodes", "D) Current drops to zero"], jawapan: 1 },
+            { bab: 7, soalan: "54. Magnetic field lines outside a bar magnet always point from:", pilihan: ["A) South pole to North pole", "B) North pole to South pole", "C) Centre to both ends", "D) East to West"], jawapan: 1 },
+            { bab: 7, soalan: "55. How can the strength of an electromagnet be increased?", pilihan: ["A) Decreasing the electric current", "B) Increasing the number of turns of the coil", "C) Removing the soft iron core", "D) Using a shorter wire"], jawapan: 1 },
+            { bab: 7, soalan: "56. Like magnetic poles (such as North and North) brought close together will:", pilihan: ["A) Attract each other", "B) Repel each other", "C) Lose magnetism", "D) Produce electricity"], jawapan: 1 },
+
+            // BAB 8: FORCE AND MOTION
+            { bab: 8, soalan: "57. Which type of force opposes relative motion between two surfaces in contact?", pilihan: ["A) Gravitational force", "B) Frictional force", "C) Electrostatic force", "D) Magnetic force"], jawapan: 1 },
+            { bab: 8, soalan: "58. Pressure is calculated using which mathematical formula?", pilihan: ["A) Pressure = Force / Area", "B) Pressure = Force × Area", "C) Pressure = Work / Time", "D) Pressure = Mass / Volume"], jawapan: 0 },
+            { bab: 8, soalan: "59. Atmospheric pressure decreases when altitude above sea level:", pilihan: ["A) Decreases", "B) Increases", "C) Remains constant", "D) Drops to zero"], jawapan: 1 },
+            { bab: 8, soalan: "60. A simple lever system consists of three main components, which are:", pilihan: ["A) Mass, Velocity, Distance", "B) Effort, Energy, Power", "C) Effort, Fulcrum, Load", "D) Friction, Gravity, Force"], jawapan: 2 },
+            { bab: 8, soalan: "61. Which instrument is used to measure the magnitude of a force in Newtons (N)?", pilihan: ["A) Spring balance", "B) Lever balance", "C) Barometer", "D) Manometer"], jawapan: 0 },
+            { bab: 8, soalan: "62. An object floats stationary on the surface of water when the buoyant force acting on it is:", pilihan: ["A) Less than the weight of the object", "B) Equal to the weight of the object", "C) Zero", "D) Greater than atmospheric pressure"], jawapan: 1 },
+            { bab: 8, soalan: "63. Moment of force increases when the perpendicular distance from the pivot (fulcrum):", pilihan: ["A) Decreases", "B) Remains unchanged", "C) Increases", "D) Equals zero"], jawapan: 2 },
+            { bab: 8, soalan: "64. Why does a sharp knife cut vegetables much more easily than a blunt knife?", pilihan: ["A) Smaller surface area produces higher pressure", "B) Larger surface area reduces friction", "C) Less force is needed to reduce mass", "D) Sharp edges increase gravitational pull"], jawapan: 0 },
+
+            // BAB 9: HEAT
+            { bab: 9, soalan: "65. What is the S.I. unit for measuring heat energy?", pilihan: ["A) Degree Celsius (°C)", "B) Joule (J)", "C) Kelvin (K)", "D) Watt (W)"], jawapan: 1 },
+            { bab: 9, soalan: "66. Thermal equilibrium is reached between two objects in contact when both have the same:", pilihan: ["A) Mass", "B) Volume", "C) Temperature", "D) Heat capacity"], jawapan: 2 },
+            { bab: 9, soalan: "67. Heat transfer through solid materials by direct particle vibration is:", pilihan: ["A) Convection", "B) Radiation", "C) Conduction", "D) Evaporation"], jawapan: 2 },
+            { bab: 9, soalan: "68. Heat transfer in fluids through movement of density currents is called:", pilihan: ["A) Conduction", "B) Convection", "C) Radiation", "D) Insulation"], jawapan: 1 },
+            { bab: 9, soalan: "69. Thermal energy from the Sun reaches Earth through vacuum by:", pilihan: ["A) Radiation", "B) Conduction", "C) Convection", "D) Diffusion"], jawapan: 0 },
+            { bab: 9, soalan: "70. Sea breeze blows from the sea towards the land during the day due to:", pilihan: ["A) Conduction", "B) Convection currents", "C) Solar radiation", "D) Evaporation"], jawapan: 1 },
+            { bab: 9, soalan: "71. Bimetallic strips bend when heated because the two metals:", pilihan: ["A) Melt at same temperature", "B) Expand at different rates", "C) Contract rapidly", "D) Have identical density"], jawapan: 1 },
+            { bab: 9, soalan: "72. Dark, dull surfaces are good:", pilihan: ["A) Absorbers and radiators of heat", "B) Reflectors of heat", "C) Thermal insulators", "D) Non-radiating bodies"], jawapan: 0 },
+
+            // BAB 10: SOUND WAVES
+            { bab: 10, soalan: "73. Sound waves are produced by:", pilihan: ["A) Light rays", "B) Vibrations of particles", "C) Chemical reactions", "D) Magnetic fields"], jawapan: 1 },
+            { bab: 10, soalan: "74. Sound requires what in order to travel?", pilihan: ["A) Medium (solid, liquid or gas)", "B) Vacuum", "C) Electric current", "D) Light source"], jawapan: 0 },
+            { bab: 10, soalan: "75. Sound waves CANNOT travel through:", pilihan: ["A) Water", "B) Steel bar", "C) Vacuum", "D) Air"], jawapan: 2 },
+            { bab: 10, soalan: "76. The pitch of a sound depends directly on its:", pilihan: ["A) Amplitude", "B) Frequency", "C) Speed", "D) Distance"], jawapan: 1 },
+            { bab: 10, soalan: "77. The loudness of a sound wave depends on its:", pilihan: ["A) Amplitude", "B) Frequency", "C) Pitch", "D) Wavelength"], jawapan: 0 },
+            { bab: 10, soalan: "78. Reflection of sound waves from a hard surface is called an:", pilihan: ["A) Ultrasound", "B) Infrasound", "C) Echo", "D) Absorption"], jawapan: 2 },
+            { bab: 10, soalan: "79. In which medium does sound travel at the highest speed?", pilihan: ["A) Solids", "B) Liquids", "C) Gases", "D) Vacuum"], jawapan: 0 },
+            { bab: 10, soalan: "80. The normal human hearing range for sound frequency is between:", pilihan: ["A) 0 Hz to 10 Hz", "B) 20 Hz to 20,000 Hz", "C) 50,000 Hz to 100,000 Hz", "D) Above 1,000,000 Hz"], jawapan: 1 },
+
+            // BAB 11: STARS AND GALAXIES
+            { bab: 11, soalan: "81. The galaxy in which our Solar System is located is called:", pilihan: ["A) Andromeda", "B) Triangulum", "C) Milky Way", "D) Sombrero"], jawapan: 2 },
+            { bab: 11, soalan: "82. Stars produce light and heat energy through nuclear reactions converting:", pilihan: ["A) Hydrogen into helium", "B) Oxygen into carbon", "C) Helium into iron", "D) Nitrogen into ozone"], jawapan: 0 },
+            { bab: 11, soalan: "83. What main physical property determines the color of a star?", pilihan: ["A) Distance from Earth", "B) Surface temperature", "C) Speed of rotation", "D) Shape of galaxy"], jawapan: 1 },
+            { bab: 11, soalan: "84. The closest star to Earth (other than our Sun) is:", pilihan: ["A) Sirius", "B) Betelgeuse", "C) Proxima Centauri", "D) Polaris"], jawapan: 2 },
+            { bab: 11, soalan: "85. Massive supergiant stars end their life cycle in a gigantic explosion called:", pilihan: ["A) Nebula", "B) Supernova", "C) Black dwarf", "D) Solar flare"], jawapan: 1 },
+            { bab: 11, soalan: "86. What classification of galaxy is the Milky Way?", pilihan: ["A) Spiral galaxy", "B) Elliptical galaxy", "C) Irregular galaxy", "D) Ring galaxy"], jawapan: 0 },
+            { bab: 11, soalan: "87. Apparent brightness of a star seen from Earth depends on its distance and:", pilihan: ["A) Age", "B) Mass only", "C) Actual luminosity", "D) Number of moons"], jawapan: 2 },
+
+            // BAB 12: SOLAR SYSTEM
+            { bab: 12, soalan: "88. Which planet is closest to the Sun in our Solar System?", pilihan: ["A) Mercury", "B) Venus", "C) Earth", "D) Mars"], jawapan: 0 },
+            { bab: 12, soalan: "89. Which planet is commonly known as the 'Red Planet'?", pilihan: ["A) Jupiter", "B) Mars", "C) Saturn", "D) Mercury"], jawapan: 1 },
+            { bab: 12, soalan: "90. What is the largest planet in our Solar System?", pilihan: ["A) Saturn", "B) Neptune", "C) Jupiter", "D) Uranus"], jawapan: 2 },
+            { bab: 12, soalan: "91. Period of revolution of a planet around the Sun increases when its distance from Sun:", pilihan: ["A) Decreases", "B) Increases", "C) Remains same", "D) Drops to zero"], jawapan: 1 },
+            { bab: 12, soalan: "92. Which planet is famous for having the most extensive ring system?", pilihan: ["A) Saturn", "B) Uranus", "C) Neptune", "D) Jupiter"], jawapan: 0 },
+            { bab: 12, soalan: "93. The natural satellite revolving around planet Earth is the:", pilihan: ["A) Sun", "B) Titan", "C) Moon", "D) Phobos"], jawapan: 2 },
+            { bab: 12, soalan: "94. The rotation of Earth on its inclined axis causes:", pilihan: ["A) Four seasons", "B) Day and night", "C) Solar eclipse", "D) Ocean tides"], jawapan: 1 },
+
+            // BAB 13: METEOROID, ASTEROID AND COMET
+            { bab: 13, soalan: "95. A small rock or metallic body floating in outer space before entering atmosphere is a:", pilihan: ["A) Meteoroid", "B) Meteor", "C) Meteorite", "D) Comet"], jawapan: 0 },
+            { bab: 13, soalan: "96. When a meteoroid enters Earth's atmosphere and burns up due to friction, it forms a:", pilihan: ["A) Comet", "B) Meteor", "C) Asteroid", "D) Supernova"], jawapan: 1 },
+            { bab: 13, soalan: "97. A meteoroid fragment that survives atmosphere entry and hits Earth's surface is a:", pilihan: ["A) Asteroid", "B) Comet", "C) Meteorite", "D) Nebula"], jawapan: 2 },
+            { bab: 13, soalan: "98. Main Asteroid Belt in our Solar System is located between the orbits of:", pilihan: ["A) Earth and Mars", "B) Mars and Jupiter", "C) Jupiter and Saturn", "D) Venus and Earth"], jawapan: 1 },
+            { bab: 13, soalan: "99. Comets are composed mainly of:", pilihan: ["A) Ice, frozen gases and dust", "B) Liquid water and rocks", "C) Pure molten iron", "D) Glowing plasma gas"], jawapan: 0 },
+            { bab: 13, soalan: "100. The bright glowing tail of a comet always points:", pilihan: ["A) Towards the Sun", "B) Towards Earth", "C) Away from the Sun", "D) Towards Jupiter"], jawapan: 2 }
+        ];
+
+        /* ALGORITMA RANDOM HARIAN (DAILY SEEDED SHUFFLE) */
+        function getDailySeed() {
+            const d = new Date();
+            return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+        }
+
+        function seededRandom(seed) {
+            var x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function shuffleArrayWithSeed(array, seed) {
+            let m = array.length, t, i;
+            let currentSeed = seed;
+            let arr = [...array];
+            while (m) {
+                i = Math.floor(seededRandom(currentSeed++) * m--);
+                t = arr[m];
+                arr[m] = arr[i];
+                arr[i] = t;
+            }
+            return arr;
+        }
+
+        const senaraiSoalanHarian = shuffleArrayWithSeed(senaraiSoalan, getDailySeed());
+
+        let soalanSemasaIndex = 0;
+        let senaraiSoalanFiltered = [...senaraiSoalanHarian];
+        let kuizSedangDiproses = false;
+
+        const dropdownBab = document.getElementById("pilihBabKuiz");
+        if (dropdownBab) {
+            dropdownBab.addEventListener("change", function(e) {
+                const val = e.target.value;
+                if (val === "semua") {
+                    senaraiSoalanFiltered = [...senaraiSoalanHarian];
+                } else {
+                    senaraiSoalanFiltered = senaraiSoalanHarian.filter(q => q.bab == val);
+                }
+                soalanSemasaIndex = 0;
+                if (senaraiSoalanFiltered.length > 0) {
+                    paparkanSoalanKuiz(window.safeKeySaya || getSafeKey(window.namaPemainSaya));
+                } else {
+                    const teks = document.getElementById("teksSoalan");
+                    const bekas = document.getElementById("bekasPilihan");
+                    if (teks) teks.innerText = "Tiada soalan untuk bab ini lagi.";
+                    if (bekas) bekas.innerHTML = "";
+                }
+            });
+        }
+
+        function paparkanSoalanKuiz(safeKeyNama) {
+            if (senaraiSoalanFiltered.length === 0) return;
+            kuizSedangDiproses = false;
+            const q = senaraiSoalanFiltered[soalanSemasaIndex];
+            const teks = document.getElementById("teksSoalan");
+            const bekas = document.getElementById("bekasPilihan");
+            if (!teks || !bekas) return;
+
+            teks.innerText = q.soalan;
+            bekas.innerHTML = "";
+
+            q.pilihan.forEach((opt, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "quiz-opt-btn";
+                btn.innerText = opt;
+                btn.onclick = () => semakJawapanKuiz(idx, q.jawapan, safeKeyNama, btn);
+                bekas.appendChild(btn);
+            });
+        }
+
+        function semakJawapanKuiz(pilihanPemain, jawapanBetul, safeKeyNama, btnDipilih) {
+            if (kuizSedangDiproses) return;
+            const keyToUse = window.safeKeySaya || safeKeyNama || "guest";
+
+            if (pilihanPemain === jawapanBetul) {
+                kuizSedangDiproses = true;
+                const semuaBtn = document.querySelectorAll("#bekasPilihan .quiz-opt-btn");
+                semuaBtn.forEach(b => b.disabled = true);
+                if (btnDipilih) {
+                    btnDipilih.style.background = "#dcfce7";
+                    btnDipilih.style.borderColor = "#22c55e";
+                    btnDipilih.style.color = "#166534";
+                }
+                window.telahJawabKuizHariIni = true;
+                playSFX('correct');
+                showToast("Jawapan Tepat! Anda mendapat +50 XP 🎉", "success");
+                tambahXPPemain(keyToUse, 50);
+                soalanSemasaIndex = (soalanSemasaIndex + 1) % senaraiSoalanFiltered.length;
+                setTimeout(() => paparkanSoalanKuiz(keyToUse), 1000);
+            } else {
+                if (btnDipilih) {
+                    btnDipilih.style.background = "#fee2e2";
+                    btnDipilih.style.borderColor = "#ef4444";
+                    btnDipilih.style.color = "#991b1b";
+                    btnDipilih.disabled = true;
+                }
+                playSFX('wrong');
+                showToast("Jawapan kurang tepat. Cuba lagi!", "error");
+            }
+        }
+
+        window.sebutSoalan = function() {
+            if (senaraiSoalanFiltered.length === 0) return;
+            const q = senaraiSoalanFiltered[soalanSemasaIndex];
+            if (!q) return;
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+                const utter = new SpeechSynthesisUtterance(q.soalan);
+                utter.lang = 'en-US';
+                utter.rate = 0.9;
+                window.speechSynthesis.speak(utter);
+            } else {
+                showToast("Fungsi sebutan audio tidak disokong di pelayar ini.", "error");
+            }
+        };
+
+        function tambahXPPemain(safeKeyNama, amaunXP) {
+            const keyToUse = safeKeyNama || window.safeKeySaya || "guest";
+            const rujukanXP = ref(db, "kawan_sistem_v2/" + keyToUse + "/xp");
+            runTransaction(rujukanXP, (xpSemasa) => {
+                return (Number(xpSemasa) || 0) + amaunXP;
+            }).then((res) => {
+                if (res.committed) {
+                    kemaskiniLencanaPemain(keyToUse, res.snapshot.val() || 0);
+                }
+            });
+        }
+
+        window.beliGelaran = function(gelaran, kos) {
+            if (!window.namaPemainSaya) return;
+            const safeKey = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+            const rujukanXP = ref(db, "kawan_sistem_v2/" + safeKey + "/xp");
+            
+            runTransaction(rujukanXP, (xp) => {
+                const semasa = Number(xp) || 0;
+                if (semasa < kos) return;
+                return semasa - kos;
+            }).then((res) => {
+                if (res.committed) {
+                    set(ref(db, "kawan_sistem_v2/" + safeKey + "/gelaran"), gelaran);
+                    showToast(`Gelaran '${gelaran}' ditebus!`, "success");
+                } else {
+                    showToast(`XP tidak mencukupi! Perlu ${kos} XP.`, "error");
+                }
+            });
+        };
+
+        window.beliBingkai = function(bingkaiClass, kos) {
+            if (!window.namaPemainSaya) return;
+            const safeKey = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+            const rujukanXP = ref(db, "kawan_sistem_v2/" + safeKey + "/xp");
+            
+            runTransaction(rujukanXP, (xp) => {
+                const semasa = Number(xp) || 0;
+                if (semasa < kos) return;
+                return semasa - kos;
+            }).then((res) => {
+                if (res.committed) {
+                    set(ref(db, "kawan_sistem_v2/" + safeKey + "/bingkai"), bingkaiClass);
+                    showToast(`Bingkai ditebus & dipakai!`, "success");
+                } else {
+                    showToast(`XP tidak mencukupi! Perlu ${kos} XP.`, "error");
+                }
+            });
+        };
+
+        function muatKuizDanXP(safeKeyNama) {
+            const rujukanXP = ref(db, "kawan_sistem_v2/" + safeKeyNama + "/xp");
+            onValue(rujukanXP, (snap) => {
+                const xp = snap.val() || 0;
+                window.xpSemasaGlobal = xp;
+                
+                const paparan = document.getElementById("paparanXP");
+                if (paparan) paparan.innerText = `⭐ ${xp} XP`;
+                
+                // Kemaskini Kad Profil Pandai Realtime
+                const elemStatSkor = document.getElementById("statSkor");
+                if (elemStatSkor) elemStatSkor.innerText = xp;
+
+                // Kemaskini Dropdown Avatar Navbar Realtime
+                window.kemaskiniNavbarAvatar(window.namaPemainSaya, window.avatarSemasaGlobal, xp);
+
+                const btnSijil = document.getElementById("btnBukaSijil");
+                if (btnSijil) {
+                    if (xp >= 500) btnSijil.style.display = "inline-block";
+                    else btnSijil.style.display = "none";
+                }
+                
+                kemaskiniLencanaPemain(safeKeyNama, xp);
+            });
+
+            paparkanSoalanKuiz(safeKeyNama);
+        }
+
+        function kemaskiniLencanaPemain(safeKeyNama, xp) {
+            const bekasLencana = document.getElementById("bekasLencana");
+            const fill = document.getElementById("xpBarFill");
+            const peratusTeks = document.getElementById("teksPeratusXP");
+            if (!bekasLencana) return;
+            let htmlLencana = "";
+
+            let targetXP = 300;
+            let peratus = Math.min(Math.round((xp / targetXP) * 100), 100);
+            if (fill) fill.style.width = peratus + "%";
+            if (peratusTeks) peratusTeks.innerText = peratus + "%";
+
+            if (xp >= 50) htmlLencana += `<span class="badge-pill">🥉 Junior Scientist</span>`;
+            if (xp >= 150) htmlLencana += `<span class="badge-pill">🥈 Bio Explorer</span>`;
+            if (xp >= 300) htmlLencana += `<span class="badge-pill">🥇 Master Chemist</span>`;
+
+            if (htmlLencana === "") {
+                bekasLencana.innerHTML = `<span style="font-size: 12px; color: #888888;">Belum ada lencana (Kumpul 50 XP untuk Lencana Pertama)</span>`;
+            } else {
+                bekasLencana.innerHTML = htmlLencana;
+            }
+        }
+
+        window.tukarAvatarPemain = function(avatarIkon) {
+            if (!window.namaPemainSaya) return;
+            const safeKeyNama = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+            set(ref(db, "kawan_sistem_v2/" + safeKeyNama + "/avatar"), avatarIkon).then(() => {
+                showToast("Avatar ditukar ke " + avatarIkon, "success");
+            });
+        };
+
+        /* Leaderboard & Hall of Fame Spotlight */
+        function muatLeaderboard() {
+            const rujukanKawanSistem = ref(db, "kawan_sistem_v2");
+            onValue(rujukanKawanSistem, (snapshot) => {
+                const data = snapshot.val();
+                const bekas = document.getElementById("senaraiLeaderboard");
+                if (!bekas) return;
+                bekas.innerHTML = "";
+
+                if (!data) {
+                    bekas.innerHTML = "<div style='color:#888888; padding: 10px; text-align:center;'>Belum ada data saintis.</div>";
+                    return;
+                }
+
+                let senaraiPemain = [];
+                for (let key in data) {
+                    let userObj = data[key];
+                    let namaFormat = userObj.nama_asal || key.replace(/_/g, " ");
+                    let xpVal = userObj.xp || 0;
+                    let av = userObj.avatar || "👨‍🔬";
+                    let gelaranVal = userObj.gelaran || "";
+                    let bingkaiVal = userObj.bingkai || "";
+                    senaraiPemain.push({ nama: namaFormat, xp: xpVal, avatar: av, gelaran: gelaranVal, bingkai: bingkaiVal });
+                }
+
+                senaraiPemain.sort((a, b) => b.xp - a.xp);
+
+                if (senaraiPemain.length > 0) {
+                    const spotlightElem = document.getElementById("hallOfFameSpotlight");
+                    if (spotlightElem) {
+                        spotlightElem.innerText = `🏆 ${senaraiPemain[0].nama} ${senaraiPemain[0].gelaran ? '(' + senaraiPemain[0].gelaran + ')' : ''} — ${senaraiPemain[0].xp} XP`;
+                    }
+                }
+
+                const top5 = senaraiPemain.slice(0, 5);
+                top5.forEach((p, index) => {
+                    let pingat = `${index + 1}.`;
+                    if (index === 0) pingat = "🥇";
+                    if (index === 1) pingat = "🥈";
+                    if (index === 2) pingat = "🥉";
+
+                    const div = document.createElement("div");
+                    div.className = "leaderboard-item";
+                    div.innerHTML = `
+                        <span>${pingat} <span class="${escapeHTML(p.bingkai)}">${escapeHTML(p.avatar)}</span> ${escapeHTML(p.nama)} <small style="color:#8e24aa;">${p.gelaran ? '[' + escapeHTML(p.gelaran) + ']' : ''}</small></span>
+                        <span style="color: #ffb300;">⭐ ${p.xp} XP</span>
+                    `;
+                    bekas.appendChild(div);
+                });
+            });
+        }
+
+        muatLeaderboard();
+        paparkanSoalanKuiz("guest");
+
+        function semakDailyStreak(safeKeyNama) {
+            const d = new Date();
+            const tarikhHariIni = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            
+            const semalamObj = new Date();
+            semalamObj.setDate(semalamObj.getDate() - 1);
+            const tarikhSemalam = `${semalamObj.getFullYear()}-${String(semalamObj.getMonth() + 1).padStart(2, '0')}-${String(semalamObj.getDate()).padStart(2, '0')}`;
+
+            const rujukanStreak = ref(db, "kawan_sistem_v2/" + safeKeyNama + "/streak_info");
+
+            get(rujukanStreak).then((snap) => {
+                let dataStreak = snap.val() || { streak: 0, tarikh_terakhir: "" };
+
+                if (dataStreak.tarikh_terakhir === tarikhHariIni) {
+                    // Sudah log masuk hari ini
+                } else if (dataStreak.tarikh_terakhir === tarikhSemalam) {
+                    dataStreak.streak += 1;
+                    dataStreak.tarikh_terakhir = tarikhHariIni;
+                    set(rujukanStreak, dataStreak);
+                    tambahXPPemain(safeKeyNama, 15);
+                    showToast(`🔥 Streak bertambah ke ${dataStreak.streak} Hari! Bonus +15 XP! 🎉`, "success");
+                } else {
+                    dataStreak.streak = 1;
+                    dataStreak.tarikh_terakhir = tarikhHariIni;
+                    set(rujukanStreak, dataStreak);
+                    showToast(`🔥 Daily Streak Hari Ke-1 Bermula!`, "info");
+                }
+
+                const paparan = document.getElementById("paparanStreak");
+                if (paparan) {
+                    paparan.innerText = `🔥 ${dataStreak.streak} Day Streak`;
+                }
+
+                // Kemaskini Kad Profil Pandai Realtime
+                const elemStreakKad = document.getElementById("statStreak");
+                if (elemStreakKad) elemStreakKad.innerText = `${dataStreak.streak} days`;
+            });
+        }
+
+        /* Pengurusan Sesi Kawan & Chat Realtime */
+        window.namaPemainSaya = "";
+        window.safeKeySaya = "";
+        window.avatarSemasaGlobal = "🔬";
+        let chatIDSemasa = "";
+        let unsubscribeChatListener = null;
+        let friendStatusListeners = {};
+        let activeBattleRoomId = null;
+        const cabaranDipaparkan = new Set();
+
+        /* FUNGSI TUKAR TAB & LOG MASUK TERUS DALAM MODAL */
+        window.tukarTabModal = function(tab) {
+            const isLogin = (tab === 'login');
+            document.getElementById("panelTabLogin").style.display = isLogin ? "block" : "none";
+            document.getElementById("panelTabGuest").style.display = isLogin ? "none" : "block";
+
+            const btnLogin = document.getElementById("tabBtnLogin");
+            const btnGuest = document.getElementById("tabBtnGuest");
+
+            btnLogin.style.background = isLogin ? "#0052D4" : "transparent";
+            btnLogin.style.color = isLogin ? "#ffffff" : "#475569";
+
+            btnGuest.style.background = !isLogin ? "#28a745" : "transparent";
+            btnGuest.style.color = !isLogin ? "#ffffff" : "#475569";
+        };
+
+        window.logMasukDariModal = function() {
+            const email = document.getElementById("loginEmailModal").value.trim();
+            const pass = document.getElementById("loginPassModal").value;
+            const btn = document.getElementById("btnSubmitLoginModal");
+
+            if (!email || !pass) {
+                showToast("Sila masukkan e-mel dan kata laluan anda!", "error");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Sedang log masuk... ⏳";
+
+            signInWithEmailAndPassword(auth, email, pass)
+                .then(() => {
+                    sessionStorage.removeItem("skip_popup_daftar");
+                    document.getElementById("modalNama").style.display = "none";
+                    showToast("Berjaya log masuk! Selamat kembali 🚀", "success");
+                })
+                .catch((err) => {
+                    btn.disabled = false;
+                    btn.innerText = "Log Masuk Sekarang 🚀";
+                    let mesej = "E-mel atau kata laluan tidak tepat.";
+                    if (err.code === "auth/invalid-email") mesej = "Format e-mel tidak sah.";
+                    else if (err.code === "auth/too-many-requests") mesej = "Terlalu banyak percubaan. Cuba sebentar lagi.";
+                    showToast(mesej, "error");
+                });
+        };
+
+        /* PEMANTAU STATUS LOG MASUK */
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // HANYA KIRA VISITOR COUNTER APABILA PENGGUNA BENAR-BENAR SIGN IN
+                rekodPelawatSignIn(user);
+
+                document.getElementById("modalNama").style.display = "none";
+                window.kemaskiniMenuAuth(true);
+
+                user.reload().then(() => {
+                    const defaultName = auth.currentUser.displayName || auth.currentUser.email.split('@')[0];
+                    const savedName = sessionStorage.getItem("saintis_nickname") || defaultName;
+                    
+                    window.namaPemainSaya = savedName;
+                    window.safeKeySaya = user.uid;
+
+                    sessionStorage.setItem("saintis_nickname", savedName);
+                    sessionStorage.setItem("saintis_key", window.safeKeySaya);
+
+                    mulakanSistemKawan(savedName, window.safeKeySaya);
+                }).catch(() => {
+                    const savedName = sessionStorage.getItem("saintis_nickname") || user.email.split('@')[0];
+                    window.namaPemainSaya = savedName;
+                    window.safeKeySaya = user.uid;
+                    mulakanSistemKawan(savedName, window.safeKeySaya);
+                });
+            } else {
+                // Pengguna belum sign in -> Visitor Counter TIDAK ditambah
+                let savedName = sessionStorage.getItem("saintis_nickname");
+                let savedKey = sessionStorage.getItem("saintis_key");
+                let skipPopup = sessionStorage.getItem("skip_popup_daftar");
+
+                if (!savedName) {
+                    window.kemaskiniMenuAuth(false);
+                    if (!skipPopup) {
+                        document.getElementById("modalNama").style.display = "flex";
+                    }
+                } else {
+                    window.kemaskiniMenuAuth(true);
+                    window.namaPemainSaya = savedName;
+                    window.safeKeySaya = savedKey || getSafeKey(savedName);
+                    mulakanSistemKawan(savedName, window.safeKeySaya);
+                }
+            }
+        });
+
+        /* BORANG PENDAFTARAN GUEST */
+        window.sahkanNamaDanMula = function() {
+            var namaInput = document.getElementById("inputNamaPelajar").value.trim();
+            var sekolahInput = document.getElementById("inputSekolah").value.trim();
+            var daerahInput = document.getElementById("inputDaerah").value.trim();
+            var negeriInput = document.getElementById("inputNegeri").value.trim();
+
+            if (namaInput === "") {
+                showToast("Sila masukkan nama saintis kitak!", "error");
+                return;
+            }
+
+            const currentUser = auth.currentUser;
+            const keyToUse = currentUser ? currentUser.uid : getSafeKey(namaInput);
+
+            // Semak jika pengguna Guest menggunakan nama yang sudah wujud
+            if (!currentUser) {
+                get(ref(db, "kawan_sistem_v2/" + keyToUse)).then((snap) => {
+                    if (snap.exists()) {
+                        showToast(`Nama "${namaInput}" sudah digunakan! Sila tambah nama bapa atau nombor (Cth: ${namaInput} 2).`, "error");
+                        return;
+                    }
+                    simpanDanMulaSesi(namaInput, keyToUse, sekolahInput, daerahInput, negeriInput);
+                });
+            } else {
+                simpanDanMulaSesi(namaInput, keyToUse, sekolahInput, daerahInput, negeriInput);
+            }
+        };
+
+        function simpanDanMulaSesi(namaInput, keyToUse, sekolahInput, daerahInput, negeriInput) {
+            sessionStorage.setItem("saintis_nickname", namaInput);
+            sessionStorage.setItem("saintis_key", keyToUse);
+            sessionStorage.setItem("saintis_sekolah", sekolahInput || "SMK Matang Jaya");
+            sessionStorage.setItem("saintis_daerah", daerahInput || "Kuching");
+            sessionStorage.setItem("saintis_negeri", negeriInput || "Sarawak");
+
+            window.namaPemainSaya = namaInput;
+            window.safeKeySaya = keyToUse;
+            window.kemaskiniMenuAuth(true);
+
+            mulakanSistemKawan(namaInput, keyToUse);
+
+            document.getElementById("modalNama").style.display = "none";
+            showToast("Pendaftaran Berjaya! Selamat datang, " + namaInput + " 🚀", "success");
+        }
+
+        window.batalIsiNama = function() {
+            sessionStorage.setItem("skip_popup_daftar", "true");
+            document.getElementById("modalNama").style.display = "none";
+        };
+
+        function mulakanSistemKawan(namaSahih, safeKeyNama) {
+            if (!safeKeyNama) safeKeyNama = getSafeKey(namaSahih);
+            window.safeKeySaya = safeKeyNama;
+
+            // Semak data sedia ada di Firebase supaya maklumat pengguna berdaftar tidak tertindih
+            get(ref(db, "kawan_sistem_v2/" + safeKeyNama)).then((snap) => {
+                const dataSediaAda = snap.val() || {};
+                const namaAkhir = dataSediaAda.nama_asal || namaSahih;
+                const sekolahAkhir = dataSediaAda.sekolah || sessionStorage.getItem("saintis_sekolah") || "SMK Matang Jaya";
+                const daerahAkhir = dataSediaAda.daerah || sessionStorage.getItem("saintis_daerah") || "Kuching";
+                const negeriAkhir = dataSediaAda.negeri || sessionStorage.getItem("saintis_negeri") || "Sarawak";
+
+                window.namaPemainSaya = namaAkhir;
+                sessionStorage.setItem("saintis_nickname", namaAkhir);
+                sessionStorage.setItem("saintis_sekolah", sekolahAkhir);
+                sessionStorage.setItem("saintis_daerah", daerahAkhir);
+                sessionStorage.setItem("saintis_negeri", negeriAkhir);
+
+                update(ref(db, "kawan_sistem_v2/" + safeKeyNama), {
+                    nama_asal: namaAkhir,
+                    sekolah: sekolahAkhir,
+                    daerah: daerahAkhir,
+                    negeri: negeriAkhir
+                });
+
+                const elemNama = document.getElementById("pNamaPelajar");
+                if (elemNama) elemNama.innerText = namaAkhir.toUpperCase();
+                
+                const elemHandle = document.getElementById("pHandle");
+                if (elemHandle) elemHandle.innerText = "@" + getSafeKey(namaAkhir);
+
+                const elemSekolah = document.getElementById("pSekolah");
+                if (elemSekolah) elemSekolah.innerText = sekolahAkhir;
+
+                const elemLokasi = document.getElementById("pLokasi");
+                if (elemLokasi) elemLokasi.innerText = negeriAkhir + ", Malaysia";
+            });
+
+            onValue(ref(db, "kawan_sistem_v2/" + safeKeyNama), (snap) => {
+                const u = snap.val() || {};
+                let currentAv = u.avatar || "🔬";
+                window.avatarSemasaGlobal = currentAv;
+                let gelaranText = u.gelaran ? ` <i>[${escapeHTML(u.gelaran)}]</i>` : '';
+                let bingkaiClass = u.bingkai || 'frame-gold';
+
+                const elemAvatarGempak = document.getElementById("profilAvatarGempak");
+                if (elemAvatarGempak) {
+                    elemAvatarGempak.innerText = currentAv;
+                    elemAvatarGempak.className = bingkaiClass;
+                }
+
+                window.kemaskiniNavbarAvatar(window.namaPemainSaya || namaSahih, currentAv, u.xp || 0);
+
+                const statusProfilBox = document.getElementById("statusProfilSaya");
+                if (statusProfilBox) {
+                    statusProfilBox.innerHTML = `👤 Profil Saya: <span class="avatar-badge ${escapeHTML(bingkaiClass)}">${escapeHTML(currentAv)}</span><b>${escapeHTML(window.namaPemainSaya || namaSahih)}</b>${gelaranText} | Status: 🟢 <span style="color: #28a745;">Online</span>`;
+                }
+            });
+
+            const statusOnlineSaya = ref(db, "kawan_sistem_v2/" + safeKeyNama + "/status_online");
+            const connectedRef = ref(db, ".info/connected");
+
+            onValue(connectedRef, (snap) => {
+                if (snap.val() === true) {
+                    set(statusOnlineSaya, true);
+                    onDisconnect(statusOnlineSaya).set(false);
+                }
+            });
+
+            dengarJemputanKawan(safeKeyNama);
+            muatSenaraiKawan(safeKeyNama);
+            muatKuizDanXP(safeKeyNama);
+            dengarCabaranMasuk(safeKeyNama);
+            semakDailyStreak(safeKeyNama);
+            muatStatusQuestHarian(safeKeyNama);
+        }
+
+        /* 1-LAWAN-1 QUIZ BATTLE */
+        window.cabarKawan = function(safeTargetKey, namaKawan) {
+            if (!window.namaPemainSaya) return;
+            const safeKeySaya = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+            const roomId = [safeKeySaya, safeTargetKey].sort().join("_VS_");
+            
+            set(ref(db, "battle_v2/" + roomId), {
+                status: "waiting",
+                pemainA: window.namaPemainSaya,
+                pemainAKey: safeKeySaya,
+                pemainB: namaKawan,
+                pemainBKey: safeTargetKey,
+                skorA: 0,
+                skorB: 0,
+                soalanIdx: 0
+            }).then(() => {
+                set(ref(db, "kawan_sistem_v2/" + safeTargetKey + "/cabaran_masuk/" + safeKeySaya), {
+                    namaPengirim: window.namaPemainSaya,
+                    roomId: roomId,
+                    pengirimKey: safeKeySaya
+                });
+                showToast("Cabaran dihantar ke " + namaKawan + "! Menunggu rintangan...", "info");
+                pantauLobbyBattle(roomId);
+            });
+        };
+
+        function dengarCabaranMasuk(safeKeyNamaSaya) {
+            onValue(ref(db, "kawan_sistem_v2/" + safeKeyNamaSaya + "/cabaran_masuk"), (snap) => {
+                const data = snap.val();
+                if (data) {
+                    for (let key in data) {
+                        const cab = data[key];
+                        const unikId = `${cab.roomId}_${key}`;
+                        if (cabaranDipaparkan.has(unikId)) continue;
+                        cabaranDipaparkan.add(unikId);
+                        playSFX('chat');
+                        
+                        const container = document.getElementById("toast-container");
+                        if (container) {
+                            const toast = document.createElement("div");
+                            toast.className = "toast-msg info";
+                            toast.id = `toast-battle-${unikId}`;
+                            toast.style.flexDirection = "column";
+                            toast.style.alignItems = "flex-start";
+                            toast.innerHTML = `
+                                <div><b>⚔️ ${escapeHTML(cab.namaPengirim)} mencabar kitak Kuiz Battle!</b></div>
+                                <div style="margin-top:8px; display:flex; gap:8px;">
+                                    <button onclick="window.terimaCabaranBattle('${escapeHTML(cab.roomId)}', '${escapeHTML(key)}')" style="background:#28a745; color:white; border:none; padding:5px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">Terima ⚔️</button>
+                                    <button onclick="window.tolakCabaranBattle('${escapeHTML(key)}', '${escapeHTML(cab.roomId)}')" style="background:#dc3545; color:white; border:none; padding:5px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">Tolak ❌</button>
+                                </div>
+                            `;
+                            container.appendChild(toast);
+                        }
+                    }
+                }
+            });
+        }
+
+        window.terimaCabaranBattle = function(roomId, pengirimKey) {
+            const unikId = `${roomId}_${pengirimKey}`;
+            cabaranDipaparkan.delete(unikId);
+            const toastEl = document.getElementById(`toast-battle-${unikId}`);
+            if (toastEl) toastEl.remove();
+
+            remove(ref(db, "kawan_sistem_v2/" + (window.safeKeySaya || getSafeKey(window.namaPemainSaya)) + "/cabaran_masuk/" + pengirimKey));
+            update(ref(db, "battle_v2/" + roomId), { status: "active" }).then(() => {
+                pantauLobbyBattle(roomId);
+            });
+        };
+
+        window.tolakCabaranBattle = function(pengirimKey, roomId = "") {
+            const unikId = `${roomId}_${pengirimKey}`;
+            cabaranDipaparkan.delete(unikId);
+            const toastEl = document.getElementById(`toast-battle-${unikId}`);
+            if (toastEl) toastEl.remove();
+
+            remove(ref(db, "kawan_sistem_v2/" + (window.safeKeySaya || getSafeKey(window.namaPemainSaya)) + "/cabaran_masuk/" + pengirimKey));
+        };
+
+        let battleRewardClaimed = false;
+
+        function pantauLobbyBattle(roomId) {
+            if (activeBattleRoomId) {
+                off(ref(db, "battle_v2/" + activeBattleRoomId));
+            }
+            activeBattleRoomId = roomId;
+            battleRewardClaimed = false;
+            
+            onValue(ref(db, "battle_v2/" + roomId), (snap) => {
+                const bData = snap.val();
+                if (!bData) {
+                    document.getElementById("modalQuizBattle").style.display = "none";
+                    return;
+                }
+
+                if (bData.status === "active") {
+                    document.getElementById("modalQuizBattle").style.display = "flex";
+                    kemaskiniPaparanBattle(bData);
+                }
+            });
+        }
+
+        function kemaskiniPaparanBattle(bData) {
+            const myKey = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+            const isA = (myKey === bData.pemainAKey);
+            
+            const myScore = isA ? bData.skorA : bData.skorB;
+            const oppScore = isA ? bData.skorB : bData.skorA;
+            const oppName = isA ? bData.pemainB : bData.pemainA;
+
+            document.getElementById("skorSayaBattle").innerText = `Kitak (${window.namaPemainSaya}): ${myScore} pts`;
+            document.getElementById("skorLawanBattle").innerText = `${oppName}: ${oppScore} pts`;
+
+            const currentQIdx = bData.soalanIdx || 0;
+            
+            if (currentQIdx >= 10) {
+                let pemenangTeks = "⚔️ BATTLE SELESAI: SERI!";
+                if (myScore > oppScore) {
+                    pemenangTeks = `🎉 KITAK MENANG BATTLE TOK! (+100 XP Bonus)`;
+                    if (!battleRewardClaimed) {
+                        battleRewardClaimed = true;
+                        tambahXPPemain(myKey, 100);
+                    }
+                } else if (oppScore > myScore) {
+                    pemenangTeks = `❌ ${oppName} Menang Battle Tok!`;
+                }
+                
+                document.getElementById("soalanBattleTeks").innerText = pemenangTeks;
+                document.getElementById("pilihanBattleContainer").innerHTML = `<p style="font-weight:bold; color:#0052D4;">Tamat 10 Soalan Cabaran Battle!</p>`;
+                return;
+            }
+
+            const q = senaraiSoalanHarian[currentQIdx % senaraiSoalanHarian.length];
+            document.getElementById("soalanBattleTeks").innerText = `Soalan ${currentQIdx + 1}/10: ${q.soalan}`;
+            
+            const container = document.getElementById("pilihanBattleContainer");
+            container.innerHTML = "";
+            q.pilihan.forEach((opt, idx) => {
+                const btn = document.createElement("button");
+                btn.className = "quiz-opt-btn";
+                btn.innerText = opt;
+                btn.onclick = () => jawabSoalanBattle(idx, q.jawapan, bData, isA);
+                container.appendChild(btn);
+            });
+        }
+
+        function jawabSoalanBattle(pilihanIdx, jawapanBetul, bData, isA) {
+            if (pilihanIdx === jawapanBetul) {
+                playSFX('correct');
+                showToast("Jawapan Tepat! +10 Mata Battle 🎉", "success");
+                if (isA) {
+                    update(ref(db, "battle_v2/" + activeBattleRoomId), {
+                        skorA: (bData.skorA || 0) + 10,
+                        soalanIdx: (bData.soalanIdx || 0) + 1
+                    });
+                } else {
+                    update(ref(db, "battle_v2/" + activeBattleRoomId), {
+                        skorB: (bData.skorB || 0) + 10,
+                        soalanIdx: (bData.soalanIdx || 0) + 1
+                    });
+                }
+            } else {
+                playSFX('wrong');
+                showToast("Jawapan Salah! Lanjut ke soalan seterusnya...", "error");
+                update(ref(db, "battle_v2/" + activeBattleRoomId), {
+                    soalanIdx: (bData.soalanIdx || 0) + 1
+                });
+            }
+        }
+
+        window.keluarBattle = function() {
+            document.getElementById("modalQuizBattle").style.display = "none";
+            if (activeBattleRoomId) {
+                off(ref(db, "battle_v2/" + activeBattleRoomId));
+                remove(ref(db, "battle_v2/" + activeBattleRoomId));
+                activeBattleRoomId = null;
+            }
+        };
+
+        window.hantarJemputanKawan = function() {
+            if (!window.namaPemainSaya) return;
+
+            var namaPenerima = document.getElementById("cariNamaKawan").value.trim();
+            if (namaPenerima === "") {
+                showToast("Sila masukkan nama rakan yang ingin dicari!", "error");
+                return;
+            }
+
+            if (namaPenerima.toLowerCase() === window.namaPemainSaya.toLowerCase()) {
+                showToast("Kitak tidak boleh menghantar jemputan kepada diri sendiri!", "error");
+                return;
+            }
+
+            var safeKeyPengirim = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+
+            get(ref(db, "kawan_sistem_v2")).then((allSnap) => {
+                const semuaPengguna = allSnap.val() || {};
+                let kunciDijumpai = null;
+
+                for (let key in semuaPengguna) {
+                    const namaDalamDB = (semuaPengguna[key].nama_asal || "").trim().toLowerCase();
+                    if (namaDalamDB === namaPenerima.toLowerCase() && key !== safeKeyPengirim) {
+                        kunciDijumpai = key;
+                        break;
+                    }
+                }
+
+                if (!kunciDijumpai) {
+                    showToast(`Saintis bernama "${namaPenerima}" tidak dijumpai dalam sistem.`, "error");
+                    return;
+                }
+
+                get(ref(db, "kawan_sistem_v2/" + safeKeyPengirim + "/senarai_kawan/" + kunciDijumpai)).then((snap) => {
+                    if (snap.exists()) {
+                        showToast(namaPenerima + " sudah wujud dalam senarai kawan anda!", "error");
+                        return;
+                    }
+
+                    set(ref(db, "kawan_sistem_v2/" + kunciDijumpai + "/jemputan_masuk/" + safeKeyPengirim), {
+                        namaPengirim: window.namaPemainSaya,
+                        keyPengirim: safeKeyPengirim,
+                        tarikh: new Date().toLocaleTimeString()
+                    }).then(() => {
+                        showToast("Jemputan berjaya dihantar kepada " + namaPenerima + "!", "success");
+                        document.getElementById("cariNamaKawan").value = "";
+                    }).catch((err) => {
+                        showToast("Ralat menghantar jemputan: " + err, "error");
+                    });
+                });
+            });
+        };
+
+        function dengarJemputanKawan(safeKeyNamaSaya) {
+            onValue(ref(db, "kawan_sistem_v2/" + safeKeyNamaSaya + "/jemputan_masuk"), function(snapshot) {
+                var dataJemputan = snapshot.val();
+                var containerJemputan = document.getElementById("senaraiJemputan");
+
+                if (dataJemputan) {
+                    var html = "";
+                    for (var pengirimKey in dataJemputan) {
+                        var info = dataJemputan[pengirimKey];
+
+                        html += `<div class="senarai-box" style="padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #bce0fd;">
+                            <span class="nama-kawan-text" style="font-weight: bold; color: #1a2a6c;">${escapeHTML(info.namaPengirim)}</span>
+                            <div>
+                                <button onclick="window.terimaKawan('${escapeHTML(safeKeyNamaSaya)}', '${escapeHTML(pengirimKey)}')" style="background: #28a745; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; margin-right: 5px;">Accept</button>
+                                <button onclick="window.tolakKawan('${escapeHTML(safeKeyNamaSaya)}', '${escapeHTML(pengirimKey)}')" style="background: #dc3545; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">Reject</button>
+                            </div>
+                        </div>`;
+                    }
+                    containerJemputan.innerHTML = html;
+                } else {
+                    containerJemputan.innerHTML = "No pending requests";
+                }
+            });
+        }
+
+        window.terimaKawan = function(myKey, pengirimKey) {
+            var safeMyKey = myKey || window.safeKeySaya;
+            var safePengirimKey = pengirimKey;
+            var namaSayaSah = window.namaPemainSaya || safeMyKey;
+
+            get(ref(db, "kawan_sistem_v2/" + safePengirimKey + "/nama_asal")).then((snap) => {
+                var namaPengirim = snap.val() || safePengirimKey;
+
+                var updates = {};
+                updates["kawan_sistem_v2/" + safeMyKey + "/senarai_kawan/" + safePengirimKey] = { nama: namaPengirim, key: safePengirimKey };
+                updates["kawan_sistem_v2/" + safePengirimKey + "/senarai_kawan/" + safeMyKey] = { nama: namaSayaSah, key: safeMyKey };
+                updates["kawan_sistem_v2/" + safeMyKey + "/jemputan_masuk/" + safePengirimKey] = null;
+
+                update(ref(db), updates).then(() => {
+                    showToast("Anda kini berkawan dengan " + namaPengirim + "!", "success");
+                });
+            });
+        };
+
+        window.tolakKawan = function(myKey, pengirimKey) {
+            if (confirm("Adakah anda pasti mahu menolak jemputan ini?")) {
+                remove(ref(db, "kawan_sistem_v2/" + (myKey || window.safeKeySaya) + "/jemputan_masuk/" + pengirimKey)).then(() => {
+                    showToast("Jemputan kawan telah ditolak.", "info");
+                });
+            }
+        };
+
+        function muatSenaraiKawan(safeKeyNamaSaya) {
+            onValue(ref(db, "kawan_sistem_v2/" + safeKeyNamaSaya + "/senarai_kawan"), function(snapshot) {
+                var dataKawan = snapshot.val();
+                var containerKawan = document.getElementById("senaraiKawanContainer");
+
+                for (let key in friendStatusListeners) {
+                    if (friendStatusListeners[key]) {
+                        off(ref(db, "kawan_sistem_v2/" + key + "/status_online"));
+                    }
+                }
+                friendStatusListeners = {};
+
+                if (dataKawan) {
+                    containerKawan.innerHTML = ""; 
+                    for (var kawanKey in dataKawan) {
+                        var kInfo = dataKawan[kawanKey];
+                        var safeTargetKey = kInfo.key || kawanKey;
+                        var cleanNama = kInfo.nama || kawanKey;
+                        
+                        var itemDiv = document.createElement("div");
+                        itemDiv.className = "senarai-box";
+                        itemDiv.style = "padding: 8px 10px; margin-bottom: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #a5d6a7;";
+                        itemDiv.innerHTML = `
+                            <div>
+                                <span class="nama-kawan-text" style="font-weight: bold; color: #1a2a6c;">${escapeHTML(cleanNama)}</span>
+                                <span id="status-tag-${escapeHTML(safeTargetKey)}" style="font-size: 11px; margin-left: 5px;">⚪ Offline</span>
+                            </div>
+                            <div>
+                                <button onclick="window.cabarKawan('${escapeHTML(safeTargetKey)}', '${escapeHTML(cleanNama).replace(/'/g, "\\'")}')" style="background: #ff9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold; margin-right: 4px;">Cabar ⚔️</button>
+                                <button onclick="window.bukaKotakChat('${escapeHTML(safeTargetKey)}', '${escapeHTML(cleanNama).replace(/'/g, "\\'")}')" style="background: #0052D4; color: white; border: none; padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; font-weight: bold;">Chat 💬</button>
+                            </div>
+                        `;
+                        containerKawan.appendChild(itemDiv);
+
+                        (function(targetKey) {
+                            friendStatusListeners[targetKey] = onValue(ref(db, "kawan_sistem_v2/" + targetKey + "/status_online"), (stSnap) => {
+                                var tag = document.getElementById("status-tag-" + targetKey);
+                                if (tag) {
+                                    tag.innerHTML = stSnap.val() === true ? "🟢 <span style='color: #28a745;'>Online</span>" : "⚪ <span style='color: #757575;'>Offline</span>";
+                                }
+                            });
+                        })(safeTargetKey);
+                    }
+                } else {
+                    containerKawan.innerHTML = "No friends added yet.";
+                }
+            });
+        }
+
+        /* Chat Popup Logic */
+        window.bukaKotakChat = function(kawanKey, namaKawan) {
+            if (!window.namaPemainSaya) return;
+
+            const safeKeySaya = window.safeKeySaya || getSafeKey(window.namaPemainSaya);
+            const safeKeyKawan = kawanKey;
+            chatIDSemasa = [safeKeySaya, safeKeyKawan].sort().join("_CHAT_");
+
+            document.getElementById("tajukRakanChat").innerText = "💬 " + namaKawan;
+            document.getElementById("kotakSembangPopup").style.display = "flex";
+
+            if (unsubscribeChatListener) unsubscribeChatListener();
+
+            unsubscribeChatListener = onValue(ref(db, "chat_v2/" + chatIDSemasa), (snapshot) => {
+                const dataMesej = snapshot.val();
+                const bekas = document.getElementById("bekasMesejChat");
+                if (!bekas) return;
+                bekas.innerHTML = "";
+
+                if (dataMesej) {
+                    for (let id in dataMesej) {
+                        const m = dataMesej[id];
+                        const isMe = (m.pengirim === window.namaPemainSaya);
+                        
+                        const divBubble = document.createElement("div");
+                        divBubble.className = `chat-bubble ${isMe ? 'me' : 'them'}`;
+                        divBubble.innerHTML = `<div>${escapeHTML(m.mesej)}</div><div class="chat-time">${escapeHTML(m.masa || '')}</div>`;
+                        bekas.appendChild(divBubble);
+                    }
+                    bekas.scrollTop = bekas.scrollHeight;
+                } else {
+                    bekas.innerHTML = `<div style="text-align: center; color: #888888; font-size: 12px; margin-top: 20px;">Belum ada mesej. Mulakan perbualan!</div>`;
+                }
+            });
+        };
+
+        window.tutupKotakChat = function() {
+            document.getElementById("kotakSembangPopup").style.display = "none";
+        };
+
+        window.hantarMesejChat = function() {
+            const input = document.getElementById("inputMesejChat");
+            if (!input) return;
+            const teks = input.value.trim();
+            if (teks === "" || !chatIDSemasa) return;
+
+            push(ref(db, "chat_v2/" + chatIDSemasa), {
+                pengirim: window.namaPemainSaya,
+                mesej: teks,
+                masa: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }).then(() => { 
+                playSFX('chat');
+                input.value = ""; 
+            });
+        };
+
+        window.jikaTekanEnter = function(e) {
+            if (e.key === 'Enter') hantarMesejChat();
+        };
+    </script>
+</body>
+</html>

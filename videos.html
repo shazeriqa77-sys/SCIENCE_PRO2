@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri Video Sains Form 2 - Science Portal</title>
+    
+    <style>
+        /* Base & Layout Settings */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Header Styling */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px 20px;
+            background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC); 
+            border-bottom: 4px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);
+            text-align: center;
+        }
+
+        /* NAVBAR UNIFORM 42PX (SELARI DENGAN INDEX.HTML) */
+        .navbar {
+            background-color: #1a2a6c;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0; 
+            z-index: 100;
+        }
+
+        .navbar a {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 0 16px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .navbar a:hover {
+            background-color: #00c6ff;
+            color: #0d1b2a;
+        }
+
+        .navbar a.active-link {
+            background-color: #00c6ff !important;
+            color: #0d1b2a !important;
+            border-radius: 8px !important;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .dropdown {
+            display: inline-flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #ffffff;
+            min-width: 280px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 101;
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .dropdown-content a {
+            color: #333333;
+            padding: 12px 16px;
+            display: block;
+            font-size: 14px;
+            border-bottom: 1px solid #eeeeee;
+            font-weight: normal;
+            text-align: left;
+            height: auto;
+            border-radius: 0;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #e3f2fd;
+            padding-left: 24px;
+            color: #0052D4;
+            font-weight: bold;
+        }
+
+        .dropdown:hover .dropdown-content { display: block; }
+
+        /* Kedudukan Butang Profil & Dropdown Penjuru Kanan Navbar */
+        .nav-right-user {
+            margin-left: auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-btn-pandai {
+            background: linear-gradient(135deg, #00c6ff, #0052D4);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 25px;
+            padding: 4px 14px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .avatar-btn-pandai:hover {
+            transform: scale(1.03);
+            box-shadow: 0 4px 12px rgba(0, 198, 255, 0.4);
+        }
+
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 115%;
+            right: 0;
+            background: #ffffff;
+            min-width: 230px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 1000;
+            border: 1px solid #e2e8f0;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .user-dropdown-menu.show { display: block; }
+
+        .user-dropdown-header {
+            background: linear-gradient(135deg, #1a2a6c, #0052D4);
+            color: white;
+            padding: 14px;
+            font-size: 13px;
+        }
+
+        .user-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #333333;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .user-dropdown-item:hover {
+            background-color: #e3f2fd;
+            color: #0052D4;
+        }
+
+        .user-dropdown-divider {
+            height: 1px;
+            background-color: #e2e8f0;
+            margin: 4px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-dark-toggle {
+            background-color: #334155;
+            color: #ffffff;
+            border: 2px solid #00c6ff;
+            height: 42px;
+            padding: 0 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        .btn-dark-toggle:hover {
+            background-color: #00c6ff;
+            color: #0d1b2a;
+        }
+
+        /* Container Video Grid */
+        .main-content {
+            padding: 40px 20px;
+            flex: 1; 
+            max-width: 1200px;
+            margin: 20px auto;
+            width: 90%;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Style Butang Bab */
+        .btn-bab {
+            background-color: #e2e8f0;
+            color: #1a2a6c;
+            border: 2px solid #bce0fd;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+
+        .btn-bab:hover, .btn-bab.active {
+            background-color: #0052D4;
+            color: #ffffff;
+            border-color: #00c6ff;
+            box-shadow: 0 4px 10px rgba(0, 82, 212, 0.3);
+        }
+
+        /* Style Butang Penapis Bahasa (DLP / BUKAN DLP) */
+        .btn-lang {
+            background-color: #ffffff;
+            color: #0052D4;
+            border: 2px solid #0052D4;
+            padding: 7px 18px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-lang:hover, .btn-lang.active {
+            background-color: #0052D4;
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 82, 212, 0.25);
+        }
+
+        .tajuk-bab-utama {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #0052D4;
+            border-bottom: 2px solid #00c6ff;
+            padding-bottom: 8px;
+            text-align: left;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .video-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .video-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,198,255,0.2);
+            border-color: #00c6ff;
+        }
+
+        .tag-subbab {
+            background-color: #00c6ff;
+            color: #0d1b2a;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 10px;
+            display: inline-block;
+            border-bottom-right-radius: 8px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .tag-lang-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-bottom-left-radius: 8px;
+            z-index: 10;
+        }
+
+        .tag-lang-badge.dlp {
+            background-color: #28a745;
+            color: #ffffff;
+        }
+
+        .tag-lang-badge.bukan-dlp {
+            background-color: #ff9800;
+            color: #ffffff;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            background: #000;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-info {
+            padding: 15px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .video-info h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #0052D4;
+        }
+
+        .video-info p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .video-action-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-claim-video {
+            flex: 1;
+            background: #28a745;
+            color: #ffffff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: none;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-claim-video:hover {
+            background: #218838;
+        }
+
+        .btn-claim-video.watched {
+            background: #0052D4;
+        }
+
+        .btn-youtube-link {
+            flex: 1;
+            display: inline-block;
+            background: #ff0000;
+            color: #ffffff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+            transition: background 0.2s;
+        }
+
+        .btn-youtube-link:hover {
+            background: #cc0000;
+        }
+
+        /* Mod Gelap */
+        body.dark-mode { background-color: #0f172a !important; color: #f1f5f9 !important; }
+        body.dark-mode .main-content { background-color: #1e293b !important; color: #f1f5f9 !important; }
+        body.dark-mode .main-content p { color: #cbd5e1 !important; }
+        body.dark-mode .video-card { background-color: #0f172a !important; border-color: #334155 !important; }
+        body.dark-mode .video-info h3 { color: #38bdf8 !important; }
+        body.dark-mode .video-info p { color: #cbd5e1 !important; }
+        body.dark-mode .btn-bab { background-color: #1e293b; color: #f1f5f9; border-color: #334155; }
+        body.dark-mode .btn-bab:hover, body.dark-mode .btn-bab.active { background-color: #38bdf8; color: #0f172a; }
+        body.dark-mode .btn-lang { background-color: #1e293b; color: #38bdf8; border-color: #38bdf8; }
+        body.dark-mode .btn-lang:hover, body.dark-mode .btn-lang.active { background-color: #38bdf8; color: #0f172a; }
+        body.dark-mode .tajuk-bab-utama { color: #38bdf8 !important; border-color: #38bdf8 !important; }
+        body.dark-mode .user-dropdown-menu { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .user-dropdown-item { color: #f1f5f9 !important; border-color: #334155 !important; }
+        body.dark-mode .user-dropdown-item:hover { background-color: #334155 !important; color: #38bdf8 !important; }
+
+        /* Toast Notifications */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast-msg { background: #fff; color: #333; padding: 12px 18px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; font-weight: bold; display: flex; align-items: center; border-left: 5px solid #00c6ff; }
+        .toast-msg.success { border-left-color: #28a745; }
+
+        .footer {
+            background-color: #0d1b2a;
+            color: #cccccc;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header-container">
+        <h1 style="color: white; margin: 0; font-size: 36px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3);">
+            📹 GALERI VIDEO PEMBELAJARAN
+        </h1>
+    </div>
+
+    <!-- Navbar (Uniform 42px - Selari 100% dengan index.html) -->
+    <nav class="navbar">
+        <a href="index.html">Main Lab</a>
+        <a href="ruang_ilmu.html">Ruang Ilmu 📚</a>
+        <a href="videos.html" class="active-link">Student Videos 📹</a>
+        
+        <div class="dropdown">
+            <a href="#">Science Form 2 ▼</a>
+            <div class="dropdown-content">
+                <a href="science_chap1.html">Chapter 1: Biodiversity</a>
+                <a href="science_chap2.html">Chapter 2: Ecosystem</a>
+                <a href="science_chap3.html">Chapter 3: Nutrition</a>
+                <a href="science_chap4.html">Chapter 4: Human Health</a>
+                <a href="science_chap5.html">Chapter 5: Water and Solution</a>
+                <a href="science_chap6.html">Chapter 6: Acids and Alkalis</a>
+                <a href="science_chap7.html">Chapter 7: Energy and Power</a>
+                <a href="science_chap8.html">Chapter 8: Rate of Reaction</a>
+                <a href="science_chap9.html">Chapter 9: Speed</a>
+                <a href="science_chap10.html">Chapter 10: Sound Waves</a>
+                <a href="science_chap11.html">Chapter 11: Stars and Galaxies</a>
+                <a href="science_chap12.html">Chapter 12: The Solar System</a>
+                <a href="science_chap13.html">Chapter 13: Meteoroid, Asteroid and Comet</a>
+            </div>
+        </div>
+
+        <a href="interactive_lab.html">Interactive Lab</a>
+        <a href="performance.html">Scientist Analytics</a>
+        <a href="contact.html">Ask a Teacher</a>
+
+        <button onclick="toggleDarkMode()" class="btn-dark-toggle" id="btnDarkMode">🌙 Mod Gelap</button>
+
+        <!-- BUTANG AVATAR DROPDOWN PENJURU KANAN NAVBAR -->
+        <div class="nav-right-user">
+            <button class="avatar-btn-pandai" onclick="toggleUserDropdown(event)">
+                <span id="navUserAvatar" style="font-size: 16px;">🔬</span>
+                <span id="navUserName">Saintis</span>
+                <span style="font-size: 10px;">▼</span>
+            </button>
+
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+                <div class="user-dropdown-header">
+                    <div style="font-weight: bold; font-size: 14px;" id="dropHeaderNama">SAINTIS ZEP</div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-top: 2px;" id="dropHeaderXP">⭐ 0 XP</div>
+                </div>
+                
+                <a href="profile.html" class="user-dropdown-item" onclick="tutupDropdownUser()">
+                    <span>👤</span> My Profile (Profil Saya)
+                </a>
+                
+                <a href="quests.html" class="user-dropdown-item" onclick="tutupDropdownUser()">
+                    <span>🔥</span> Daily Quests & Streak
+                </a>
+                
+                <a href="certificate.html" class="user-dropdown-item" onclick="tutupDropdownUser()">
+                    <span>📜</span> Sijil Digital ZEP
+                </a>
+                
+                <div class="user-dropdown-divider"></div>
+                
+                <div id="bekasStatusAuth">
+                    <a href="login.html" class="user-dropdown-item" style="color: #28a745;" onclick="tutupDropdownUser();">
+                        <span>🔑</span> Log Masuk / Daftar Akaun
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Content Area -->
+    <div class="main-content">
+        <div style="text-align: center;">
+            <h2 style="font-size: 28px; margin-bottom: 8px;">Koleksi Video Mengikut Sub-Bab</h2>
+            <p style="color: #666; font-size: 15px;">Pilih aliran bahasa dan bab di bawah untuk menonton video Sains Tingkatan 2.</p>
+        </div>
+
+        <!-- PENAPIS ALIRAN BAHASA (DLP / BUKAN DLP) -->
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; margin-bottom: 10px;">
+            <button class="btn-lang active" onclick="tapisBahasa('semua', event)">🌟 Semua Video</button>
+            <button class="btn-lang" onclick="tapisBahasa('dlp', event)">🌐 DLP (English)</button>
+            <button class="btn-lang" onclick="tapisBahasa('bukan-dlp', event)">🇲🇾 BUKAN DLP (Bahasa Melayu)</button>
+        </div>
+
+        <!-- Butang Tab Bab (1 - 13) -->
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 10px; margin-bottom: 10px;">
+            <button class="btn-bab active" onclick="pilihBab(1, event)">Bab 1</button>
+            <button class="btn-bab" onclick="pilihBab(2, event)">Bab 2</button>
+            <button class="btn-bab" onclick="pilihBab(3, event)">Bab 3</button>
+            <button class="btn-bab" onclick="pilihBab(4, event)">Bab 4</button>
+            <button class="btn-bab" onclick="pilihBab(5, event)">Bab 5</button>
+            <button class="btn-bab" onclick="pilihBab(6, event)">Bab 6</button>
+            <button class="btn-bab" onclick="pilihBab(7, event)">Bab 7</button>
+            <button class="btn-bab" onclick="pilihBab(8, event)">Bab 8</button>
+            <button class="btn-bab" onclick="pilihBab(9, event)">Bab 9</button>
+            <button class="btn-bab" onclick="pilihBab(10, event)">Bab 10</button>
+            <button class="btn-bab" onclick="pilihBab(11, event)">Bab 11</button>
+            <button class="btn-bab" onclick="pilihBab(12, event)">Bab 12</button>
+            <button class="btn-bab" onclick="pilihBab(13, event)">Bab 13</button>
+        </div>
+
+        <!-- ================= BAB 1 ================= -->
+        <div id="bab-1" class="kandungan-bab">
+            <h3 class="tajuk-bab-utama">🧬 Bab 1: Biodiversiti</h3>
+            <div class="video-grid">
+                
+                <!-- VIDEO DLP SUB-BAB 1.1 -->
+                <div class="video-card" data-lang="dlp">
+                    <div class="tag-subbab">Sub-Bab 1.1</div>
+                    <div class="tag-lang-badge dlp">🌐 DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/ZluJOnTndmQ" title="1.1 Diversity of Organisms (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>1.1 Diversity of Organisms (DLP)</h3>
+                            <p>Concept of biodiversity, importance of biodiversity, and endemic/threatened species in Malaysia.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=ZluJOnTndmQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIDEO BUKAN DLP SUB-BAB 1.1 -->
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 1.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/OcKCHQeiFdI" title="1.1 Kepelbagaian Organisma (Bahasa Melayu)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>1.1 Kepelbagaian Organisma (Bahasa Melayu)</h3>
+                            <p>Konsep & kepentingan biodiversiti, faktor habitat/cuaca, spesies endemik di Malaysia serta kaedah pemeliharaan oleh Cikgu Teo.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=OcKCHQeiFdI" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIDEO DLP SUB-BAB 1.2 -->
+                <div class="video-card" data-lang="dlp">
+                    <div class="tag-subbab">Sub-Bab 1.2</div>
+                    <div class="tag-lang-badge dlp">🌐 DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/ooujCl4v20c" title="1.2 Classification of Animals (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>1.2 Classification of Animals (DLP)</h3>
+                            <p>Detailed breakdown of Invertebrates & Vertebrates (mammals, birds, reptiles, amphibians, fish) by Cikgu Teo.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=ooujCl4v20c" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIDEO BUKAN DLP SUB-BAB 1.2 -->
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 1.2</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/zu3nFC9Cgiw" title="1.2 Pengelasan Organisma (Bahasa Melayu)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>1.2 Pengelasan Haiwan (Bahasa Melayu)</h3>
+                            <p>Penerangan pengelasan haiwan Invertebrata (berkaki / tanpa kaki) & Vertebrata (ikan, amfibia, reptilia, burung, mamalia) oleh Cikgu Teo.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=zu3nFC9Cgiw" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= BAB 2 ================= -->
+<div id="bab-2" class="kandungan-bab" style="display: none;">
+    <h3 class="tajuk-bab-utama">🌿 Bab 2: Ekosistem</h3>
+    <div class="video-grid">
+        <div class="video-card" data-lang="dlp">
+            <div class="tag-subbab">Sub-Bab 2.1</div>
+            <div class="tag-lang-badge dlp">🌐 DLP</div>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube-nocookie.com/embed/wXqcPRewmWA" title="2.1 Energy Flow in Ecosystem (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+                <div>
+                    <h3>2.1 Energy Flow in Ecosystem (DLP)</h3>
+                    <p>Food chains, food webs, producers, consumers and decomposers.</p>
+                </div>
+                <div class="video-action-group">
+                    <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                    <a href="https://www.youtube.com/watch?v=wXqcPRewmWA" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-card" data-lang="bukan-dlp">
+            <div class="tag-subbab">Sub-Bab 2.1</div>
+            <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube-nocookie.com/embed/s0bMYfHybDQ" title="2.1 Aliran Tenaga dalam Ekosistem" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+                <div>
+                    <h3>2.1 Aliran Tenaga dalam Ekosistem</h3>
+                    <p>Rantai makanan, siratan makanan, pengeluar, pengguna dan pengurai.</p>
+                </div>
+                <div class="video-action-group">
+                    <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                    <a href="https://www.youtube.com/watch?v=s0bMYfHybDQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-card" data-lang="dlp">
+            <div class="tag-subbab">Sub-Bab 2.2</div>
+            <div class="tag-lang-badge dlp">🌐 DLP</div>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube-nocookie.com/embed/-CaR2ebSUjQ" title="2.2 Nutrient Cycle in an Ecosystem (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+                <div>
+                    <h3>2.2 Nutrient Cycle in an Ecosystem (DLP)</h3>
+                    <p>Water cycle, carbon cycle, oxygen cycle and the role of living things.</p>
+                </div>
+                <div class="video-action-group">
+                    <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                    <a href="https://www.youtube.com/watch?v=-CaR2ebSUjQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+
+                </div>
+            </div>
+        </div>
+            
+            <div class="video-card" data-lang="dlp">
+    <div class="tag-subbab">Sub-Bab 2.3 (Part 1)</div>
+    <div class="tag-lang-badge dlp">🌐 DLP</div>
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube-nocookie.com/embed/XDio-z0z6Ek" title="2.3 Interdependence among Organisms - Part 1 (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+        <div>
+            <h3>2.3 Interdependence among Organisms — Part 1 (DLP)</h3>
+            <p>Habitat, species, population, community, ecosystem and interdependence among living things.</p>
+        </div>
+        <div class="video-action-group">
+            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+            <a href="https://www.youtube.com/watch?v=XDio-z0z6Ek" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+        </div>
+    </div>
+</div>
+
+        <div class="video-card" data-lang="dlp">
+    <div class="tag-subbab">Sub-Bab 2.3 (Part 2)</div>
+    <div class="tag-lang-badge dlp">🌐 DLP</div>
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube-nocookie.com/embed/uzQgTPJ9H9s" title="2.3 Interaction between Organisms - Part 2 (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+        <div>
+            <h3>2.3 Interaction between Organisms — Part 2 (DLP)</h3>
+            <p>Symbiosis (mutualism, commensalism, parasitism), prey-predator, competition and biological control.</p>
+        </div>
+        <div class="video-action-group">
+            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+            <a href="https://www.youtube.com/watch?v=uzQgTPJ9H9s" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+        </div>
+    </div>
+</div>
+
+        <div class="video-card" data-lang="dlp">
+    <div class="tag-subbab">Sub-Bab 2.4</div>
+    <div class="tag-lang-badge dlp">🌐 DLP</div>
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube-nocookie.com/embed/rLSzpyqlo0s" title="2.4 Role of Humans in Maintaining a Balanced Nature (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+        <div>
+            <h3>2.4 Role of Humans in Maintaining a Balanced Nature (DLP)</h3>
+            <p>Effects of human activities on the environment and steps to solve environmental issues.</p>
+        </div>
+        <div class="video-action-group">
+            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+            <a href="https://www.youtube.com/watch?v=rLSzpyqlo0s" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+        </div>
+    </div>
+</div>
+
+    </div>
+</div>
+
+        <!-- ================= BAB 3 ================= -->
+<div id="bab-3" class="kandungan-bab" style="display: none;">
+    <h3 class="tajuk-bab-utama">🥗 Bab 3: Nutrisi (Nutrition)</h3>
+    <div class="video-grid">
+        <div class="video-card" data-lang="dlp">
+            <div class="tag-subbab">Sub-Bab 3.1</div>
+            <div class="tag-lang-badge dlp">🌐 DLP</div>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube-nocookie.com/embed/SQUU005ZYW8" title="3.1 Classes of Food (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+                <div>
+                    <h3>3.1 Classes of Food (DLP)</h3>
+                    <p>Carbohydrates, proteins, fats, vitamins, minerals, fibre, water and food tests.</p>
+                </div>
+                <div class="video-action-group">
+                    <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                    <a href="https://www.youtube.com/watch?v=SQUU005ZYW8" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="video-card" data-lang="bukan-dlp">
+            <div class="tag-subbab">Sub-Bab 3.1</div>
+            <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="3.1 Kelas Makanan" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <div class="video-info">
+                <div>
+                    <h3>3.1 Kelas Makanan</h3>
+                    <p>Karbohidrat, protein, lemak, vitamin, mineral, pelawas dan air.</p>
+                </div>
+                <div class="video-action-group">
+                    <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                    <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+                </div>
+            </div>
+        </div>
+
+                <div class="video-card" data-lang="dlp">
+    <div class="tag-subbab">Sub-Bab 3.2</div>
+    <div class="tag-lang-badge dlp">🌐 DLP</div>
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube-nocookie.com/embed/AV-S68ICAD4" title="3.2 Importance of a Balanced Diet (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+        <div>
+            <h3>3.2 Importance of a Balanced Diet (DLP)</h3>
+            <p>Balanced diet, food pyramid, calorific value of food and factors affecting energy requirements.</p>
+        </div>
+        <div class="video-action-group">
+            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+            <a href="https://www.youtube.com/watch?v=AV-S68ICAD4" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+        </div>
+    </div>
+</div>
+
+        <div class="video-card" data-lang="dlp">
+    <div class="tag-subbab">Sub-Bab 3.3</div>
+    <div class="tag-lang-badge dlp">🌐 DLP</div>
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube-nocookie.com/embed/Hi10FYbcEZc" title="3.3 Human Digestive System (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+        <div>
+            <h3>3.3 Human Digestive System (DLP)</h3>
+            <p>Human digestive system, physical and chemical digestion, digestive enzymes and flow of food.</p>
+        </div>
+        <div class="video-action-group">
+            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+            <a href="https://www.youtube.com/watch?v=Hi10FYbcEZc" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+        </div>
+    </div>
+</div>
+
+        <div class="video-card" data-lang="dlp">
+    <div class="tag-subbab">Sub-Bab 3.4</div>
+    <div class="tag-lang-badge dlp">🌐 DLP</div>
+    <div class="video-wrapper">
+        <iframe src="https://www.youtube-nocookie.com/embed/0cj8jk3lGNo" title="3.4 Process of Absorption and Transportation of Digested Food and Defecation (DLP)" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+    <div class="video-info">
+        <div>
+            <h3>3.4 Process of Absorption and Transportation of Digested Food and Defecation (DLP)</h3>
+            <p>Structure of villus, absorption of digested food, transportation of nutrients and defecation.</p>
+        </div>
+        <div class="video-action-group">
+            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+            <a href="https://www.youtube.com/watch?v=0cj8jk3lGNo" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo(this)" class="btn-youtube-link">▶️ YouTube</a>
+        </div>
+    </div>
+</div>
+
+    </div>
+</div>
+
+        <!-- ================= BAB 4 ================= -->
+        <div id="bab-4" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">🩺 Bab 4: Kesihatan Manusia</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 4.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="4.1 Penyakit Berjangkit" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>4.1 Penyakit Berjangkit & Tidak Berjangkit</h3>
+                            <p>Punca penyakit, vektor pembawa dan langkah pencegahan wabak.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 5 ================= -->
+        <div id="bab-5" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">💧 Bab 5: Air dan Larutan</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 5.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="5.1 Sifat Air" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>5.1 Sifat Fizikal Air</h3>
+                            <p>Tegangan permukaan air, tindakan kapilari dan proses elektrolisis air.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 6 ================= -->
+        <div id="bab-6" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">🧪 Bab 6: Asid dan Alkali</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 6.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="6.1 Asid dan Alkali" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>6.1 Sifat Asid dan Alkali</h3>
+                            <p>Skala pH, ujian kertas litmus dan penunjuk asid-alkali.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 7 ================= -->
+        <div id="bab-7" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">⚡ Bab 7: Elektrik dan Magnetisma</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 7.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="7.1 Elektrik" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>7.1 Elektrostatik & Arus Elektrik</h3>
+                            <p>Cas elektrik, elektroskop, arus, voltan dan rintangan.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 8 ================= -->
+        <div id="bab-8" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">🚀 Bab 8: Daya dan Gerakan</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 8.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="8.1 Daya" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>8.1 Jenis-jenis Daya</h3>
+                            <p>Daya geseran, daya graviti, daya apungan dan kesan daya.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 9 ================= -->
+        <div id="bab-9" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">🔥 Bab 9: Haba</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 9.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="9.1 Pengaliran Haba" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>9.1 Pengaliran Haba & Keseimbangan Thermal</h3>
+                            <p>Konduksi, perolakan, sinaran dan prinsip pengembangan bahan.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 10 ================= -->
+        <div id="bab-10" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">🔊 Bab 10: Gelombang Bunyi</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 10.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="10.1 Gelombang Bunyi" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>10.1 Ciri-ciri Gelombang Bunyi</h3>
+                            <p>Pemindahan bunyi, gema, kelangsingan dan kenyaringan bunyi.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 11 ================= -->
+        <div id="bab-11" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">🌟 Bab 11: Bintang dan Galaksi</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 11.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="11.1 Bintang dan Galaksi" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>11.1 Bintang & Galaksi dalam Alam Semesta</h3>
+                            <p>Ciri-ciri bintang, kitar hayat bintang dan Galaksi Bima Sakti.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 12 ================= -->
+        <div id="bab-12" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">🪐 Bab 12: Sistem Suria</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 12.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="12.1 Sistem Suria" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>12.1 Sistem Suria Kita</h3>
+                            <p>Perbandingan ciri-ciri planet dan jarak planet dari Matahari.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= BAB 13 ================= -->
+        <div id="bab-13" class="kandungan-bab" style="display: none;">
+            <h3 class="tajuk-bab-utama">☄️ Bab 13: Meteoroid, Asteroid dan Komet</h3>
+            <div class="video-grid">
+                <div class="video-card" data-lang="bukan-dlp">
+                    <div class="tag-subbab">Sub-Bab 13.1</div>
+                    <div class="tag-lang-badge bukan-dlp">🇲🇾 BUKAN DLP</div>
+                    <div class="video-wrapper">
+                        <iframe src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" title="13.1 Batuan Angkasa" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <div class="video-info">
+                        <div>
+                            <h3>13.1 Jasad Lain dalam Sistem Suria</h3>
+                            <p>Perbezaan ciri meteoroid, asteroid, komet dan pergerakannya.</p>
+                        </div>
+                        <div class="video-action-group">
+                            <button onclick="rekodTontonVideo(this)" class="btn-claim-video">👁️ Selesai Tonton</button>
+                            <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" onclick="rekodTontonVideo()" class="btn-youtube-link">▶️ YouTube</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        Science Portal © 2026 Student Video Collection
+        <div id="toast-container"></div>
+    </footer>
+
+    <!-- Firebase Realtime Database & System Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAtbX6wmdNwmXkgUvewnfRRXRTfyq5IZ8",
+            authDomain: "jejak-sejarah-tingkatan-2.firebaseapp.com",
+            projectId: "jejak-sejarah-tingkatan-2",
+            storageBucket: "jejak-sejarah-tingkatan-2.firebasestorage.app",
+            messagingSenderId: "92872994798",
+            appId: "1:92872994798:web:9c205538a5eb8f388e68ff",
+            measurementId: "G-8RZ21D4FXY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        function getSafeKey(nama) {
+            if (!nama) return "guest";
+            return nama.trim().toLowerCase().replace(/[.#$\[\]\/ ]/g, "_");
+        }
+
+        function getTarikhHariIni() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        /* FUNGSI DROPDOWN AVATAR PANDAI (PENJURU KANAN NAVBAR) */
+        window.toggleUserDropdown = function(event) {
+            if (event) event.stopPropagation();
+            const menu = document.getElementById("userDropdownMenu");
+            if (menu) menu.classList.toggle("show");
+        };
+
+        window.tutupDropdownUser = function() {
+            const menu = document.getElementById("userDropdownMenu");
+            if (menu) menu.classList.remove("show");
+        };
+
+        window.addEventListener("click", function() {
+            window.tutupDropdownUser();
+        });
+
+        window.kemaskiniNavbarAvatar = function(nama, avatar, xp) {
+            const elemAvatar = document.getElementById("navUserAvatar");
+            const elemNama = document.getElementById("navUserName");
+            const dropNama = document.getElementById("dropHeaderNama");
+            const dropXP = document.getElementById("dropHeaderXP");
+
+            if (elemAvatar) elemAvatar.innerText = avatar || "🔬";
+            if (elemNama) elemNama.innerText = nama || "Saintis ZEP";
+            if (dropNama) dropNama.innerText = (nama || "Saintis ZEP").toUpperCase();
+            if (dropXP) dropXP.innerText = `⭐ ${xp || 0} XP`;
+        };
+
+        window.kemaskiniMenuAuth = function(sudahLogMasuk) {
+            const bekas = document.getElementById("bekasStatusAuth");
+            if (!bekas) return;
+
+            if (sudahLogMasuk) {
+                bekas.innerHTML = `
+                    <a href="javascript:void(0);" class="user-dropdown-item" style="color: #dc3545;" onclick="tutupDropdownUser(); logOutUser();">
+                        <span>🚪</span> Log Keluar (Logout)
+                    </a>`;
+            } else {
+                bekas.innerHTML = `
+                    <a href="login.html" class="user-dropdown-item" style="color: #28a745;" onclick="tutupDropdownUser();">
+                        <span>🔑</span> Log Masuk / Daftar Akaun
+                    </a>`;
+            }
+        };
+
+        window.logOutUser = function() {
+            if (confirm("Adakah anda pasti mahu log keluar?")) {
+                const safeKey = window.safeKeySaya || sessionStorage.getItem("saintis_key");
+                if (safeKey) {
+                    set(ref(db, "kawan_sistem_v2/" + safeKey + "/status_online"), false);
+                }
+                signOut(auth).then(() => {
+                    sessionStorage.clear();
+                    localStorage.clear();
+                    window.showToast("Berjaya log keluar!", "success");
+                    setTimeout(() => { window.location.href = "login.html"; }, 800);
+                }).catch(() => {
+                    sessionStorage.clear();
+                    window.location.href = "login.html";
+                });
+            }
+        };
+
+        function segerakProfilNavbar(namaSahih, safeKey) {
+            window.namaPemainSaya = namaSahih;
+            window.safeKeySaya = safeKey;
+            window.kemaskiniNavbarAvatar(namaSahih, "🔬", 0);
+
+            onValue(ref(db, "kawan_sistem_v2/" + safeKey), (snap) => {
+                const u = snap.val() || {};
+                const namaPaparan = u.nama_asal || namaSahih;
+                const avatarPaparan = u.avatar || "🔬";
+                const xpPaparan = u.xp || 0;
+                window.kemaskiniNavbarAvatar(namaPaparan, avatarPaparan, xpPaparan);
+            });
+        }
+
+        setPersistence(auth, browserSessionPersistence).then(() => {
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    window.kemaskiniMenuAuth(true);
+                    const defaultName = user.displayName || (user.email ? user.email.split('@')[0] : "Saintis");
+                    const savedName = sessionStorage.getItem("saintis_nickname") || defaultName;
+                    sessionStorage.setItem("saintis_nickname", savedName);
+                    sessionStorage.setItem("saintis_key", user.uid);
+                    segerakProfilNavbar(savedName, user.uid);
+                } else {
+                    const savedName = sessionStorage.getItem("saintis_nickname");
+                    const savedKey = sessionStorage.getItem("saintis_key");
+                    if (savedName) {
+                        window.kemaskiniMenuAuth(true);
+                        segerakProfilNavbar(savedName, savedKey || getSafeKey(savedName));
+                    } else {
+                        window.kemaskiniMenuAuth(false);
+                    }
+                }
+            });
+        });
+
+        /* Toast System */
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById("toast-container");
+            if (!container) return;
+            const toast = document.createElement("div");
+            toast.className = `toast-msg ${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
+        };
+
+        /* Rekod Tontonan Video untuk Daily Quest 3 (Selari dengan index.html) */
+        window.rekodTontonVideo = function(btnElem) {
+            const tarikhHariIni = getTarikhHariIni();
+            localStorage.setItem("telahTontonVideo_" + tarikhHariIni, "true");
+
+            if (btnElem) {
+                btnElem.innerText = "✅ Sudah Ditonton";
+                btnElem.classList.add("watched");
+            }
+
+            window.showToast("📹 Syabas! Misi Tonton Video Harian (Quest 3) Selesai! Buka Main Lab untuk tebus XP 🎉", "success");
+        };
+
+        /* Penapis Bahasa & Bab */
+        let bahasaAktif = 'semua';
+
+        window.tapisBahasa = function(jenisBahasa, evt) {
+            bahasaAktif = jenisBahasa;
+            const butangBahasa = document.querySelectorAll('.btn-lang');
+            butangBahasa.forEach(btn => btn.classList.remove('active'));
+            if (evt && evt.target) evt.target.classList.add('active');
+            kemaskiniPaparanVideo();
+        };
+
+        window.pilihBab = function(nomborBab, evt) {
+            const senaraiBab = document.querySelectorAll('.kandungan-bab');
+            senaraiBab.forEach(el => el.style.display = 'none');
+
+            const butang = document.querySelectorAll('.btn-bab');
+            butang.forEach(btn => btn.classList.remove('active'));
+
+            const babDipilih = document.getElementById('bab-' + nomborBab);
+            if (babDipilih) {
+                babDipilih.style.display = 'block';
+            }
+
+            if (evt && evt.target) {
+                evt.target.classList.add('active');
+            }
+
+            kemaskiniPaparanVideo();
+        };
+
+        function kemaskiniPaparanVideo() {
+            const kadVideo = document.querySelectorAll('.video-card');
+            kadVideo.forEach(card => {
+                const lang = card.getAttribute('data-lang');
+                if (bahasaAktif === 'semua' || lang === bahasaAktif) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        /* Mod Gelap Toggle */
+        window.toggleDarkMode = function() {
+            document.body.classList.toggle("dark-mode");
+            const isDark = document.body.classList.contains("dark-mode");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            const btn = document.getElementById("btnDarkMode");
+            if (btn) btn.innerText = isDark ? "☀️ Mod Terang" : "🌙 Mod Gelap";
+        };
+
+        if (localStorage.getItem("theme") === "dark") {
+            document.body.classList.add("dark-mode");
+            const btn = document.getElementById("btnDarkMode");
+            if (btn) btn.innerText = "☀️ Mod Terang";
+        }
+    </script>
+    <script src="navbar.js"></script>
+</body>
+</html>

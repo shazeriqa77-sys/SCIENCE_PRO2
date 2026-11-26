@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZEP Cyber Auth Gateway — Science Exploration Portal</title>
+    
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            color: #333333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* Matrix Digital Rain Canvas */
+        #matrixCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        body.hacker-mode #matrixCanvas { opacity: 0.25; }
+
+        /* Header Styling */
+        .header-container {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 20px;
+            background: linear-gradient(135deg, #0d1b2a, #1a2a6c, #0052D4); 
+            border-bottom: 4px solid rgba(0, 198, 255, 0.55);
+            box-shadow: 0 4px 18px rgba(0, 198, 255, 0.3);
+            text-align: center;
+        }
+
+        .header-container h1 {
+            color: white;
+            text-shadow: 0 0 12px rgba(0, 198, 255, 0.6);
+            font-size: 32px;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .cyber-sub-banner {
+            margin-top: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11.5px;
+            color: #38bdf8;
+            letter-spacing: 0.8px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: relative;
+            z-index: 2;
+            background-color: #1a2a6c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 8px 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .navbar a, .btn-nav-cyber {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 0 16px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13.5px;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.25s;
+            cursor: pointer;
+        }
+
+        .navbar a:hover {
+            background-color: #00c6ff;
+            color: #0d1b2a;
+        }
+
+        .btn-nav-cyber {
+            background: #020b02;
+            color: #00ff41;
+            border: 1.5px solid #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
+        }
+
+        .btn-nav-cyber:hover {
+            background: #00ff41;
+            color: #020602;
+            box-shadow: 0 0 16px rgba(0, 255, 65, 0.7);
+        }
+
+        /* Auth Container Card */
+        .auth-wrapper {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 32px 16px;
+        }
+
+        .auth-card {
+            background: #ffffff;
+            width: 100%;
+            max-width: 470px;
+            border-radius: 18px;
+            box-shadow: 0 14px 35px rgba(13, 27, 42, 0.16);
+            border: 2px solid #cbd5e1;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Telemetry Strip Inside Card */
+        .security-telemetry {
+            background: #0f172a;
+            color: #38bdf8;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11px;
+            padding: 8px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff41;
+            box-shadow: 0 0 8px #00ff41;
+            margin-right: 6px;
+            animation: blink 1.4s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        /* Tab Switcher */
+        .auth-tabs {
+            display: flex;
+            background: #eef2f7;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            background: none;
+            font-size: 14.5px;
+            font-weight: bold;
+            color: #64748b;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .auth-tab-btn.active {
+            background: #ffffff;
+            color: #0052D4;
+            border-bottom: 3px solid #0052D4;
+        }
+
+        /* Form Body */
+        .auth-body {
+            padding: 24px 26px 28px 26px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 9px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0052D4;
+            box-shadow: 0 0 0 3px rgba(0, 82, 212, 0.15);
+        }
+
+        .btn-eye {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #64748b;
+            padding: 4px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Password Entropy Analyzer Box */
+        .entropy-box {
+            margin-top: 8px;
+            padding: 9px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 11.5px;
+        }
+
+        .entropy-bar-track {
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        .entropy-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #ef4444;
+            transition: width 0.25s ease, background-color 0.25s ease;
+        }
+
+        .mini-action-link {
+            background: none;
+            border: none;
+            color: #0052D4;
+            font-size: 11.5px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        /* Agent Avatar Picker & ID Preview */
+        .agent-preview-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f8fafc;
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            border: 1px solid #38bdf8;
+        }
+
+        .agent-avatar-display {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(56, 189, 248, 0.15);
+            border: 2px solid #38bdf8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+        }
+
+        .avatar-selector-strip {
+            display: flex;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .av-opt {
+            background: #f1f5f9;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 8px;
+            width: 36px;
+            height: 34px;
+            font-size: 17px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .av-opt:hover, .av-opt.selected {
+            background: #dbeafe;
+            border-color: #0052D4;
+            transform: scale(1.08);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #0052D4, #4364F7);
+            color: white;
+            border: none;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 82, 212, 0.35);
+        }
+
+        .btn-submit:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Mini CLI Shell Drawer */
+        .cli-drawer {
+            display: none;
+            background: #020802;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            border-top: 1px solid #00ff41;
+            padding: 12px 16px;
+        }
+
+        .cli-drawer.open { display: block; }
+
+        .cli-log {
+            max-height: 110px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+        }
+
+        .cli-input-row {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-top: 1px dashed rgba(0, 255, 65, 0.35);
+            padding-top: 6px;
+        }
+
+        .cli-input-row input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff41;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12.5px;
+            font-weight: bold;
+        }
+
+        /* =========================================================
+           HACKER MATRIX CRT MODE (PHOSPHOR GREEN THEME)
+           ========================================================= */
+        body.hacker-mode {
+            background-color: #020602 !important;
+            color: #00ff41 !important;
+            font-family: 'Courier New', Courier, monospace !important;
+        }
+
+        body.hacker-mode .header-container {
+            background: linear-gradient(135deg, #001400, #002b00, #020802) !important;
+            border-bottom-color: #00ff41 !important;
+        }
+
+        body.hacker-mode .header-container h1,
+        body.hacker-mode .cyber-sub-banner {
+            color: #00ff41 !important;
+            text-shadow: 0 0 12px rgba(0, 255, 65, 0.7);
+        }
+
+        body.hacker-mode .navbar {
+            background-color: #031203 !important;
+            border-bottom: 1px solid #00ff41;
+        }
+
+        body.hacker-mode .auth-card {
+            background: rgba(3, 14, 3, 0.94) !important;
+            border-color: #00ff41 !important;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.25) !important;
+        }
+
+        body.hacker-mode .security-telemetry {
+            background: #010801 !important;
+            color: #00ff41 !important;
+            border-bottom-color: rgba(0, 255, 65, 0.35) !important;
+        }
+
+        body.hacker-mode .auth-tabs {
+            background: #041704 !important;
+            border-bottom-color: #00ff41 !important;
+        }
+
+        body.hacker-mode .auth-tab-btn {
+            color: #4ade80 !important;
+        }
+
+        body.hacker-mode .auth-tab-btn.active {
+            background: #020b02 !important;
+            color: #00ff41 !important;
+            border-bottom: 3px solid #00ff41 !important;
+        }
+
+        body.hacker-mode .form-group label,
+        body.hacker-mode .mini-action-link {
+            color: #00ff41 !important;
+        }
+
+        body.hacker-mode .form-group input,
+        body.hacker-mode .entropy-box,
+        body.hacker-mode .av-opt {
+            background: #010901 !important;
+            color: #00ff41 !important;
+            border-color: #00ff41 !important;
+        }
+
+        body.hacker-mode .btn-submit {
+            background: #00ff41 !important;
+            color: #020602 !important;
+            box-shadow: 0 0 18px rgba(0, 255, 65, 0.5) !important;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast-msg {
+            background-color: #ffffff;
+            color: #333333;
+            padding: 14px 18px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            font-size: 13.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            min-width: 280px;
+            border-left: 5px solid #00c6ff;
+            animation: slideIn 0.3s forwards;
+        }
+
+        .toast-msg.success { border-left-color: #28a745; }
+        .toast-msg.error { border-left-color: #dc3545; }
+        .toast-msg.info { border-left-color: #0052D4; }
+        .toast-msg span.icon { font-size: 18px; margin-right: 10px; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateX(100%); } }
+
+        .footer {
+            position: relative;
+            z-index: 2;
+            background-color: #0d1b2a;
+            color: #cccccc;
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrixCanvas"></canvas>
+
+    <!-- Header Section -->
+    <div class="header-container">
+        <h1 id="headerTitle">🛡️ ZEP CYBER AUTH GATEWAY</h1>
+        <div class="cyber-sub-banner" id="subBanner">PROTOCOL: TLS 1.3 • FIREBASE IDENTITY VAULT • ZOMBS ARRAS OMEGA DOMINATION</div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="zombs_arras_omega_domination.html" id="backLink">⬅️ Kembali ke Arena Domination</a>
+        <button type="button" class="btn-nav-cyber" onclick="toggleHackerMode()">💻 MATRIX CRT</button>
+        <button type="button" class="btn-nav-cyber" onclick="toggleCliDrawer()">>_ SHELL</button>
+    </nav>
+
+    <!-- Form Card -->
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <!-- Bar Telemetri Keselamatan -->
+            <div class="security-telemetry">
+                <span><span class="pulse-dot"></span>AUTH_NODE: ONLINE</span>
+                <span id="sessionFingerprint">SIG: SHA256-INIT</span>
+            </div>
+
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn active" id="tabLoginBtn" onclick="tukarTab('login')">🔑 Log Masuk</button>
+                <button type="button" class="auth-tab-btn" id="tabDaftarBtn" onclick="tukarTab('daftar')">🕵️‍♂️ Daftar Ejen Baharu</button>
+            </div>
+
+            <div class="auth-body">
+                <!-- FORM LOG MASUK -->
+                <form id="formLogMasuk" onsubmit="kendalikanLogMasuk(event)">
+                    <div class="form-group">
+                        <label>E-mel Saintis</label>
+                        <input type="email" id="loginEmail" placeholder="contoh@gmail.com" autocomplete="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span>Kata Laluan</span>
+                            <button type="button" class="mini-action-link" onclick="hantarResetKataLaluan()">Lupa Kata Laluan?</button>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" required>
+                            <button type="button" class="btn-eye" onclick="toggleVisibilitiPass('loginPassword', this)" title="Tunjuk/Sembunyi">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btnSubmitLogin">Sahkan Identiti & Masuk 🚀</button>
+                </form>
+
+                <!-- FORM DAFTAR AKAUN -->
+                <form id="formDaftar" style="display: none;" onsubmit="kendalikanPendaftaran(event)">
+                    <!-- Pratonton Kad ID Ejen Langsung -->
+                    <div class="agent-preview-card">
+                        <div class="agent-avatar-display" id="previewAvatar">🕵️‍♂️</div>
+                        <div style="flex: 1; text-align: left;">
+                            <div style="font-size: 10px; color: #38bdf8; font-family: monospace; font-weight: bold;">KAD IDENTITI EJEN ZEP</div>
+                            <div id="previewNama" style="font-size: 15px; font-weight: 800; letter-spacing: 0.4px;">EJEN BAHARU</div>
+                            <div id="previewSekolah" style="font-size: 11px; color: #94a3b8;">SMK Sains Malaysia • KSSM</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nama / Kod Nama Ejen Saintis</label>
+                        <input type="text" id="regNama" placeholder="Cth: Fatimah / CyberHawk" oninput="kemaskiniKadEjen()" required>
+                        <div class="avatar-selector-strip">
+                            <button type="button" class="av-opt selected" onclick="pilihAvatar('🕵️‍♂️', this)">🕵️</button>
+                            <button type="button" class="av-opt" onclick="pilihAvatar('🔬', this)">🔬</button>
+                            <button type="button" class="av-opt" onclick="pilihAvatar('🧬', this)">🧬</button>
+                            <button type="button" class="av-opt" onclick="pilihAvatar('🚀', this)">🚀</button>
+                            <button type="button" class="av-opt" onclick="pilihAvatar('⚛️', this)">⚛️</button>
+                            <button type="button" class="av-opt" onclick="pilihAvatar('🤖', this)">🤖</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>E-mel Portal</label>
+                        <input type="email" id="regEmail" placeholder="contoh@gmail.com" autocomplete="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span>Kata Laluan (min 6 aksara)</span>
+                            <button type="button" class="mini-action-link" onclick="janaKataLaluanKuat()">🎲 Jana Kata Laluan Kuat</button>
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="password" id="regPassword" placeholder="••••••••" minlength="6" autocomplete="new-password" oninput="analisisEntropi(this.value)" required>
+                            <button type="button" class="btn-eye" onclick="toggleVisibilitiPass('regPassword', this)" title="Tunjuk/Sembunyi">👁️</button>
+                        </div>
+
+                        <!-- Penganalisis Kekuatan Kriptografi -->
+                        <div class="entropy-box">
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>ENTROPI: <b id="entropyBits">0 bit</b></span>
+                                <span id="entropyLabel" style="font-weight: bold; color: #ef4444;">TIADA</span>
+                            </div>
+                            <div class="entropy-bar-track">
+                                <div class="entropy-bar-fill" id="entropyFill"></div>
+                            </div>
+                            <div style="font-size: 10.5px; opacity: 0.85;">Anggaran Masa Godam Brute-Force: <b id="crackTimeText">0 saat</b></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nama Sekolah</label>
+                        <input type="text" id="regSekolah" placeholder="Cth: SMK Matang Jaya" oninput="kemaskiniKadEjen()" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group" style="flex:1;">
+                            <label>Daerah</label>
+                            <input type="text" id="regDaerah" placeholder="Cth: Kuching" required>
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>Negeri</label>
+                            <input type="text" id="regNegeri" placeholder="Cth: Sarawak" required>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btnSubmitDaftar">Daftar Akaun & Mula Misi 🧪</button>
+                </form>
+            </div>
+
+            <!-- Mini Terminal CLI Bersepadu -->
+            <div class="cli-drawer" id="cliDrawer">
+                <div class="cli-log" id="cliLog">ZEP AUTH SHELL v2.6 — Taip 'help' untuk diagnostik keselamatan.</div>
+                <div class="cli-input-row">
+                    <span>auth@zep:~$</span>
+                    <input type="text" id="cliInput" placeholder="help | matrix | genpass | status" autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <footer class="footer">
+        Science Form 2 Exploration Portal © 2026 | ZEP Cyber Identity Kernel
+    </footer>
+
+    <!-- Firebase SDK Modules (v10.12.2 selaras dengan badge.html) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        console.log("%c🛡️ ZEP CYBER AUTH GATEWAY AKTIF • Sambungan Disulitkan", "color: #00ff41; font-weight: bold; font-size: 13px; font-family: monospace;");
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAtbX6wmdNwmXkgUvewnfRRXRTfyq5IZ8",
+            authDomain: "jejak-sejarah-tingkatan-2.firebaseapp.com",
+            databaseURL: "https://jejak-sejarah-tingkatan-2-default-rtdb.firebaseio.com",
+            projectId: "jejak-sejarah-tingkatan-2",
+            storageBucket: "jejak-sejarah-tingkatan-2.firebasestorage.app",
+            messagingSenderId: "92872994798",
+            appId: "1:92872994798:web:9c205538a5eb8f388e68ff",
+            measurementId: "G-8RZ21D4FXY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        /* Tentukan sasaran redirect selepas log masuk (lalai: zombs_arras_omega_domination.html) */
+        function dapatkanSasaranRedirect() {
+            const params = new URLSearchParams(window.location.search);
+            const rawNext = (params.get("next") || "").trim();
+            if (/^[a-zA-Z0-9._-]+\.html$/.test(rawNext)) {
+                return rawNext;
+            }
+            return "zombs_arras_omega_domination.html";
+        }
+
+        const redirectTarget = dapatkanSasaranRedirect();
+        const backLinkEl = document.getElementById("backLink");
+        if (backLinkEl) {
+            backLinkEl.href = redirectTarget;
+        }
+
+        function pergiKeSasaran() {
+            window.location.href = redirectTarget;
+        }
+
+        let sedangProsesAuth = false;
+        let avatarDipilih = "🕵️‍♂️";
+
+        function bersihTeks(str) {
+            return String(str || "").replace(/[<>&"']/g, (c) => ({
+                "<": "<", ">": ">", "&": "&", '"': """, "'": "'"
+            }[c]));
+        }
+
+        /* Web Audio Synth SFX */
+        const SoundFX = (() => {
+            let ctx = null;
+            function main(f1, f2, dur, type = "sine", vol = 0.05) {
+                try {
+                    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (ctx.state === "suspended") ctx.resume();
+                    const o = ctx.createOscillator();
+                    const g = ctx.createGain();
+                    o.type = type;
+                    o.frequency.setValueAtTime(f1, ctx.currentTime);
+                    o.frequency.exponentialRampToValueAtTime(f2, ctx.currentTime + dur);
+                    g.gain.setValueAtTime(vol, ctx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+                    o.connect(g);
+                    g.connect(ctx.destination);
+                    o.start();
+                    o.stop(ctx.currentTime + dur);
+                } catch (_) {}
+            }
+            return {
+                klik: () => main(620, 920, 0.05, "sine", 0.04),
+                berjaya: () => {
+                    main(523.25, 783.99, 0.1, "triangle", 0.06);
+                    setTimeout(() => main(783.99, 1046.5, 0.16, "triangle", 0.06), 90);
+                },
+                ralat: () => main(220, 140, 0.18, "sawtooth", 0.05)
+            };
+        })();
+
+        /* Enjin CyberScramble */
+        function cyberScramble(el, teksAkhir, durasi = 420) {
+            if (!el) return;
+            const glif = "01#@$%&*<>[]{}ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const mula = performance.now();
+            function langkah(now) {
+                const progres = Math.min((now - mula) / durasi, 1);
+                const kunci = Math.floor(progres * teksAkhir.length);
+                let hasil = "";
+                for (let i = 0; i < teksAkhir.length; i++) {
+                    if (teksAkhir[i] === " ") hasil += " ";
+                    else if (i < kunci) hasil += teksAkhir[i];
+                    else hasil += glif[Math.floor(Math.random() * glif.length)];
+                }
+                el.innerText = hasil;
+                if (progres < 1) requestAnimationFrame(langkah);
+                else el.innerText = teksAkhir;
+            }
+            requestAnimationFrame(langkah);
+        }
+
+        /* Jana Tandatangan Sesi SHA-256 */
+        (async () => {
+            if (window.crypto && window.crypto.subtle) {
+                const raw = `${navigator.userAgent}|${Date.now()}`;
+                const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+                const hex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("").toUpperCase();
+                document.getElementById("sessionFingerprint").innerText = `SIG: ${hex.slice(0, 12)}`;
+            }
+        })();
+
+        /* Matrix Digital Rain Canvas */
+        const MatrixRain = (() => {
+            const canvas = document.getElementById("matrixCanvas");
+            const ctx = canvas.getContext("2d");
+            let interval = null;
+            const aksara = "01H2ONaClCO2ZEPKSSMアァカサタナハマヤラワ0123456789";
+
+            function mula() {
+                if (interval) return;
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                const fontSize = 15;
+                const kolum = Math.floor(canvas.width / fontSize);
+                const titisan = Array(kolum).fill(1);
+
+                interval = setInterval(() => {
+                    ctx.fillStyle = "rgba(2, 6, 2, 0.08)";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = "#00ff41";
+                    ctx.font = fontSize + "px monospace";
+
+                    for (let i = 0; i < titisan.length; i++) {
+                        const teks = aksara[Math.floor(Math.random() * aksara.length)];
+                        ctx.fillText(teks, i * fontSize, titisan[i] * fontSize);
+                        if (titisan[i] * fontSize > canvas.height && Math.random() > 0.975) titisan[i] = 0;
+                        titisan[i]++;
+                    }
+                }, 42);
+            }
+
+            function henti() {
+                clearInterval(interval);
+                interval = null;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            window.addEventListener("resize", () => {
+                if (interval) {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+            });
+
+            return { mula, henti };
+        })();
+
+        window.toggleHackerMode = function(paksa = null) {
+            SoundFX.klik();
+            const aktif = paksa !== null ? paksa : !document.body.classList.contains("hacker-mode");
+            if (aktif) {
+                document.body.classList.add("hacker-mode");
+                localStorage.setItem("zep_hacker_mode", "on");
+                MatrixRain.mula();
+                cyberScramble(document.getElementById("headerTitle"), "🛡️ ZEP CYBER ROOT GATEWAY", 400);
+            } else {
+                document.body.classList.remove("hacker-mode");
+                localStorage.setItem("zep_hacker_mode", "off");
+                MatrixRain.henti();
+                cyberScramble(document.getElementById("headerTitle"), "🛡️ ZEP CYBER AUTH GATEWAY", 400);
+            }
+        };
+
+        if (localStorage.getItem("zep_hacker_mode") === "on") {
+            window.toggleHackerMode(true);
+        }
+
+        /* Toast Helper */
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById("toast-container");
+            if (!container) return;
+            const toast = document.createElement("div");
+            toast.className = `toast-msg ${type}`;
+            let icon = type === "success" ? "✅" : (type === "error" ? "❌" : "ℹ️");
+            toast.innerHTML = `<span class="icon">${icon}</span> <span>${bersihTeks(message)}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = "fadeOut 0.4s forwards";
+                setTimeout(() => toast.remove(), 400);
+            }, 3200);
+        };
+
+        /* Semak status pengesahan sedia ada (dilindungi oleh sedangProsesAuth) */
+        onAuthStateChanged(auth, (user) => {
+            if (user && !sedangProsesAuth) {
+                pergiKeSasaran();
+            }
+        });
+
+        /* Pengurusan Tukar Tab (Log Masuk / Daftar) */
+        window.tukarTab = function(jenis) {
+            SoundFX.klik();
+            const tabLoginBtn = document.getElementById("tabLoginBtn");
+            const tabDaftarBtn = document.getElementById("tabDaftarBtn");
+            const formLogMasuk = document.getElementById("formLogMasuk");
+            const formDaftar = document.getElementById("formDaftar");
+
+            if (jenis === 'login') {
+                tabLoginBtn.classList.add("active");
+                tabDaftarBtn.classList.remove("active");
+                formLogMasuk.style.display = "block";
+                formDaftar.style.display = "none";
+            } else {
+                tabDaftarBtn.classList.add("active");
+                tabLoginBtn.classList.remove("active");
+                formDaftar.style.display = "block";
+                formLogMasuk.style.display = "none";
+            }
+        };
+
+        /* Tunjuk / Sembunyi Kata Laluan */
+        window.toggleVisibilitiPass = function(inputId, btn) {
+            SoundFX.klik();
+            const inp = document.getElementById(inputId);
+            if (!inp) return;
+            const isPass = inp.type === "password";
+            inp.type = isPass ? "text" : "password";
+            btn.innerText = isPass ? "🙈" : "👁️";
+        };
+
+        /* Pemilih Avatar & Pratonton Kad Ejen */
+        window.pilihAvatar = function(ikon, btn) {
+            SoundFX.klik();
+            avatarDipilih = ikon;
+            document.getElementById("previewAvatar").innerText = ikon;
+            document.querySelectorAll(".av-opt").forEach(b => b.classList.remove("selected"));
+            if (btn) btn.classList.add("selected");
+        };
+
+        window.kemaskiniKadEjen = function() {
+            const nama = document.getElementById("regNama").value.trim() || "EJEN BAHARU";
+            const sekolah = document.getElementById("regSekolah").value.trim() || "SMK Sains Malaysia";
+            document.getElementById("previewNama").innerText = nama.toUpperCase();
+            document.getElementById("previewSekolah").innerText = `${sekolah} • KSSM`;
+        };
+
+        /* Penganalisis Entropi Kriptografi Kata Laluan */
+        window.analisisEntropi = function(pass) {
+            const bitsEl = document.getElementById("entropyBits");
+            const labelEl = document.getElementById("entropyLabel");
+            const fillEl = document.getElementById("entropyFill");
+            const timeEl = document.getElementById("crackTimeText");
+
+            if (!pass) {
+                bitsEl.innerText = "0 bit";
+                labelEl.innerText = "TIADA";
+                labelEl.style.color = "#ef4444";
+                fillEl.style.width = "0%";
+                timeEl.innerText = "0 saat";
+                return;
+            }
+
+            let pool = 0;
+            if (/[a-z]/.test(pass)) pool += 26;
+            if (/[A-Z]/.test(pass)) pool += 26;
+            if (/[0-9]/.test(pass)) pool += 10;
+            if (/[^a-zA-Z0-9]/.test(pass)) pool += 32;
+
+            const entropi = Math.round(pass.length * Math.log2(pool || 1));
+            bitsEl.innerText = `${entropi} bit`;
+
+            const kombinasi = Math.pow(pool || 10, pass.length);
+            const saat = kombinasi / 1e10;
+
+            let masaStr = "< 1 saat";
+            if (saat > 31536000 * 100) masaStr = "Berabad-abad (Kebal)";
+            else if (saat > 31536000) masaStr = `${Math.round(saat / 31536000)} tahun`;
+            else if (saat > 86400) masaStr = `${Math.round(saat / 86400)} hari`;
+            else if (saat > 3600) masaStr = `${Math.round(saat / 3600)} jam`;
+            else if (saat > 60) masaStr = `${Math.round(saat / 60)} minit`;
+            else if (saat >= 1) masaStr = `${Math.round(saat)} saat`;
+            timeEl.innerText = masaStr;
+
+            if (entropi < 35) {
+                labelEl.innerText = "LEMAH";
+                labelEl.style.color = "#ef4444";
+                fillEl.style.width = "28%";
+                fillEl.style.background = "#ef4444";
+            } else if (entropi < 55) {
+                labelEl.innerText = "SEDERHANA";
+                labelEl.style.color = "#f59e0b";
+                fillEl.style.width = "58%";
+                fillEl.style.background = "#f59e0b";
+            } else if (entropi < 75) {
+                labelEl.innerText = "KUAT";
+                labelEl.style.color = "#16a34a";
+                fillEl.style.width = "82%";
+                fillEl.style.background = "#16a34a";
+            } else {
+                labelEl.innerText = "GRED KETENTERAAN";
+                labelEl.style.color = "#00c6ff";
+                fillEl.style.width = "100%";
+                fillEl.style.background = "#00c6ff";
+            }
+        };
+
+        /* Penjana Kata Laluan Rawak Selamat */
+        window.janaKataLaluanKuat = function() {
+            SoundFX.berjaya();
+            const setAksara = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*";
+            const arr = new Uint32Array(12);
+            crypto.getRandomValues(arr);
+            let hasil = "ZEP#";
+            for (let i = 0; i < 8; i++) {
+                hasil += setAksara[arr[i] % setAksara.length];
+            }
+            const inp = document.getElementById("regPassword");
+            inp.value = hasil;
+            inp.type = "text";
+            analisisEntropi(hasil);
+            showToast("Kata laluan rawak gred tinggi dijana & dipaparkan!", "success");
+        };
+
+        /* Reset Kata Laluan melalui Firebase Auth */
+        window.hantarResetKataLaluan = async function() {
+            const email = document.getElementById("loginEmail").value.trim();
+            if (!email) {
+                SoundFX.ralat();
+                showToast("Sila taip e-mel anda pada ruangan E-mel Saintis dahulu!", "error");
+                document.getElementById("loginEmail").focus();
+                return;
+            }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                SoundFX.berjaya();
+                showToast(`Pautan tetapan semula kata laluan telah dihantar ke ${email}! 📧`, "success");
+            } catch (err) {
+                SoundFX.ralat();
+                showToast("Gagal menghantar e-mel reset. Pastikan e-mel berdaftar & sah.", "error");
+            }
+        };
+
+        /* Mini Terminal CLI Drawer */
+        window.toggleCliDrawer = function() {
+            SoundFX.klik();
+            const drawer = document.getElementById("cliDrawer");
+            drawer.classList.toggle("open");
+            if (drawer.classList.contains("open")) {
+                document.getElementById("cliInput").focus();
+            }
+        };
+
+        window.addEventListener("keydown", (e) => {
+            if (e.key === "`" && document.activeElement.tagName !== "INPUT") {
+                e.preventDefault();
+                window.toggleCliDrawer();
+            }
+        });
+
+        document.getElementById("cliInput").addEventListener("keydown", (e) => {
+            if (e.key !== "Enter") return;
+            const val = e.target.value.trim().toLowerCase();
+            e.target.value = "";
+            if (!val) return;
+            const log = document.getElementById("cliLog");
+
+            if (val === "help") {
+                log.textContent = "ARAHAN: status | matrix | genpass | target | clear";
+            } else if (val === "status") {
+                log.textContent = `[OK] Firebase Auth & RTDB Node: AKTIF | Target: ${redirectTarget}`;
+            } else if (val === "target") {
+                log.textContent = `[INFO] Haluan selepas auth: ${redirectTarget}`;
+            } else if (val === "matrix") {
+                window.toggleHackerMode();
+                log.textContent = `[OK] Mod Matrix CRT ditukar.`;
+            } else if (val === "genpass") {
+                window.tukarTab("daftar");
+                window.janaKataLaluanKuat();
+                log.textContent = `[OK] Kata laluan rawak diisi ke borang pendaftaran.`;
+            } else if (val === "clear") {
+                log.textContent = "";
+            } else {
+                log.textContent = `[RALAT] Arahan '${val}' tidak dikenali. Taip 'help'.`;
+            }
+        });
+
+        /* KENDALIKAN LOG MASUK */
+        window.kendalikanLogMasuk = async function(e) {
+            e.preventDefault();
+            const email = document.getElementById("loginEmail").value.trim();
+            const password = document.getElementById("loginPassword").value;
+            const btnSubmit = document.getElementById("btnSubmitLogin");
+
+            sedangProsesAuth = true;
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Menyahsulit Identiti... ⏳";
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                const userRef = ref(db, `kawan_sistem_v2/${user.uid}`);
+                const snap = await get(userRef);
+
+                let namaPemain = user.displayName || email.split('@')[0];
+                let sekolah = "SMK Matang Jaya";
+                let daerah = "Kuching";
+                let negeri = "Sarawak";
+
+                if (snap.exists()) {
+                    const dataObj = snap.val();
+                    if (dataObj.nama_asal) namaPemain = dataObj.nama_asal;
+                    if (dataObj.sekolah) sekolah = dataObj.sekolah;
+                    if (dataObj.daerah) daerah = dataObj.daerah;
+                    if (dataObj.negeri) negeri = dataObj.negeri;
+                    await update(userRef, { status_online: true, mod_aktif: redirectTarget.replace(".html", "") });
+                } else {
+                    await set(userRef, {
+                        nama_asal: namaPemain,
+                        sekolah,
+                        daerah,
+                        negeri,
+                        xp: 0,
+                        avatar: "🔬",
+                        status_online: true,
+                        mod_aktif: redirectTarget.replace(".html", "")
+                    });
+                }
+
+                sessionStorage.setItem("saintis_nickname", namaPemain);
+                sessionStorage.setItem("saintis_key", user.uid);
+                sessionStorage.setItem("saintis_sekolah", sekolah);
+                sessionStorage.setItem("saintis_daerah", daerah);
+                sessionStorage.setItem("saintis_negeri", negeri);
+
+                SoundFX.berjaya();
+                showToast(`Akses Dibenarkan! Selamat kembali, ${namaPemain} 🎉`, "success");
+                setTimeout(() => {
+                    pergiKeSasaran();
+                }, 950);
+
+            } catch (error) {
+                sedangProsesAuth = false;
+                SoundFX.ralat();
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Sahkan Identiti & Masuk 🚀";
+
+                let ralatMesej = "Ralat log masuk. Sila cuba lagi.";
+                if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    ralatMesej = "E-mel atau kata laluan tidak sah!";
+                } else if (error.code === 'auth/invalid-email') {
+                    ralatMesej = "Format e-mel tidak sah!";
+                } else if (error.code === 'auth/too-many-requests') {
+                    ralatMesej = "Terlalu banyak percubaan gagal. Sila tunggu sebentar.";
+                }
+                showToast(ralatMesej, "error");
+            }
+        };
+
+        /* KENDALIKAN PENDAFTARAN AKAUN BAHARU */
+        window.kendalikanPendaftaran = async function(e) {
+            e.preventDefault();
+            const nama = document.getElementById("regNama").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
+            const password = document.getElementById("regPassword").value;
+            const sekolah = document.getElementById("regSekolah").value.trim();
+            const daerah = document.getElementById("regDaerah").value.trim();
+            const negeri = document.getElementById("regNegeri").value.trim();
+            const btnSubmit = document.getElementById("btnSubmitDaftar");
+
+            if (!nama || !email || !password) {
+                showToast("Sila lengkapkan maklumat yang diperlukan!", "error");
+                return;
+            }
+
+            sedangProsesAuth = true;
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Menjana Kunci Ejen... ⏳";
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                await updateProfile(user, { displayName: nama });
+
+                await set(ref(db, `kawan_sistem_v2/${user.uid}`), {
+                    nama_asal: nama,
+                    sekolah: sekolah || "SMK Matang Jaya",
+                    daerah: daerah || "Kuching",
+                    negeri: negeri || "Sarawak",
+                    xp: 0,
+                    avatar: avatarDipilih || "🕵️‍♂️",
+                    status_online: true,
+                    mod_aktif: redirectTarget.replace(".html", "")
+                });
+
+                sessionStorage.setItem("saintis_nickname", nama);
+                sessionStorage.setItem("saintis_key", user.uid);
+                sessionStorage.setItem("saintis_sekolah", sekolah);
+                sessionStorage.setItem("saintis_daerah", daerah);
+                sessionStorage.setItem("saintis_negeri", negeri);
+
+                SoundFX.berjaya();
+                showToast(`Identiti Ejen Dicipta! Selamat datang, ${nama} 🚀`, "success");
+                setTimeout(() => {
+                    pergiKeSasaran();
+                }, 950);
+
+            } catch (error) {
+                sedangProsesAuth = false;
+                SoundFX.ralat();
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = "Daftar Akaun & Mula Misi 🧪";
+
+                let ralatMesej = "Ralat pendaftaran: " + error.message;
+                if (error.code === 'auth/email-already-in-use') {
+                    ralatMesej = "E-mel ini sudah berdaftar! Sila guna tab Log Masuk.";
+                } else if (error.code === 'auth/weak-password') {
+                    ralatMesej = "Kata laluan mestilah sekurang-kurangnya 6 aksara!";
+                }
+                showToast(ralatMesej, "error");
+            }
+        };
+    </script>
+</body>
+</html>

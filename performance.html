@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0052D4">
+    <title>Scientist Analytics & Performance - ZEP Portal [PRO Hacker Edition]</title>
+    
+    <!-- PUSAT KAWALAN TEMA, MATRIX & SFX SEAWALNYA -->
+    <script>
+        let sfxAktif = localStorage.getItem("zep_sfx") !== "off";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("theme") === "dark") {
+                document.body.classList.add("dark-mode");
+                const btn = document.getElementById("btnDarkMode");
+                if (btn) btn.innerText = "☀️ Terang";
+            }
+            if (localStorage.getItem("zep_matrix") === "on") {
+                aktifkanModHacker(false);
+            }
+            kemaskiniButangSFX();
+        });
+
+        function toggleDarkMode() {
+            mainBunyiKlik();
+            document.body.classList.toggle("dark-mode");
+            const isDark = document.body.classList.contains("dark-mode");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            const btn = document.getElementById("btnDarkMode");
+            if (btn) btn.innerText = isDark ? "☀️ Terang" : "🌙 Gelap";
+        }
+
+        function toggleAudioFX() {
+            sfxAktif = !sfxAktif;
+            localStorage.setItem("zep_sfx", sfxAktif ? "on" : "off");
+            kemaskiniButangSFX();
+            if (sfxAktif) mainBunyiKlik();
+        }
+
+        function kemaskiniButangSFX() {
+            const btn = document.getElementById("btnAudioFX");
+            if (btn) btn.innerText = sfxAktif ? "🔊 SFX" : "🔇 Muted";
+        }
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let ctxAudio = null;
+
+        function mainBunyiKlik() {
+            if (!sfxAktif) return;
+            try {
+                if (!ctxAudio) ctxAudio = new AudioCtx();
+                if (ctxAudio.state === "suspended") ctxAudio.resume();
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(660, ctxAudio.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1100, ctxAudio.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.07, ctxAudio.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(ctxAudio.destination);
+                osc.start();
+                osc.stop(ctxAudio.currentTime + 0.09);
+            } catch (e) {}
+        }
+    </script>
+
+    <!-- PUSAT KAWALAN FIREBASE ANALYTICS -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAtbX6wmdNwmXkgUvewnfRRXRTfyq5IZ8",
+            authDomain: "jejak-sejarah-tingkatan-2.firebaseapp.com",
+            databaseURL: "https://jejak-sejarah-tingkatan-2-default-rtdb.firebaseio.com",
+            projectId: "jejak-sejarah-tingkatan-2",
+            storageBucket: "jejak-sejarah-tingkatan-2.firebasestorage.app",
+            messagingSenderId: "92872994798",
+            appId: "1:92872994798:web:9c205538a5eb8f388e68ff",
+            measurementId: "G-8RZ21D4FXY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let semuaDataMarkah = {};
+        let semuaDataEscape = {};
+        let senaraiPaparanSemasa = [];
+        let namaPemainSemasa = "";
+        let profilSaintisSemasa = { avatar: "🔬", xp: 0, sekolah: "", negeri: "" };
+        let unsubscribeProfil = null;
+
+        const senaraiBabNama = {
+            1: "Biodiversity", 2: "Ecosystem", 3: "Nutrition", 4: "Human Health",
+            5: "Water & Solution", 6: "Acids & Alkalis", 7: "Work, Energy & Power",
+            8: "Rate of Reaction", 9: "Speed & Acceleration", 10: "Sound Waves",
+            11: "Stars & Galaxies", 12: "Solar System", 13: "Meteoroid & Comet"
+        };
+
+        const petaNamaBilikEscape = {
+            "global_lab": "Global Lab (Standard)",
+            "global_lab_pro": "Global Lab Pro",
+            "global_lab_pro2": "Global Lab Pro 2",
+            "global_lab_mega": "Global Lab Mega",
+            "global_lab_legend": "Global Lab Legend",
+            "global_lab_legend_v2": "👑 Mega Lab LEGEND (V2)"
+        };
+
+        function elakXSS(teks) {
+            const div = document.createElement("div");
+            div.textContent = teks || "";
+            return div.innerHTML;
+        }
+
+        function bersihkanKeyFirebase(str) {
+            return String(str || "")
+                .trim()
+                .replace(/[.#$\/\[\]\s]+/g, "_")
+                .replace(/^_+|_+$/g, "");
+        }
+
+        function dapatkanIkonRank(pangkat) {
+            if (!pangkat) return "👍";
+            if (pangkat.toUpperCase() === "LEGEND") return "👑";
+            if (pangkat.toUpperCase() === "PRO") return "🌟";
+            return "👍";
+        }
+
+        function formatNamaBilikEscape(roomKey) {
+            if (petaNamaBilikEscape[roomKey]) return petaNamaBilikEscape[roomKey];
+            return String(roomKey || "Sci-Escape Lab")
+                .replace(/_/g, " ")
+                .replace(/\b\w/g, huruf => huruf.toUpperCase());
+        }
+
+        function formatMasaSaat(saat) {
+            const jumlah = Math.round(Number(saat));
+            const minit = Math.floor(jumlah / 60);
+            const bakiSaat = jumlah % 60;
+            return minit > 0 ? `${minit}m ${bakiSaat}s` : `${bakiSaat}s`;
+        }
+
+        function dapatkanSenaraiEscapeSah() {
+            let senarai = [];
+            for (let roomKey in semuaDataEscape) {
+                const roomObj = semuaDataEscape[roomKey];
+                if (!roomObj || !roomObj.best_record) continue;
+
+                const br = roomObj.best_record;
+                const namaTeam = String(br.team || br.nama || "").trim();
+                const saat = Number(br.time ?? br.jumlahSaat ?? br.saat);
+
+                if (!namaTeam || isNaN(saat) || saat <= 0) continue;
+
+                senarai.push({
+                    roomKey: roomKey,
+                    bilikPaparan: formatNamaBilikEscape(roomKey),
+                    nama: namaTeam,
+                    jumlahSaat: saat,
+                    masaPaparan: formatMasaSaat(saat)
+                });
+            }
+            senarai.sort((a, b) => a.jumlahSaat - b.jumlahSaat);
+            return senarai;
+        }
+
+        function kemaskiniAnalisisPeribadi(namaUser) {
+            namaPemainSemasa = namaUser;
+            const elNama = document.getElementById("namaProfilLogin");
+            if (elNama) elNama.innerText = `${profilSaintisSemasa.avatar} ${namaUser}`;
+
+            // Selaraskan butang profil navbar kanan
+            document.getElementById("navUserAvatar").innerText = profilSaintisSemasa.avatar;
+            document.getElementById("navUserName").innerText = namaUser;
+            document.getElementById("dropHeaderNama").innerText = namaUser.toUpperCase();
+            document.getElementById("dropHeaderXP").innerText = `⭐ ${profilSaintisSemasa.xp} XP`;
+
+            document.getElementById("bekasStatusAuth").innerHTML = `
+                <a href="#" class="user-dropdown-item" style="color: #ef4444 !important;" onclick="logKeluarZEP(event)">
+                    <span>🚪</span> Log Keluar Sistem
+                </a>
+            `;
+
+            paparAnalisisPeribadi();
+            window.paparPapanJuara();
+            window.paparPapanJuaraEscape();
+        }
+
+        window.logKeluarZEP = function(e) {
+            e.preventDefault();
+            if (confirm("Adakah anda pasti mahu log keluar?")) {
+                signOut(auth).finally(() => {
+                    sessionStorage.clear();
+                    localStorage.removeItem("saintis_nickname");
+                    localStorage.removeItem("saintis_key");
+                    window.location.reload();
+                });
+            }
+        };
+
+        window.pilihBabDariGrid = function(babNum) {
+            mainBunyiKlik();
+            const selectBab = document.getElementById("filterBab");
+            if (selectBab) {
+                selectBab.value = String(babNum);
+                window.paparPapanJuara();
+                selectBab.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+        };
+
+        window.eksportLeaderboardCSV = function() {
+            mainBunyiKlik();
+            if (!senaraiPaparanSemasa || senaraiPaparanSemasa.length === 0) {
+                alert("Tiada rekod papan juara untuk dieksport buat masa ini.");
+                return;
+            }
+            let csv = "Rank,Scientist Name,Chapter,Record Time,Badge\n";
+            senaraiPaparanSemasa.forEach((p, idx) => {
+                const namaSafe = String(p.nama || "").replace(/"/g, '""');
+                const masaSafe = String(p.masaTeks || (p.jumlahSaat + "s")).replace(/"/g, '""');
+                const pangkatSafe = String(p.pangkat || "Scientist").replace(/"/g, '""');
+                csv += `${idx + 1},"${namaSafe}",Chapter ${p.bab || 1},"${masaSafe}","${pangkatSafe}"\n`;
+            });
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `ZEP_Leaderboard_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        };
+
+        // 1. SEMAK STATUS LOG MASUK & SEGERAK PROFIL SECARA MASA NYATA
+        onAuthStateChanged(auth, (user) => {
+            if (unsubscribeProfil) {
+                unsubscribeProfil();
+                unsubscribeProfil = null;
+            }
+
+            let sessionKey = sessionStorage.getItem("saintis_key") || localStorage.getItem("saintis_key") || "";
+            let namaPemain = sessionStorage.getItem("saintis_nickname") || localStorage.getItem("saintis_nickname") || "";
+
+            if (user || namaPemain) {
+                let kunciUtama = user ? user.uid : bersihkanKeyFirebase(sessionKey || namaPemain);
+
+                const applyProfileSnapshot = (dataProfil = {}) => {
+                    profilSaintisSemasa = {
+                        avatar: dataProfil.avatar || "🔬",
+                        xp: Number(dataProfil.xp ?? dataProfil.markah ?? 0),
+                        sekolah: dataProfil.sekolah || sessionStorage.getItem("saintis_sekolah") || localStorage.getItem("saintis_sekolah") || "",
+                        negeri: dataProfil.negeri || ""
+                    };
+
+                    const resolvedName = dataProfil.nama_asal || dataProfil.nama || namaPemain || (user ? (user.displayName || user.email.split('@')[0]) : "Saintis ZEP");
+                    sessionStorage.setItem("saintis_nickname", resolvedName);
+                    if (kunciUtama) sessionStorage.setItem("saintis_key", kunciUtama);
+
+                    kemaskiniAnalisisPeribadi(resolvedName);
+                };
+
+                if (kunciUtama) {
+                    unsubscribeProfil = onValue(ref(db, "kawan_sistem_v2/" + kunciUtama), (snap) => {
+                        applyProfileSnapshot(snap.exists() ? (snap.val() || {}) : {});
+                    }, () => {
+                        applyProfileSnapshot({});
+                    });
+                } else {
+                    applyProfileSnapshot({});
+                }
+            } else {
+                namaPemainSemasa = "";
+                document.getElementById("namaProfilLogin").innerText = "Guest Scientist (Not Logged In)";
+                document.getElementById("analisisPeribadiCard").innerHTML = "<p style='color: #888; margin: 10px 0;'>Please login or play a ZEP / Sci-Escape mission to track your personal performance analytics! 🔬</p>";
+                window.paparPapanJuara();
+                window.paparPapanJuaraEscape();
+            }
+        });
+
+        // 2. PAPAR ANALISIS PERIBADI + TRACKER 13 BAB + REKOD ESCAPE ROOM
+        function paparAnalisisPeribadi() {
+            if (!namaPemainSemasa) return;
+
+            let rekodPemain = [];
+            let rekodIkutBab = {};
+
+            for (let id in semuaDataMarkah) {
+                const rec = semuaDataMarkah[id];
+                if (!rec || !rec.nama) continue;
+
+                const saat = Number(rec.jumlahSaat);
+                if (isNaN(saat) || saat <= 0) continue;
+
+                if (rec.nama.trim().toLowerCase() === namaPemainSemasa.trim().toLowerCase()) {
+                    const rekodSah = { ...rec, jumlahSaat: saat };
+                    rekodPemain.push(rekodSah);
+
+                    let babNum = parseInt(rec.bab || "1", 10);
+                    if (!rekodIkutBab[babNum] || saat < rekodIkutBab[babNum].jumlahSaat) {
+                        rekodIkutBab[babNum] = rekodSah;
+                    }
+                }
+            }
+
+            const semuaEscapeSah = dapatkanSenaraiEscapeSah();
+            const namaSayaLower = namaPemainSemasa.trim().toLowerCase();
+            const rekodEscapePemain = semuaEscapeSah.filter(r => {
+                const namaRecLower = r.nama.trim().toLowerCase();
+                return namaRecLower === namaSayaLower || (namaSayaLower.length >= 3 && namaRecLower.includes(namaSayaLower));
+            });
+
+            const terbaikEscape = rekodEscapePemain[0] || null;
+            const teksTerbaikEscape = terbaikEscape ? terbaikEscape.masaPaparan : "Belum Rekod";
+            const subBilikEscape = terbaikEscape ? `<div style="font-size: 11px; opacity: 0.85; margin-top: 2px;">${elakXSS(terbaikEscape.bilikPaparan)}</div>` : "";
+
+            const jumlahBabSelesai = Object.keys(rekodIkutBab).length;
+            const peratusSiap = Math.round((jumlahBabSelesai / 13) * 100);
+
+            let htmlGridBab = `<div class="mastery-grid">`;
+            for (let b = 1; b <= 13; b++) {
+                if (rekodIkutBab[b]) {
+                    let masaBab = elakXSS(rekodIkutBab[b].masaTeks || (rekodIkutBab[b].jumlahSaat + 's'));
+                    htmlGridBab += `
+                        <div class="bab-pill bab-done" onclick="pilihBabDariGrid(${b})" style="cursor:pointer;" title="Chapter ${b}: ${senaraiBabNama[b]} (Klik untuk tapis)">
+                            <div style="font-weight: bold; font-size: 12px;">✅ Ch. ${b}</div>
+                            <div style="font-size: 11px; opacity: 0.9;">⏱️ ${masaBab}</div>
+                        </div>
+                    `;
+                } else {
+                    htmlGridBab += `
+                        <div class="bab-pill bab-locked" onclick="pilihBabDariGrid(${b})" style="cursor:pointer;" title="Chapter ${b}: ${senaraiBabNama[b]} (Not Completed)">
+                            <div style="font-weight: bold; font-size: 12px;">🔒 Ch. ${b}</div>
+                            <div style="font-size: 11px; opacity: 0.7;">Locked</div>
+                        </div>
+                    `;
+                }
+            }
+            htmlGridBab += `</div>`;
+
+            const infoSekolah = profilSaintisSemasa.sekolah 
+                ? `<div class="school-badge">🏫 ${elakXSS(profilSaintisSemasa.sekolah)}${profilSaintisSemasa.negeri ? ', ' + elakXSS(profilSaintisSemasa.negeri) : ''}</div>` 
+                : '';
+
+            if (rekodPemain.length > 0 || terbaikEscape) {
+                rekodPemain.sort((a, b) => a.jumlahSaat - b.jumlahSaat);
+                let terbaik = rekodPemain[0] || null;
+                let ikonRank = terbaik ? dapatkanIkonRank(terbaik.pangkat) : "🔐";
+
+                document.getElementById("analisisPeribadiCard").innerHTML = `
+                    ${infoSekolah}
+                    <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 12px; margin-top: 12px;">
+                        <div class="stat-card stat-purple">
+                            <div style="font-size: 13px; opacity: 0.85;">Total Lab XP</div>
+                            <div style="font-size: 22px; font-weight: bold;">⚡ ${profilSaintisSemasa.xp} XP</div>
+                        </div>
+                        <div class="stat-card stat-blue">
+                            <div style="font-size: 13px; opacity: 0.85;">ZEP Missions</div>
+                            <div style="font-size: 22px; font-weight: bold;">🧪 ${rekodPemain.length} Games</div>
+                        </div>
+                        <div class="stat-card stat-green">
+                            <div style="font-size: 13px; opacity: 0.85;">Best ZEP Time</div>
+                            <div style="font-size: 22px; font-weight: bold;">⏱️ ${terbaik ? elakXSS(terbaik.masaTeks || (terbaik.jumlahSaat + 's')) : '-'}</div>
+                        </div>
+                        <div class="stat-card stat-rose">
+                            <div style="font-size: 13px; opacity: 0.85;">Fastest Escape Room</div>
+                            <div style="font-size: 22px; font-weight: bold;">🔐 ${elakXSS(teksTerbaikEscape)}</div>
+                            ${subBilikEscape}
+                        </div>
+                        <div class="stat-card stat-yellow">
+                            <div style="font-size: 13px; opacity: 0.85;">Highest Rank</div>
+                            <div style="font-size: 22px; font-weight: bold;">${ikonRank} ${elakXSS(terbaik?.pangkat || 'Escaper')}</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 22px; text-align: left;">
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 6px;">
+                            <span>📚 Form 2 Syllabus Mastery (${jumlahBabSelesai} / 13 Chapters Cleared)</span>
+                            <span style="color: #0052D4;">${peratusSiap}%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width: ${peratusSiap}%;"></div>
+                        </div>
+                        ${htmlGridBab}
+                    </div>
+                `;
+            } else {
+                document.getElementById("analisisPeribadiCard").innerHTML = `
+                    ${infoSekolah}
+                    <p style='color: #e67e22; margin: 8px 0; font-weight: bold;'>Current Lab XP: ⚡ ${profilSaintisSemasa.xp} XP</p>
+                    <p style='color: #64748b; font-size: 14px; margin-bottom: 12px;'>No ZEP or Sci-Escape Room timers recorded yet. Jump into any mission to unlock your badges! 🚀</p>
+                    ${htmlGridBab}
+                `;
+            }
+        }
+
+        // 3. PAPAN JUARA GLOBAL ZEP
+        window.paparPapanJuara = function() {
+            const babDipilih = document.getElementById("filterBab")?.value || "ALL";
+            const kataCarian = (document.getElementById("cariSaintis")?.value || "").trim().toLowerCase();
+            let petaPemainTerbaik = {};
+
+            for (let id in semuaDataMarkah) {
+                let rec = semuaDataMarkah[id];
+                if (!rec || !rec.nama) continue;
+
+                const saat = Number(rec.jumlahSaat);
+                if (isNaN(saat) || saat <= 0) continue;
+                if (babDipilih !== "ALL" && String(rec.bab || "1") !== babDipilih) continue;
+
+                let keyNama = rec.nama.trim().toLowerCase();
+                if (!petaPemainTerbaik[keyNama] || saat < petaPemainTerbaik[keyNama].jumlahSaat) {
+                    petaPemainTerbaik[keyNama] = { ...rec, jumlahSaat: saat };
+                }
+            }
+
+            let senaraiPemain = Object.values(petaPemainTerbaik);
+            senaraiPemain.sort((a, b) => a.jumlahSaat - b.jumlahSaat);
+            senaraiPaparanSemasa = senaraiPemain;
+
+            const bekasPodium = document.getElementById("podiumJuara");
+            if (senaraiPemain.length > 0) {
+                bekasPodium.style.display = "flex";
+                const top3 = [
+                    { data: senaraiPemain[0], kelas: "podium-1", pingat: "🥇", label: "CHAMPION #1" },
+                    { data: senaraiPemain[1], kelas: "podium-2", pingat: "🥈", label: "RUNNER-UP #2" },
+                    { data: senaraiPemain[2], kelas: "podium-3", pingat: "🥉", label: "3RD PLACE #3" }
+                ];
+
+                let htmlPodium = "";
+                top3.forEach((slot) => {
+                    if (slot.data) {
+                        let p = slot.data;
+                        let ikonRank = dapatkanIkonRank(p.pangkat);
+                        htmlPodium += `
+                            <div class="podium-card ${slot.kelas}">
+                                <div style="font-size: 36px; line-height: 1.1;">${slot.pingat}</div>
+                                <div style="font-size: 11px; font-weight: 800; letter-spacing: 1px; opacity: 0.75; margin: 4px 0;">${slot.label}</div>
+                                <div class="podium-name">${elakXSS(p.nama)}</div>
+                                <div style="font-size: 18px; font-weight: bold; color: #e67e22; margin: 6px 0;">⏱️ ${elakXSS(p.masaTeks || (p.jumlahSaat + 's'))}</div>
+                                <div><span class="badge-chapter">Ch. ${elakXSS(String(p.bab || '1'))}</span> <span style="font-size: 12px; font-weight: bold;">${ikonRank} ${elakXSS(p.pangkat || 'Scientist')}</span></div>
+                            </div>
+                        `;
+                    } else {
+                        htmlPodium += `
+                            <div class="podium-card ${slot.kelas}" style="opacity: 0.55; border-style: dashed;">
+                                <div style="font-size: 32px;">${slot.pingat}</div>
+                                <div style="font-size: 11px; font-weight: bold; margin: 6px 0;">${slot.label}</div>
+                                <div style="font-size: 13px;">Spot Available!</div>
+                            </div>
+                        `;
+                    }
+                });
+                bekasPodium.innerHTML = htmlPodium;
+            } else {
+                bekasPodium.style.display = "none";
+            }
+
+            let htmlJadual = "";
+            let jumlahDipapar = 0;
+
+            senaraiPemain.forEach((pemain, index) => {
+                if (kataCarian && !pemain.nama.toLowerCase().includes(kataCarian)) return;
+                jumlahDipapar++;
+
+                let pingat = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1) + ".";
+                let ikonRank = dapatkanIkonRank(pemain.pangkat);
+                let adalahSaya = namaPemainSemasa && pemain.nama.trim().toLowerCase() === namaPemainSemasa.trim().toLowerCase();
+
+                htmlJadual += `
+                    <tr class="${adalahSaya ? 'my-row-highlight' : ''}">
+                        <td style="font-size: 20px; text-align: center; font-weight: bold;">${pingat}</td>
+                        <td style="font-weight: bold; font-size:16px;" class="player-name">
+                            ${elakXSS(pemain.nama)}
+                            ${adalahSaya ? '<span class="badge-you">ANDA</span>' : ''}
+                        </td>
+                        <td style="text-align: center;"><span class="badge-chapter">Chapter ${elakXSS(String(pemain.bab || '1'))}</span></td>
+                        <td style="text-align: center; font-weight: bold; color: #e67e22;">⏱️ ${elakXSS(pemain.masaTeks || (pemain.jumlahSaat + 's'))}</td>
+                        <td style="text-align: center;">${ikonRank} ${elakXSS(pemain.pangkat || 'Scientist')}</td>
+                    </tr>
+                `;
+            });
+
+            if (jumlahDipapar > 0) {
+                document.getElementById("badanJadual").innerHTML = htmlJadual;
+            } else {
+                document.getElementById("badanJadual").innerHTML = "<tr><td colspan='5' style='text-align:center; padding: 30px;'>No matching scientist records found. Be the first to clear the lab! 🚀</td></tr>";
+            }
+        };
+
+        // 4. PAPAN JUARA PALING TERPANTAS SCI-ESCAPE ROOM
+        function kemaskiniDropdownBilikEscape() {
+            const selectBilik = document.getElementById("filterBilikEscape");
+            if (!selectBilik) return;
+
+            const pilihanSemasa = selectBilik.value || "ALL";
+            const kunciSet = new Set(["global_lab_legend_v2", ...Object.keys(semuaDataEscape || {})]);
+            const kunciBilik = Array.from(kunciSet);
+
+            let htmlOpt = `<option value="ALL">🌐 All Escape Rooms (Best Overall)</option>`;
+            kunciBilik.forEach(roomKey => {
+                htmlOpt += `<option value="${elakXSS(roomKey)}">${elakXSS(formatNamaBilikEscape(roomKey))}</option>`;
+            });
+            selectBilik.innerHTML = htmlOpt;
+
+            if (kunciBilik.includes(pilihanSemasa)) {
+                selectBilik.value = pilihanSemasa;
+            }
+        }
+
+        window.paparPapanJuaraEscape = function() {
+            const bilikDipilih = document.getElementById("filterBilikEscape")?.value || "ALL";
+            const kataCarian = (document.getElementById("cariEscapeSaintis")?.value || "").trim().toLowerCase();
+
+            let senaraiRekod = dapatkanSenaraiEscapeSah();
+            if (bilikDipilih !== "ALL") {
+                senaraiRekod = senaraiRekod.filter(r => r.roomKey === bilikDipilih);
+            }
+
+            let petaTerbaikUnik = {};
+            senaraiRekod.forEach(r => {
+                const key = r.nama.trim().toLowerCase();
+                if (!petaTerbaikUnik[key] || r.jumlahSaat < petaTerbaikUnik[key].jumlahSaat) {
+                    petaTerbaikUnik[key] = r;
+                }
+            });
+            const senaraiTerbaikUnik = Object.values(petaTerbaikUnik).sort((a, b) => a.jumlahSaat - b.jumlahSaat);
+
+            const bekasPodium = document.getElementById("podiumEscape");
+            if (senaraiTerbaikUnik.length > 0) {
+                bekasPodium.style.display = "flex";
+                const top3 = [
+                    { data: senaraiTerbaikUnik[0], kelas: "podium-1", pingat: "🥇", label: "ESCAPE MASTER #1" },
+                    { data: senaraiTerbaikUnik[1], kelas: "podium-2", pingat: "🥈", label: "FAST ESCAPER #2" },
+                    { data: senaraiTerbaikUnik[2], kelas: "podium-3", pingat: "🥉", label: "3RD ESCAPER #3" }
+                ];
+
+                let htmlPodium = "";
+                top3.forEach((slot) => {
+                    if (slot.data) {
+                        let p = slot.data;
+                        htmlPodium += `
+                            <div class="podium-card ${slot.kelas}">
+                                <div style="font-size: 36px; line-height: 1.1;">${slot.pingat}</div>
+                                <div style="font-size: 11px; font-weight: 800; letter-spacing: 1px; opacity: 0.75; margin: 4px 0;">${slot.label}</div>
+                                <div class="podium-name">${elakXSS(p.nama)}</div>
+                                <div style="font-size: 18px; font-weight: bold; color: #e11d48; margin: 6px 0;">⏱️ ${elakXSS(p.masaPaparan)}</div>
+                                <div><span class="badge-escape">🔐 ${elakXSS(p.bilikPaparan)}</span></div>
+                            </div>
+                        `;
+                    } else {
+                        htmlPodium += `
+                            <div class="podium-card ${slot.kelas}" style="opacity: 0.55; border-style: dashed;">
+                                <div style="font-size: 32px;">${slot.pingat}</div>
+                                <div style="font-size: 11px; font-weight: bold; margin: 6px 0;">${slot.label}</div>
+                                <div style="font-size: 13px;">Spot Available!</div>
+                            </div>
+                        `;
+                    }
+                });
+                bekasPodium.innerHTML = htmlPodium;
+            } else {
+                bekasPodium.style.display = "none";
+            }
+
+            let htmlJadual = "";
+            let jumlahDipapar = 0;
+            const namaSayaLower = namaPemainSemasa ? namaPemainSemasa.trim().toLowerCase() : "";
+
+            senaraiTerbaikUnik.forEach((pemain, index) => {
+                if (kataCarian && !pemain.nama.toLowerCase().includes(kataCarian) && !pemain.bilikPaparan.toLowerCase().includes(kataCarian)) return;
+                jumlahDipapar++;
+
+                let pingat = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : (index + 1) + ".";
+                const namaRecLower = pemain.nama.trim().toLowerCase();
+                let adalahSaya = namaSayaLower && (namaRecLower === namaSayaLower || (namaSayaLower.length >= 3 && namaRecLower.includes(namaSayaLower)));
+                let gelaranEscape = index === 0 ? "🔓 Grand Escape Master" : index < 3 ? "⚡ Swift Codebreaker" : "🔑 Lab Escaper";
+
+                htmlJadual += `
+                    <tr class="${adalahSaya ? 'my-row-highlight' : ''}">
+                        <td style="font-size: 20px; text-align: center; font-weight: bold;">${pingat}</td>
+                        <td style="font-weight: bold; font-size:16px;" class="player-name">
+                            ${elakXSS(pemain.nama)}
+                            ${adalahSaya ? '<span class="badge-you">ANDA</span>' : ''}
+                        </td>
+                        <td style="text-align: center;"><span class="badge-escape">🔐 ${elakXSS(pemain.bilikPaparan)}</span></td>
+                        <td style="text-align: center; font-weight: bold; color: #e11d48;">⏱️ ${elakXSS(pemain.masaPaparan)}</td>
+                        <td style="text-align: center; font-weight: 600;">${gelaranEscape}</td>
+                    </tr>
+                `;
+            });
+
+            if (jumlahDipapar > 0) {
+                document.getElementById("badanJadualEscape").innerHTML = htmlJadual;
+            } else {
+                document.getElementById("badanJadualEscape").innerHTML = "<tr><td colspan='5' style='text-align:center; padding: 30px;'>Belum ada rekod Sci-Escape Room untuk pilihan ini. Jadilah saintis terpantas meloloskan diri! 🔐🚀</td></tr>";
+            }
+        };
+
+        // PENDENGAR FIREBASE ZEP MISSIONS
+        onValue(ref(db, "markah_science_zep"), (snapshot) => {
+            semuaDataMarkah = snapshot.val() || {};
+            paparAnalisisPeribadi();
+            window.paparPapanJuara();
+        }, (err) => {
+            document.getElementById("badanJadual").innerHTML = `<tr><td colspan='5' style='text-align:center; padding: 30px; color: #dc2626;'>⚠️ Ralat sambungan Firebase: ${elakXSS(err.message)}</td></tr>`;
+        });
+
+        // PENDENGAR FIREBASE SCI-ESCAPE ROOM (sci_arena_rooms)
+        onValue(ref(db, "sci_arena_rooms"), (snapshot) => {
+            semuaDataEscape = snapshot.val() || {};
+            kemaskiniDropdownBilikEscape();
+            paparAnalisisPeribadi();
+            window.paparPapanJuaraEscape();
+        }, (err) => {
+            document.getElementById("badanJadualEscape").innerHTML = `<tr><td colspan='5' style='text-align:center; padding: 30px; color: #dc2626;'>⚠️ Ralat sambungan Sci-Escape Room: ${elakXSS(err.message)}</td></tr>`;
+        });
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f8ff; 
+            color: #333; 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            transition: background 0.3s, color 0.3s; 
+        }
+
+        .header-container { 
+            position: relative;
+            z-index: 2;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-wrap: wrap;
+            text-align: center;
+            gap: 15px;
+            padding: 25px 20px; 
+            background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC); 
+            border-bottom: 4px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3); 
+        }
+
+        .header-container h1 {
+            color: white;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+            font-size: clamp(22px, 3.8vw, 36px);
+            margin: 0;
+        }
+
+        /* NAVBAR UNIFORM HACKER EDITION (HEIGHT: 42PX) */
+        .navbar {
+            background-color: #1a2a6c;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0; 
+            z-index: 100;
+        }
+
+        .navbar > a {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 0 14px;
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .navbar > a:hover, .navbar > a.active-link {
+            background-color: #00c6ff !important;
+            color: #0d1b2a !important;
+        }
+
+        .btn-nav-action {
+            background-color: #334155;
+            color: #ffffff;
+            border: 1.5px solid #00c6ff;
+            padding: 0 12px;
+            height: 42px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.25s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-nav-action:hover {
+            background-color: #00c6ff;
+            color: #0d1b2a;
+        }
+
+        .btn-matrix-trigger {
+            border-color: #00ff41 !important;
+            color: #00ff41 !important;
+            background-color: #041a08 !important;
+        }
+        .btn-matrix-trigger:hover {
+            background-color: #00ff41 !important;
+            color: #020602 !important;
+        }
+
+        .kbd-badge {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        /* Avatar Dropdown Nav Kanan */
+        .nav-right-user {
+            margin-left: auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-btn-pandai {
+            background: linear-gradient(135deg, #00c6ff, #0052D4);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 25px;
+            padding: 4px 14px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .avatar-btn-pandai:hover { transform: scale(1.03); }
+
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 115%;
+            right: 0;
+            background: #ffffff;
+            min-width: 235px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 1000;
+            border: 1px solid #e2e8f0;
+            flex-direction: column;
+        }
+        .user-dropdown-menu.show { display: flex !important; }
+
+        .user-dropdown-header {
+            background: linear-gradient(135deg, #1a2a6c, #0052D4);
+            color: white;
+            padding: 14px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .user-dropdown-item {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px !important;
+            color: #333333 !important;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .user-dropdown-item:hover { background-color: #e3f2fd !important; color: #0052D4 !important; }
+
+        /* MAIN CONTENT AREA */
+        .main-content { 
+            position: relative;
+            z-index: 2;
+            padding: 35px 30px; 
+            flex: 1; 
+            background-color: white; 
+            margin: 30px auto; 
+            max-width: 1080px; 
+            width: 92%; 
+            border-radius: 16px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06); 
+            transition: background 0.3s, color 0.3s; 
+        }
+
+        /* KOTAK ANALISIS PERIBADI */
+        .personal-analytics-box {
+            background: #f8fbff;
+            border: 2px solid #bae6fd;
+            border-radius: 14px;
+            padding: 24px;
+            margin-bottom: 40px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 82, 212, 0.05);
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .school-badge {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        .stat-card { 
+            padding: 15px 18px; 
+            border-radius: 12px; 
+            flex: 1; 
+            min-width: 145px; 
+            transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-purple { background: #f3e8ff; border: 2px solid #9333ea; color: #7e22ce; }
+        .stat-blue { background: #e3f2fd; border: 2px solid #0052D4; color: #0052D4; }
+        .stat-green { background: #eef9f0; border: 2px solid #28a745; color: #1e7e34; }
+        .stat-rose { background: #ffe4e6; border: 2px solid #e11d48; color: #be123c; }
+        .stat-yellow { background: #fff8e1; border: 2px solid #f39c12; color: #d97706; }
+
+        /* PROGRESS BAR & GRID 13 BAB */
+        .progress-track {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0052D4, #00c6ff);
+            border-radius: 999px;
+            transition: width 0.5s ease;
+        }
+        .mastery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .bab-pill {
+            padding: 8px 6px;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .bab-pill:hover { transform: scale(1.04); }
+        .bab-done { background: #dcfce7; border: 1.5px solid #22c55e; color: #166534; }
+        .bab-locked { background: #f1f5f9; border: 1.5px dashed #cbd5e1; color: #64748b; }
+
+        /* PODIUM TOP 3 JUARA */
+        .podium-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 16px;
+            margin: 25px 0 30px 0;
+            flex-wrap: wrap;
+        }
+        .podium-card {
+            flex: 1;
+            min-width: 210px;
+            max-width: 270px;
+            border-radius: 16px;
+            padding: 20px 15px;
+            text-align: center;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .podium-card:hover { transform: translateY(-6px); }
+        .podium-1 {
+            order: 2;
+            min-height: 215px;
+            background: linear-gradient(145deg, #fffbeb, #fef3c7);
+            border: 3px solid #f59e0b;
+            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.25);
+        }
+        .podium-2 {
+            order: 1;
+            min-height: 185px;
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            border: 2px solid #94a3b8;
+            box-shadow: 0 6px 18px rgba(148, 163, 184, 0.2);
+        }
+        .podium-3 {
+            order: 3;
+            min-height: 170px;
+            background: linear-gradient(145deg, #fff7ed, #ffedd5);
+            border: 2px solid #d97706;
+            box-shadow: 0 6px 18px rgba(217, 119, 6, 0.18);
+        }
+        .podium-name {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @media (max-width: 720px) {
+            .podium-1, .podium-2, .podium-3 { order: unset; min-height: auto; max-width: 100%; }
+        }
+
+        /* BAR PENAPIS & CARIAN */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .filter-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .select-filter-bab, .input-search-saintis {
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 2px solid #0052D4;
+            background-color: #ffffff;
+            color: #1e293b;
+            font-weight: bold;
+            font-size: 14px;
+            outline: none;
+        }
+        .input-search-saintis { font-weight: normal; min-width: 200px; }
+        .btn-export-csv {
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 2px solid #059669;
+            background-color: #ecfdf5;
+            color: #065f46;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-export-csv:hover {
+            background-color: #059669;
+            color: #ffffff;
+        }
+
+        /* GAYA JADUAL PRESTASI */
+        .jadual-kontena { overflow-x: auto; margin-top: 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .jadual-prestasi { width: 100%; border-collapse: collapse; background-color: white; transition: background 0.3s; }
+        .jadual-prestasi th { background-color: #0052D4; color: white; padding: 15px; font-size: 15px; border-bottom: 3px solid #00c6ff; }
+        .jadual-prestasi td { padding: 14px 15px; border-bottom: 1px solid #eee; font-size: 15px; color: #444; }
+        .jadual-prestasi tr:hover { background-color: #f8fbff; }
+        .player-name { color: #0052D4; }
+        .badge-chapter { display: inline-block; background:#e3f2fd; padding:4px 10px; border-radius:6px; border:1px solid #0052D4; color: #0052D4; font-size: 12px; font-weight: bold; }
+        .badge-escape { display: inline-block; background:#ffe4e6; padding:5px 11px; border-radius:6px; border:1px solid #e11d48; color: #be123c; font-size: 12px; font-weight: bold; line-height: 1.3; }
+        .jadual-escape th { background-color: #881337 !important; border-bottom-color: #fb7185 !important; }
+        
+        .my-row-highlight { background-color: #e0f2fe !important; }
+        .badge-you {
+            background: #0052D4;
+            color: white;
+            font-size: 10px;
+            padding: 2px 7px;
+            border-radius: 999px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
+        /* COMMAND PALETTE (Ctrl+K) */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.78);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 12vh;
+        }
+        .modal-box {
+            background: #1e293b;
+            border: 1.5px solid #38bdf8;
+            width: 92%;
+            max-width: 500px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.65);
+            color: #f8fafc;
+        }
+        .cmd-input-wrap {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid #334155;
+            gap: 10px;
+        }
+        .cmd-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 15px;
+        }
+        .cmd-list { max-height: 300px; overflow-y: auto; padding: 8px; }
+        .cmd-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #cbd5e1;
+            text-decoration: none;
+        }
+        .cmd-item:hover { background: #0284c7; color: #ffffff; }
+
+        /* MOD GELAP */
+        body.dark-mode { background-color: #0f172a !important; color: #f1f5f9 !important; }
+        body.dark-mode .main-content { background-color: #1e293b !important; color: #f1f5f9 !important; box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
+        body.dark-mode .main-content h2 { color: #38bdf8 !important; border-bottom-color: #38bdf8 !important; }
+        body.dark-mode .main-content p { color: #cbd5e1 !important; }
+        body.dark-mode .personal-analytics-box { background: #0f172a !important; border-color: #38bdf8 !important; }
+        body.dark-mode .school-badge { background: #1e293b !important; color: #38bdf8 !important; }
+        body.dark-mode .stat-purple { background: #1e293b !important; border-color: #c084fc; color: #c084fc; }
+        body.dark-mode .stat-blue { background: #1e293b !important; border-color: #38bdf8; color: #38bdf8; }
+        body.dark-mode .stat-green { background: #1e293b !important; border-color: #2ecc71; color: #2ecc71; }
+        body.dark-mode .stat-rose { background: #1e293b !important; border-color: #fb7185; color: #fb7185; }
+        body.dark-mode .stat-yellow { background: #1e293b !important; border-color: #f1c40f; color: #f1c40f; }
+        body.dark-mode .progress-track { background: #334155 !important; }
+        body.dark-mode .bab-done { background: #14532d !important; border-color: #22c55e !important; color: #86efac !important; }
+        body.dark-mode .bab-locked { background: #1e293b !important; border-color: #475569 !important; color: #94a3b8 !important; }
+        body.dark-mode .podium-1 { background: linear-gradient(145deg, #292008, #42330a) !important; }
+        body.dark-mode .podium-2 { background: linear-gradient(145deg, #1e293b, #334155) !important; }
+        body.dark-mode .podium-3 { background: linear-gradient(145deg, #2c180a, #43220d) !important; }
+        body.dark-mode .podium-name { color: #f8fafc !important; }
+        body.dark-mode .select-filter-bab, body.dark-mode .input-search-saintis { background-color: #0f172a !important; color: #38bdf8 !important; border-color: #38bdf8 !important; }
+        body.dark-mode .btn-export-csv { background-color: #064e3b !important; color: #6ee7b7 !important; border-color: #10b981 !important; }
+        body.dark-mode .jadual-prestasi { background-color: #0f172a !important; }
+        body.dark-mode .jadual-prestasi th { background-color: #0f172a !important; border-bottom-color: #38bdf8 !important; color: #38bdf8 !important; }
+        body.dark-mode .jadual-escape th { background-color: #4c0519 !important; border-bottom-color: #fb7185 !important; color: #fda4af !important; }
+        body.dark-mode .jadual-prestasi td { border-bottom-color: #334155 !important; color: #e2e8f0 !important; }
+        body.dark-mode .jadual-prestasi tr:hover { background-color: #1e293b !important; }
+        body.dark-mode .my-row-highlight { background-color: #172554 !important; }
+        body.dark-mode .player-name { color: #38bdf8 !important; }
+        body.dark-mode .badge-chapter { background: #1e293b !important; border-color: #38bdf8 !important; color: #38bdf8 !important; }
+        body.dark-mode .badge-escape { background: #2c0b16 !important; border-color: #fb7185 !important; color: #fda4af !important; }
+        body.dark-mode .user-dropdown-menu { background: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .user-dropdown-item { color: #f1f5f9 !important; border-color: #334155 !important; }
+
+        /* MOD HACKER / MATRIX TERMINAL */
+        body.matrix-mode {
+            background-color: #020602 !important;
+            color: #00ff41 !important;
+            font-family: 'Courier New', Courier, monospace !important;
+        }
+        body.matrix-mode .header-container {
+            background: linear-gradient(135deg, rgba(0,26,0,0.92), rgba(0,59,0,0.92), rgba(2,6,2,0.95)) !important;
+            border-bottom: 2px solid #00ff41 !important;
+        }
+        body.matrix-mode .navbar {
+            background-color: rgba(4, 18, 4, 0.95) !important;
+            border-bottom: 1px solid #00ff41 !important;
+        }
+        body.matrix-mode .navbar > a.active-link,
+        body.matrix-mode .navbar > a:hover,
+        body.matrix-mode .btn-nav-action:hover {
+            background-color: #00ff41 !important;
+            color: #020602 !important;
+        }
+        body.matrix-mode .main-content,
+        body.matrix-mode .personal-analytics-box,
+        body.matrix-mode .stat-card,
+        body.matrix-mode .podium-card,
+        body.matrix-mode .jadual-prestasi,
+        body.matrix-mode .jadual-prestasi th,
+        body.matrix-mode .user-dropdown-menu {
+            background: rgba(4, 15, 4, 0.9) !important;
+            border-color: #00ff41 !important;
+            color: #00ff41 !important;
+        }
+        body.matrix-mode h2, body.matrix-mode p, body.matrix-mode span, body.matrix-mode td, body.matrix-mode th, body.matrix-mode .podium-name {
+            color: #00ff41 !important;
+        }
+
+        .footer { position: relative; z-index: 2; background-color: #0d1b2a; color: #ccc; text-align: center; padding: 25px 20px; font-size: 14px; line-height: 1.6; margin-top: auto; }
+        .footer span.highlight { color: #00c6ff; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- KANVAS HUJAN KOD MATRIX -->
+    <canvas id="zepMatrixRain" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:1; pointer-events:none; opacity:0.38; display:none;"></canvas>
+
+    <!-- Header -->
+    <div class="header-container">
+        <img src="logosains.png" style="height: 85px; width: auto;" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2083/2083285.png'; this.style.height='75px';">
+        <h1>SCIENTIST PERFORMANCE & ANALYTICS</h1>
+    </div>
+
+    <!-- Navigation Bar (Selaras dengan Profile.html & Index.html) -->
+    <nav class="navbar">
+        <a href="index.html">🏠 Main Lab</a>
+        <a href="profile.html">👨‍🔬 My Profile</a>
+        <a href="interactive_lab.html">🚀 Interactive Lab</a>
+        <a href="performance.html" class="active-link">🏆 Analytics</a>
+
+        <button onclick="bukaCommandPalette()" class="btn-nav-action" title="Pintasan Pantas">
+            ⚡ Arahan <span class="kbd-badge">Ctrl+K</span>
+        </button>
+
+        <button onclick="aktifkanModHacker(true)" class="btn-nav-action btn-matrix-trigger" id="btnMatrixMode" title="Aktifkan Mod Terminal Matrix">
+            🟢 Matrix
+        </button>
+
+        <button onclick="toggleDarkMode()" class="btn-nav-action" id="btnDarkMode">🌙 Gelap</button>
+
+        <button onclick="toggleAudioFX()" class="btn-nav-action" id="btnAudioFX" title="Kesan Bunyi Synth">🔊 SFX</button>
+
+        <div class="nav-right-user">
+            <button class="avatar-btn-pandai" onclick="toggleUserDropdown(event)">
+                <span id="navUserAvatar">🔬</span>
+                <span id="navUserName">Saintis ZEP</span>
+                <span style="font-size: 10px;">▼</span>
+            </button>
+
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+                <div class="user-dropdown-header">
+                    <div style="font-weight: bold; font-size: 14px;" id="dropHeaderNama">SAINTIS ZEP</div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-top: 2px;" id="dropHeaderXP">⭐ 0 XP</div>
+                </div>
+                <a href="profile.html" class="user-dropdown-item"><span>👨‍🔬</span> Profil Saintis Saya</a>
+                <a href="sci_escape.html" class="user-dropdown-item"><span>👑</span> Sci-Escape Mega Lab</a>
+                <a href="videos.html" class="user-dropdown-item"><span>📹</span> Student Videos</a>
+                <a href="contact.html" class="user-dropdown-item"><span>💬</span> Ask a Teacher</a>
+                <div style="height:1px; background:#e2e8f0; margin:4px 0;"></div>
+                <div id="bekasStatusAuth">
+                    <a href="login.html" class="user-dropdown-item" style="color: #28a745 !important;">
+                        <span>🔑</span> Log Masuk / Daftar Akaun
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Kandungan Analitik -->
+    <div class="main-content">
+        
+        <!-- BAHAGIAN 1: ANALISIS PRESTASI PERIBADI -->
+        <h2 style="color: #1a2a6c; border-bottom: 2px solid #00c6ff; padding-bottom: 10px; display: inline-block; margin-top: 0;">
+            📈 My Personal Analytics (<span id="namaProfilLogin" style="color: #0052D4;">Loading...</span>)
+        </h2>
+        <p style="color: #555; font-size: 15px; margin-bottom: 15px;">Review your personal statistics, syllabus mastery, and accumulated lab rankings.</p>
+        
+        <div class="personal-analytics-box" id="analisisPeribadiCard">
+            <p style="color: #666;">Synchronizing personal statistics from Firebase cloud...</p>
+        </div>
+
+        <!-- BAHAGIAN 2: PAPAN JUARA GLOBAL ZEP -->
+        <h2 style="color: #1a2a6c; border-bottom: 2px solid #00c6ff; padding-bottom: 10px; display: inline-block;">
+            🏆 Top Scientists Leaderboard (ZEP Missions)
+        </h2>
+
+        <div class="filter-bar">
+            <p style="color: #555; font-size: 15px; margin: 0;">Fastest scientists who conquered the ZEP Science missions!</p>
+            <div class="filter-controls">
+                <input type="text" id="cariSaintis" onkeyup="paparPapanJuara()" placeholder="🔍 Cari nama saintis..." class="input-search-saintis">
+                <select id="filterBab" onchange="paparPapanJuara()" class="select-filter-bab">
+                    <option value="ALL">🌐 All Chapters</option>
+                    <option value="1">Chapter 1: Biodiversity</option>
+                    <option value="2">Chapter 2: Ecosystem</option>
+                    <option value="3">Chapter 3: Nutrition</option>
+                    <option value="4">Chapter 4: Human Health</option>
+                    <option value="5">Chapter 5: Water & Solution</option>
+                    <option value="6">Chapter 6: Acids & Alkalis</option>
+                    <option value="7">Chapter 7: Work, Energy & Power</option>
+                    <option value="8">Chapter 8: Rate of Reaction</option>
+                    <option value="9">Chapter 9: Speed & Acceleration</option>
+                    <option value="10">Chapter 10: Sound Waves</option>
+                    <option value="11">Chapter 11: Stars & Galaxies</option>
+                    <option value="12">Chapter 12: The Solar System</option>
+                    <option value="13">Chapter 13: Meteoroid, Asteroid & Comet</option>
+                </select>
+                <button class="btn-export-csv" onclick="eksportLeaderboardCSV()" title="Muat turun papan juara dalam format CSV">📥 CSV</button>
+            </div>
+        </div>
+
+        <div id="podiumJuara" class="podium-container" style="display: none;"></div>
+
+        <div class="jadual-kontena" style="margin-bottom: 45px;">
+            <table class="jadual-prestasi">
+                <thead>
+                    <tr>
+                        <th width="10%">Rank</th>
+                        <th width="35%">Scientist Name</th>
+                        <th width="15%">Chapter Level</th>
+                        <th width="20%">Record Time</th>
+                        <th width="20%">Badge Awarded</th>
+                    </tr>
+                </thead>
+                <tbody id="badanJadual">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px;">
+                            ⏳ Downloading global scientist records from Firebase...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- BAHAGIAN 3: PAPAN JUARA PALING TERPANTAS SCI-ESCAPE ROOM -->
+        <h2 style="color: #881337; border-bottom: 2px solid #fb7185; padding-bottom: 10px; display: inline-block;">
+            🔐 Sci-Escape Room: Fastest Escapers
+        </h2>
+
+        <div class="filter-bar">
+            <p style="color: #555; font-size: 15px; margin: 0;">Saintis terpantas yang berjaya memecahkan kod dan meloloskan diri dari Sci-Escape Room!</p>
+            <div class="filter-controls">
+                <input type="text" id="cariEscapeSaintis" onkeyup="paparPapanJuaraEscape()" placeholder="🔍 Cari nama escaper..." class="input-search-saintis">
+                <select id="filterBilikEscape" onchange="paparPapanJuaraEscape()" class="select-filter-bab">
+                    <option value="ALL">🌐 All Escape Rooms (Best Overall)</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="podiumEscape" class="podium-container" style="display: none;"></div>
+
+        <div class="jadual-kontena">
+            <table class="jadual-prestasi jadual-escape">
+                <thead>
+                    <tr>
+                        <th width="10%">Rank</th>
+                        <th width="35%">Scientist Name</th>
+                        <th width="20%">Escape Room / Level</th>
+                        <th width="15%">Escape Time</th>
+                        <th width="20%">Escape Title</th>
+                    </tr>
+                </thead>
+                <tbody id="badanJadualEscape">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px;">
+                            ⏳ Memuat turun rekod terpantas Sci-Escape Room...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- COMMAND PALETTE (Ctrl + K) -->
+    <div class="modal-overlay" id="modalCmdPalette" onclick="if(event.target.id==='modalCmdPalette') tutupCommandPalette()">
+        <div class="modal-box">
+            <div class="cmd-input-wrap">
+                <span>⚡</span>
+                <input type="text" id="inputCmdSearch" class="cmd-input" onkeyup="tapisArahanCmd()" placeholder="Taip arahan (cth: Main Lab, Profile, Sci-Escape, Matrix)...">
+                <span class="kbd-badge">ESC</span>
+            </div>
+            <div class="cmd-list" id="senaraiArahanCmd"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="visitor-counter">📡 Lab Visitor Count: Active</div>
+        <br>All rights reserved © <span class="highlight">Virtual Lab 2026 [PRO EDITION]</span>
+    </footer>
+
+    <script>
+        function toggleUserDropdown(e) {
+            e.stopPropagation();
+            mainBunyiKlik();
+            document.getElementById("userDropdownMenu").classList.toggle("show");
+        }
+        document.addEventListener("click", () => {
+            const menu = document.getElementById("userDropdownMenu");
+            if (menu) menu.classList.remove("show");
+        });
+
+        const senaraiPintasan = [
+            { label: "🏠 Kembali ke Main Lab", url: "index.html" },
+            { label: "👨‍🔬 Buka Profil Saintis Saya", url: "profile.html" },
+            { label: "👑 Main Sci-Escape Mega Lab", url: "sci_escape.html" },
+            { label: "🚀 Main ZEP Interactive Lab", url: "interactive_lab.html" },
+            { label: "🟢 Togol Mod Hacker Matrix", aksi: () => { tutupCommandPalette(); aktifkanModHacker(true); } },
+            { label: "🌙 Togol Mod Gelap / Terang", aksi: () => { tutupCommandPalette(); toggleDarkMode(); } }
+        ];
+
+        function bukaCommandPalette() {
+            mainBunyiKlik();
+            document.getElementById("modalCmdPalette").style.display = "flex";
+            const input = document.getElementById("inputCmdSearch");
+            input.value = "";
+            tapisArahanCmd();
+            setTimeout(() => input.focus(), 50);
+        }
+
+        function tutupCommandPalette() {
+            document.getElementById("modalCmdPalette").style.display = "none";
+        }
+
+        function tapisArahanCmd() {
+            const q = document.getElementById("inputCmdSearch").value.toLowerCase();
+            const bekas = document.getElementById("senaraiArahanCmd");
+            bekas.innerHTML = "";
+            senaraiPintasan.filter(i => i.label.toLowerCase().includes(q)).forEach(i => {
+                const el = document.createElement(i.url ? "a" : "div");
+                el.className = "cmd-item";
+                if (i.url) el.href = i.url;
+                el.innerHTML = `<span>${i.label}</span><span style="font-size:11px; opacity:0.7;">↵</span>`;
+                if (i.aksi) el.onclick = i.aksi;
+                bekas.appendChild(el);
+            });
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+                e.preventDefault();
+                bukaCommandPalette();
+            } else if (e.key === "Escape") {
+                tutupCommandPalette();
+            }
+        });
+
+        let intervalMatrix = null;
+        function aktifkanModHacker(togol = true) {
+            if (togol) {
+                mainBunyiKlik();
+                document.body.classList.toggle("matrix-mode");
+            } else {
+                document.body.classList.add("matrix-mode");
+            }
+            const aktif = document.body.classList.contains("matrix-mode");
+            localStorage.setItem("zep_matrix", aktif ? "on" : "off");
+            const kanvas = document.getElementById("zepMatrixRain");
+            if (aktif) {
+                kanvas.style.display = "block";
+                mulaHujanMatrix(kanvas);
+            } else {
+                kanvas.style.display = "none";
+                if (intervalMatrix) clearInterval(intervalMatrix);
+            }
+        }
+
+        function mulaHujanMatrix(kanvas) {
+            if (intervalMatrix) clearInterval(intervalMatrix);
+            const ctx = kanvas.getContext("2d");
+            kanvas.width = window.innerWidth;
+            kanvas.height = window.innerHeight;
+            const aksara = "01H2OCO2DNAZEP9876543210ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const saizFon = 14;
+            let lajur = Math.floor(kanvas.width / saizFon);
+            let titisan = Array(lajur).fill(1);
+
+            intervalMatrix = setInterval(() => {
+                if (kanvas.width !== window.innerWidth || kanvas.height !== window.innerHeight) {
+                    kanvas.width = window.innerWidth;
+                    kanvas.height = window.innerHeight;
+                    lajur = Math.floor(kanvas.width / saizFon);
+                    titisan = Array(lajur).fill(1);
+                }
+                ctx.fillStyle = "rgba(2, 6, 2, 0.08)";
+                ctx.fillRect(0, 0, kanvas.width, kanvas.height);
+                ctx.fillStyle = "#00ff41";
+                ctx.font = saizFon + "px monospace";
+                for (let i = 0; i < titisan.length; i++) {
+                    const teks = aksara[Math.floor(Math.random() * aksara.length)];
+                    ctx.fillText(teks, i * saizFon, titisan[i] * saizFon);
+                    if (titisan[i] * saizFon > kanvas.height && Math.random() > 0.975) titisan[i] = 0;
+                    titisan[i]++;
+                }
+            }, 45);
+        }
+    </script>
+</body>
+</html>

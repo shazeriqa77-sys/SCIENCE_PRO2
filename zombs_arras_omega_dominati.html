@@ -1,0 +1,2128 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZOMBS × ARRAS: OMEGA EDU-DOMINATION v2.0 PRO</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; user-select: none; }
+    body { background: #070b16; color: #f8fafc; overflow: hidden; width: 100vw; height: 100vh; }
+    #gameCanvas { display: block; width: 100vw; height: 100vh; cursor: crosshair; }
+
+    /* MODAL & FORM */
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(6px); z-index: 50; align-items: center; justify-content: center; padding: 14px;
+    }
+    .modal-card {
+      background: #0f172a; border: 2px solid #38bdf8; border-radius: 16px; padding: 18px 20px;
+      width: 100%; max-width: 650px; max-height: 92vh; overflow-y: auto;
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.7); color: #f8fafc; text-align: center;
+    }
+    .setup-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+      gap: 10px; text-align: left; margin-top: 10px;
+    }
+    .form-label { display: block; font-size: 11.5px; font-weight: 800; color: #94a3b8; margin-bottom: 4px; }
+    .input-field {
+      width: 100%; background: #1e293b; border: 1.5px solid #334155; border-radius: 8px;
+      padding: 8px 10px; color: #f8fafc; font-size: 12.5px; outline: none; user-select: text;
+    }
+    .input-field:focus { border-color: #38bdf8; }
+    .primary-btn {
+      background: linear-gradient(135deg, #2563eb, #0ea5e9); color: #fff; border: none;
+      border-radius: 10px; padding: 10px 18px; font-size: 13px; font-weight: 900;
+      cursor: pointer; box-shadow: 0 4px 16px rgba(14, 165, 233, 0.45); transition: transform 0.12s;
+    }
+    .primary-btn:hover { transform: translateY(-1px); }
+    .secondary-btn {
+      background: linear-gradient(135deg, #059669, #10b981); color: #fff; border: none;
+      border-radius: 10px; padding: 10px 16px; font-size: 12.5px; font-weight: 800; cursor: pointer;
+    }
+
+    /* TOP HUD */
+    .top-hud {
+      position: fixed; top: 10px; left: 10px; right: 10px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 10px; pointer-events: none; z-index: 20; flex-wrap: wrap;
+    }
+    .panel {
+      background: rgba(15, 23, 42, 0.88); border: 1.5px solid #334155; border-radius: 12px;
+      padding: 8px 12px; backdrop-filter: blur(6px); pointer-events: auto;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+    }
+    .title-badge { font-size: 12.5px; font-weight: 900; color: #38bdf8; letter-spacing: 0.4px; }
+    .student-meta { font-size: 11px; color: #cbd5e1; margin-top: 2px; font-weight: 600; }
+    .res-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; font-size: 12px; font-weight: 800; }
+    .c-blue { color: #38bdf8; }
+    .c-red { color: #fb7185; }
+    .c-wood { color: #4ade80; }
+    .c-stone { color: #cbd5e1; }
+    .c-xp { color: #facc15; }
+
+    .center-hud { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .center-top-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .time-pill { padding: 4px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 900; }
+    .day-mode { background: rgba(250, 204, 21, 0.18); border: 1px solid #facc15; color: #fde047; }
+    .night-mode { background: rgba(168, 85, 247, 0.22); border: 1px solid #c084fc; color: #e9d5ff; }
+    .series-pill {
+      padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 900;
+      background: rgba(30, 41, 59, 0.92); border: 1px solid #475569; color: #f8fafc;
+    }
+    .dom-indicators { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .dom-dot {
+      font-size: 10.5px; font-weight: 800; padding: 3px 8px; border-radius: 6px;
+      background: #1e293b; border: 1px solid #475569; color: #cbd5e1;
+    }
+    .dom-blue { background: rgba(14, 165, 233, 0.25); border-color: #38bdf8; color: #7dd3fc; }
+    .dom-red { background: rgba(244, 63, 94, 0.25); border-color: #fb7185; color: #fda4af; }
+
+    .top-right-col { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; pointer-events: none; }
+    .edu-bar { display: flex; gap: 6px; margin-top: 6px; align-items: center; }
+    .subj-select {
+      background: #1e293b; color: #f8fafc; border: 1px solid #475569;
+      border-radius: 7px; padding: 5px 7px; font-size: 11.5px; font-weight: 700;
+    }
+    .q-cta-btn {
+      background: linear-gradient(135deg, #eab308, #f59e0b); color: #0f172a; border: none;
+      border-radius: 7px; padding: 5px 10px; font-size: 11.5px; font-weight: 900; cursor: pointer;
+    }
+
+    /* LEADERBOARD */
+    .lb-panel { min-width: 225px; font-size: 11px; }
+    .lb-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-weight: 900; color: #facc15; margin-bottom: 4px;
+    }
+    .lb-toggle {
+      background: #1e293b; color: #cbd5e1; border: 1px solid #475569; border-radius: 5px;
+      width: 20px; height: 20px; cursor: pointer; font-weight: 900; line-height: 1;
+    }
+    .lb-list { display: flex; flex-direction: column; gap: 3px; }
+    .lb-row {
+      display: flex; justify-content: space-between; gap: 8px; padding: 3px 6px;
+      border-radius: 5px; background: rgba(30, 41, 59, 0.72); color: #cbd5e1;
+    }
+    .lb-row.me {
+      background: rgba(14, 165, 233, 0.22); border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #f8fafc; font-weight: 800;
+    }
+    .lb-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
+    .lb-score { color: #fde047; font-weight: 700; white-space: nowrap; }
+
+    /* BANNER & EVOLUTION */
+    #eventBanner {
+      display: none; position: fixed; top: 108px; left: 50%; transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.94); border: 2px solid #fef08a; color: #fef08a;
+      padding: 8px 16px; border-radius: 999px; font-size: 12.5px; font-weight: 800;
+      z-index: 30; pointer-events: none; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.55);
+      text-align: center; max-width: 90vw;
+    }
+    #evoPanel {
+      display: none; position: fixed; top: 150px; left: 12px;
+      flex-direction: column; gap: 6px; z-index: 25; border-color: #facc15;
+    }
+    .evo-title { font-size: 11.5px; font-weight: 900; color: #facc15; }
+    .evo-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+    .evo-btn {
+      background: #1e293b; color: #38bdf8; border: 1.5px solid #38bdf8;
+      border-radius: 8px; padding: 6px 10px; font-size: 11.5px; font-weight: 800; cursor: pointer;
+    }
+
+    /* BOTTOM HUD */
+    .bottom-hud {
+      position: fixed; bottom: 10px; left: 10px; right: 190px;
+      display: flex; flex-direction: column; gap: 5px; pointer-events: none; z-index: 20;
+    }
+    .chat-feed { display: flex; flex-direction: column; gap: 3px; max-width: 390px; pointer-events: none; }
+    .chat-msg-item {
+      background: rgba(15, 23, 42, 0.88); border-left: 3px solid #38bdf8;
+      padding: 4px 8px; border-radius: 6px; font-size: 11.5px; color: #f8fafc;
+    }
+    .chat-bar, .stat-bar, .build-bar, .util-row {
+      display: flex; gap: 5px; flex-wrap: wrap; align-items: center; pointer-events: auto;
+    }
+    .chat-pill {
+      background: rgba(30, 41, 59, 0.9); color: #e2e8f0; border: 1px solid #475569;
+      border-radius: 999px; padding: 4px 9px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .chat-input {
+      background: rgba(15, 23, 42, 0.92); color: #f8fafc; border: 1px solid #475569;
+      border-radius: 999px; padding: 4px 10px; font-size: 11px; width: 145px; outline: none; user-select: text;
+    }
+    .stat-pts-badge {
+      background: rgba(250, 204, 21, 0.2); border: 1px solid #facc15; color: #fde047;
+      padding: 4px 9px; border-radius: 7px; font-size: 11px; font-weight: 900;
+    }
+    .stat-btn {
+      background: rgba(15, 23, 42, 0.88); color: #94a3b8; border: 1px solid #334155;
+      border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 800; cursor: pointer;
+    }
+    .stat-btn.ready { border-color: #facc15; color: #fef08a; background: rgba(234, 179, 8, 0.16); }
+    .stat-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .build-btn {
+      background: rgba(15, 23, 42, 0.9); color: #cbd5e1; border: 1.5px solid #334155;
+      border-radius: 8px; padding: 5px 9px; font-size: 11px; font-weight: 800; cursor: pointer;
+    }
+    .build-btn.active { background: rgba(14, 165, 233, 0.28); border-color: #38bdf8; color: #fff; }
+    .util-btn {
+      background: rgba(30, 41, 59, 0.9); color: #cbd5e1; border: 1px solid #475569;
+      border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .util-btn.on { background: rgba(34, 197, 94, 0.22); border-color: #4ade80; color: #86efac; }
+    .util-btn.warn { background: rgba(244, 63, 94, 0.25); border-color: #fb7185; color: #fda4af; }
+
+    /* QUIZ & REPORT */
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .subj-tag {
+      background: rgba(56, 189, 248, 0.2); border: 1px solid #38bdf8; color: #7dd3fc;
+      padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 900;
+    }
+    .diff-tag { padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 900; }
+    .diff-asas { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid #4ade80; }
+    .diff-sederhana { background: rgba(250, 204, 21, 0.2); color: #fde047; border: 1px solid #facc15; }
+    .diff-kbat { background: rgba(244, 63, 94, 0.22); color: #fda4af; border: 1px solid #fb7185; }
+    .lifeline-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+    .life-btn {
+      background: #1e293b; color: #fde047; border: 1px solid #facc15;
+      border-radius: 7px; padding: 4px 9px; font-size: 11px; font-weight: 800; cursor: pointer;
+    }
+    .life-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .quiz-hint {
+      display: none; background: rgba(250, 204, 21, 0.14); border-left: 3px solid #facc15;
+      padding: 8px 10px; border-radius: 6px; font-size: 12px; color: #fef08a; margin-bottom: 8px; text-align: left;
+    }
+    .quiz-q {
+      font-size: 14.5px; font-weight: 800; color: #f8fafc; line-height: 1.45;
+      margin-bottom: 10px; text-align: left; white-space: pre-line;
+    }
+    .quiz-opts { display: flex; flex-direction: column; gap: 7px; }
+    .quiz-opt {
+      background: #1e293b; color: #f8fafc; border: 1.5px solid #334155; border-radius: 9px;
+      padding: 9px 12px; font-size: 13px; font-weight: 700; text-align: left; cursor: pointer; transition: 0.12s;
+    }
+    .quiz-opt:hover:not(:disabled) { border-color: #38bdf8; background: #26354d; }
+    .quiz-opt.correct { background: rgba(22, 163, 74, 0.35); border-color: #4ade80; color: #bbf7d0; }
+    .quiz-opt.wrong { background: rgba(225, 29, 72, 0.35); border-color: #fb7185; color: #fecdd3; }
+    .quiz-opt.eliminated { opacity: 0.25; text-decoration: line-through; pointer-events: none; }
+    .quiz-explain {
+      display: none; margin-top: 10px; background: rgba(14, 165, 233, 0.15); border: 1px solid #38bdf8;
+      border-radius: 9px; padding: 9px 11px; font-size: 12px; color: #e0f2fe; text-align: left; line-height: 1.45;
+    }
+    .auto-reset-pill {
+      display: inline-block; background: rgba(250, 204, 21, 0.18); border: 1px solid #facc15;
+      color: #fde047; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 800; margin-top: 8px;
+    }
+    .team-switch-box { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 8px 10px; margin: 8px 0; }
+    .team-switch-row { display: flex; gap: 8px; justify-content: center; margin-top: 6px; flex-wrap: wrap; }
+    .team-choice-btn {
+      background: #0f172a; color: #cbd5e1; border: 1.5px solid #475569;
+      border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 800; cursor: pointer;
+    }
+    .team-choice-btn.active-blue { border-color: #38bdf8; background: rgba(14, 165, 233, 0.25); color: #7dd3fc; }
+    .team-choice-btn.active-red { border-color: #fb7185; background: rgba(244, 63, 94, 0.25); color: #fda4af; }
+    .report-box {
+      background: #1e293b; border: 1px solid #334155; border-radius: 10px;
+      padding: 10px 12px; margin: 10px 0; text-align: left; font-size: 12px; color: #e2e8f0;
+    }
+    .bar-row { margin-top: 6px; }
+    .bar-label { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; margin-bottom: 2px; }
+    .bar-track { width: 100%; height: 8px; background: #0f172a; border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 999px; transition: width 0.3s; }
+  </style>
+
+  <!-- FIREBASE REALTIME MULTIPLAYER (PILIHAN: MASUKKAN KONFIGURASI FIREBASE ANDA UNTUK ONLINE GLOBAL) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getDatabase, ref, set, update, get, remove, onValue, onDisconnect } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getAuth, signInAnonymously, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // Gantikan nilai di bawah dengan firebaseConfig projek anda jika ingin mengaktifkan bilik global masa nyata:
+    const firebaseConfig = {
+      apiKey: "AIzaSyBAtbX6wmdNwmXkgUvewnfRRXRTfyq5IZ8",
+      authDomain: "jejak-sejarah-tingkatan-2.firebaseapp.com",
+      databaseURL: "https://jejak-sejarah-tingkatan-2-default-rtdb.firebaseio.com",
+      projectId: "jejak-sejarah-tingkatan-2",
+      storageBucket: "jejak-sejarah-tingkatan-2.firebasestorage.app",
+      messagingSenderId: "92872994798",
+      appId: "1:92872994798:web:9c205538a5eb8f388e68ff",
+      measurementId: "G-8RZ21D4FXY"
+    };
+
+    window.fbReady = false;
+    window.signedInAccount = null;
+    try {
+      const savedAcc = localStorage.getItem('omega_edu_signin_acc');
+      if (savedAcc) window.signedInAccount = JSON.parse(savedAcc);
+    } catch (e) {}
+
+    window.quickSignIn = function() {
+      const nameInp = document.getElementById('inpStudentName');
+      const clsInp = document.getElementById('inpStudentClass');
+      const statusEl = document.getElementById('authStatusText');
+      const cleanName = (nameInp && nameInp.value.trim()) ? nameInp.value.trim() : 'Ejen Ilmu';
+      const cleanClass = (clsInp && clsInp.value.trim()) ? clsInp.value.trim() : 'Kelas Bestari';
+      const codeNum = Math.floor(1000 + Math.random() * 9000);
+      window.signedInAccount = {
+        method: 'ID Murid',
+        name: cleanName,
+        kelas: cleanClass,
+        idTag: `EDU-${codeNum}`
+      };
+      try { localStorage.setItem('omega_edu_signin_acc', JSON.stringify(window.signedInAccount)); } catch (e) {}
+      if (statusEl) statusEl.textContent = `✅ Sign In Aktif: ${cleanName} (${window.signedInAccount.idTag})`;
+    };
+
+    window.googleSignIn = async function() {
+      const statusEl = document.getElementById('authStatusText');
+      if (!window.fbReady || !window.fbAuth) {
+        const nameInp = document.getElementById('inpStudentName');
+        const currentName = (nameInp && nameInp.value.trim()) || 'Ejen Ilmu';
+        window.signedInAccount = {
+          method: 'Google Lokal',
+          name: currentName,
+          email: 'mod.lokal@arena-edu',
+          idTag: 'GOOG-LOKAL'
+        };
+        try { localStorage.setItem('omega_edu_signin_acc', JSON.stringify(window.signedInAccount)); } catch (e) {}
+        if (statusEl) statusEl.textContent = `✅ Sign In (${currentName}) — Mod Lokal Aktif (Isi firebaseConfig untuk Cloud)`;
+        return;
+      }
+      try {
+        const provider = new GoogleAuthProvider();
+        const res = await signInWithPopup(window.fbAuth, provider);
+        if (res.user) {
+          if (res.user.displayName) {
+            document.getElementById('inpStudentName').value = res.user.displayName;
+          }
+          window.signedInAccount = {
+            method: 'Google',
+            name: res.user.displayName || document.getElementById('inpStudentName').value.trim() || 'Ejen Ilmu',
+            email: res.user.email || '',
+            uid: res.user.uid
+          };
+          try { localStorage.setItem('omega_edu_signin_acc', JSON.stringify(window.signedInAccount)); } catch (e) {}
+          if (statusEl) statusEl.textContent = `✅ Log Masuk Google: ${res.user.email || res.user.displayName}`;
+        }
+      } catch (err) {
+        if (statusEl) statusEl.textContent = `⚠️ Log Masuk Google dibatalkan / gagal.`;
+      }
+    };
+
+    if (firebaseConfig.apiKey && firebaseConfig.databaseURL) {
+      try {
+        const app = initializeApp(firebaseConfig);
+        window.fbDb = getDatabase(app);
+        window.fbAuth = getAuth(app);
+        window.fbRef = ref;
+        window.fbSet = set;
+        window.fbUpdate = update;
+        window.fbGet = get;
+        window.fbRemove = remove;
+        window.fbOnValue = onValue;
+        window.fbOnDisconnect = onDisconnect;
+        window.fbSignInAnon = () => signInAnonymously(window.fbAuth);
+        window.fbReady = true;
+        onAuthStateChanged(window.fbAuth, user => {
+          const statusEl = document.getElementById('authStatusText');
+          if (user && statusEl) {
+            statusEl.textContent = user.isAnonymous
+              ? "🟢 Sambungan Global Sedia (Mod Tetamu)"
+              : `🟢 Log Masuk: ${user.displayName || user.email}`;
+          }
+        });
+      } catch (e) {
+        console.warn("Firebase init skipped:", e);
+      }
+    }
+  </script>
+</head>
+<body>
+
+<!-- MODAL PENDAFTARAN & TETAPAN MISI -->
+<div class="modal-bg" id="setupModal" style="display:flex;">
+  <div class="modal-card">
+    <div style="font-size:11px; font-weight:900; color:#38bdf8; letter-spacing:1px;">⚔️ ARENA PEMBELAJARAN BERPASUKAN</div>
+    <h2 style="color:#facc15; margin:4px 0; font-size:19px;">ZOMBS × ARRAS: OMEGA EDU-DOMINATION v2.0</h2>
+    <p style="font-size:12px; color:#cbd5e1;">Bina kubu pertahanan, tawan 4 Orb Dominasi dengan menjawab kuiz KSSR/KSSM, dan musnahkan Teras lawan!</p>
+
+    <div style="margin-top:8px; display:flex; gap:8px; justify-content:center; align-items:center; flex-wrap:wrap; background:#1e293b; padding:8px 10px; border-radius:10px; border:1px solid #334155;">
+      <button type="button" class="util-btn on" onclick="googleSignIn()">🔐 Sign In dengan Google</button>
+      <button type="button" class="util-btn" onclick="quickSignIn()">🪪 Sign In ID Murid</button>
+      <a href="login.html?next=zombs_arras_omega_domination.html" class="util-btn" style="text-decoration:none; display:inline-flex; align-items:center;">🚪 Buka Halaman Login</a>
+      <span id="authStatusText" style="font-size:11px; color:#86efac; font-weight:700;">🟢 Mod Arena Sedia (Boleh terus main!)</span>
+    </div>
+
+    <div class="setup-grid">
+      <div>
+        <label class="form-label">👤 Nama Murid / Pemain</label>
+        <input id="inpStudentName" class="input-field" type="text" placeholder="Contoh: Fatimah Az-Zahra" value="Ejen Ilmu">
+      </div>
+      <div>
+        <label class="form-label">🏫 Kelas / Sekolah</label>
+        <input id="inpStudentClass" class="input-field" type="text" placeholder="Contoh: 1 Terbilang / 6 Bestari" value="Kelas Bestari">
+      </div>
+      <div>
+        <label class="form-label">⚔️ Pilihan Pasukan (Biru vs. Merah)</label>
+        <select id="inpTeamPref" class="input-field">
+          <option value="AUTO">⚖️ Auto-Team Seimbang (Rawak Biru / Merah)</option>
+          <option value="BLUE">🔵 Pilih Pasukan Biru (Kubu Barat)</option>
+          <option value="RED">🔴 Pilih Pasukan Merah (Kubu Timur)</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">✨ Lencana Aura Identiti</label>
+        <select id="inpAuraBadge" class="input-field">
+          <option value="#facc15">👑 Aura Emas Diraja</option>
+          <option value="#4ade80">💎 Aura Hijau Zamrud</option>
+          <option value="#c084fc">🔮 Aura Ungu Nebula</option>
+          <option value="#38bdf8">⚡ Aura Siber Cyan</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">📚 Tahap Kurikulum</label>
+        <select id="inpLevelFilter" class="input-field">
+          <option value="ALL">🌐 Semua Tahap (KSSR + KSSM)</option>
+          <option value="KSSR">🎒 KSSR (Tahun 5 & 6 / UASA)</option>
+          <option value="KSSM">🎓 KSSM (Tingkatan 1 & 2)</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">🗣️ Bahasa Soalan</label>
+        <select id="inpLangMode" class="input-field">
+          <option value="BM">🇲🇾 Bahasa Melayu</option>
+          <option value="DLP">🌐 Dwibahasa (BM + DLP English)</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">🌐 Pelayan Global (Multiplayer)</label>
+        <select id="inpServerRegion" class="input-field">
+          <option value="GLOBAL_ASIA">🌏 Global Arena — Asia-Pasifik</option>
+          <option value="GLOBAL_OPEN">🌍 Global Arena — Dunia Terbuka</option>
+          <option value="PRIVATE_ROOM">🏫 Bilik Khas Kelas / Guru</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">🔑 Kod Bilik (Jika Bilik Khas)</label>
+        <input id="inpRoomCode" class="input-field" type="text" placeholder="Contoh: 2TERBILANG" value="GLOBAL01">
+      </div>
+    </div>
+
+    <div style="background:#1e293b; border-radius:10px; padding:9px; margin-top:10px; text-align:left; font-size:11px; color:#cbd5e1; line-height:1.45;">
+      <b>⚡ Kawalan & Taktik Arena:</b>
+      <br>• <b>WASD</b> Gerak | <b>Tetikus</b> Bidik & Tembak | <b>SPACE</b> Dash | <b>1–5</b> Bina Kubu | <b>6–9</b> Naik Taraf Tangki
+      <br>• <b>Klik Peta Mini (Kanan Bawah):</b> Hantar isyarat lokasi kecemasan kepada rakan sepasukan!
+    </div>
+
+    <div style="margin-top:12px;">
+      <button class="primary-btn" onclick="startMission()">🚀 MULA MISI PEMBELAJARAN</button>
+    </div>
+  </div>
+</div>
+
+<!-- HUD ATAS -->
+<div class="top-hud">
+  <div class="panel">
+    <div class="title-badge">🎓 OMEGA EDU-DOMINATION v2.0 PRO</div>
+    <div class="student-meta" id="hudStudentInfo">👤 Ejen Ilmu • Kelas Bestari • Pusingan #1</div>
+    <div class="student-meta" id="hudRoomStatus" style="color:#38bdf8;">🌐 Bilik: GLOBAL_ASIA • 🌍 1 Pemain Online</div>
+    <div class="res-row">
+      <span class="c-blue">🔵 TERAS: <span id="hudBlueCore">100</span>%</span>
+      <span class="c-red">🔴 TERAS: <span id="hudRedCore">100</span>%</span>
+      <span class="c-wood">🪵 <span id="hudWood">130</span></span>
+      <span class="c-stone">🪨 <span id="hudStone">110</span></span>
+      <span class="c-xp">⭐ LV.<span id="hudLvl">1</span> (<span id="hudClass">Basic</span>)</span>
+    </div>
+  </div>
+
+  <div class="panel center-hud">
+    <div class="center-top-row">
+      <div id="timeBadge" class="time-pill day-mode">☀️ SIANG • 35s</div>
+      <div id="seriesScoreBadge" class="series-pill">🏆 🔵 0 — 0 🔴</div>
+    </div>
+    <div class="dom-indicators">
+      <span class="dom-dot" id="dom0">⚪ ALPHA</span>
+      <span class="dom-dot" id="dom1">⚪ BETA</span>
+      <span class="dom-dot" id="dom2">⚪ GAMMA</span>
+      <span class="dom-dot" id="dom3">⚪ DELTA</span>
+    </div>
+  </div>
+
+  <div class="top-right-col">
+    <div class="panel" style="font-size:12px; font-weight:800;">
+      <div style="display:flex; justify-content:space-between; gap:10px; color:#fde047;">
+        <span>🧠 KUIZ: <span id="hudQuizScore">0/0</span></span>
+        <span>🔥 STREAK: x<span id="hudStreak">1</span></span>
+      </div>
+      <div class="edu-bar">
+        <select id="subjectSelect" class="subj-select" onchange="changeSubject()">
+          <option value="ALL">🌍 Semua Subjek</option>
+          <option value="SAINS">🔬 Sains</option>
+          <option value="MATH">📐 Matematik</option>
+          <option value="SEJARAH">🏛️ Sejarah</option>
+          <option value="ASK">💻 Asas Sains Komputer</option>
+          <option value="CUSTOM">✏️ Soalan Guru (Custom)</option>
+        </select>
+        <button class="q-cta-btn" id="btnMainQuiz" onclick="openQuiz('manual')">⚡ Kuiz [Q]</button>
+      </div>
+    </div>
+
+    <!-- PAPAN PENDAHULU KUIZ BILIK -->
+    <div class="panel lb-panel" id="roomLeaderboard">
+      <div class="lb-header">
+        <span>🏆 PENDAHULU KUIZ BILIK</span>
+        <button class="lb-toggle" id="btnToggleLb" onclick="toggleLeaderboard()">−</button>
+      </div>
+      <div class="lb-list" id="leaderboardList">
+        <div class="lb-row me">
+          <span class="lb-name">🥇 🔵 Ejen Ilmu</span>
+          <span class="lb-score">0/0 • Lv.1</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BANNER PENGUMUMAN -->
+<div id="eventBanner">⚡ Pengumuman Arena</div>
+
+<!-- PANEL EVOLUSI ARRAS.IO -->
+<div class="panel" id="evoPanel">
+  <div class="evo-title">⚡ EVOLUSI KELAS TERSEDIA!</div>
+  <div class="evo-grid" id="evoOptions"></div>
+</div>
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- BAR BINAAN, NAIK TARAF STATISTIK, CHAT PANTAS & UTILITI BAWAH -->
+<div class="bottom-hud">
+  <div class="chat-feed" id="chatFeed"></div>
+
+  <div class="chat-bar">
+    <button class="chat-pill" onclick="sendQuickChat('🛡️ Jaga Teras!')">🛡️ Jaga Teras!</button>
+    <button class="chat-pill" onclick="sendQuickChat('🔮 Serang Orb!')">🔮 Serang Orb!</button>
+    <button class="chat-pill" onclick="sendQuickChat('⚔️ Serang Teras Lawan!')">⚔️ Serang Teras Lawan!</button>
+    <button class="chat-pill" onclick="sendQuickChat('⚡ Jom Kuiz!')">⚡ Jom Kuiz!</button>
+    <button class="chat-pill" onclick="sendQuickChat('👍 Mantap!')">👍 Mantap!</button>
+    <input id="inpQuickChat" class="chat-input" type="text" maxlength="36" placeholder="💬 Mesej bilik..." onkeydown="if(event.key==='Enter'){event.preventDefault();sendCustomChat();}">
+    <button class="chat-pill" onclick="sendCustomChat()">Hantar</button>
+  </div>
+
+  <!-- BAR NAIK TARAF STATISTIK TANGKI [6]-[9] -->
+  <div class="stat-bar">
+    <span class="stat-pts-badge">✨ Mata Naik Taraf: <span id="hudUpgradePts">1</span></span>
+    <button class="stat-btn ready" id="statBtn0" onclick="upgradeStat(0)">🚀 [6] Laju Peluru (0/5)</button>
+    <button class="stat-btn ready" id="statBtn1" onclick="upgradeStat(1)">💥 [7] Kuasa Tembak (0/5)</button>
+    <button class="stat-btn ready" id="statBtn2" onclick="upgradeStat(2)">⚡ [8] Kadar Tembak (0/5)</button>
+    <button class="stat-btn ready" id="statBtn3" onclick="upgradeStat(3)">🛡️ [9] Nyawa & Gerak (0/5)</button>
+  </div>
+
+  <div class="build-bar">
+    <button class="build-btn active" id="mode0" onclick="setBuildMode(0)">🔫 [0] Tempur</button>
+    <button class="build-btn" id="mode1" onclick="setBuildMode(1)">🧱 [1] Dinding (15🪵 10🪨)</button>
+    <button class="build-btn" id="mode2" onclick="setBuildMode(2)">⛏️ [2] Lombong (30🪵 25🪨)</button>
+    <button class="build-btn" id="mode3" onclick="setBuildMode(3)">⚡ [3] Menara Laser (40🪵 35🪨)</button>
+    <button class="build-btn" id="mode4" onclick="setBuildMode(4)">❄️ [4] Menara Krio (45🪵 40🪨)</button>
+    <button class="build-btn" id="mode5" onclick="setBuildMode(5)">🔧 [5] Baiki/Upgrade (25🪵 25🪨)</button>
+  </div>
+  <div class="util-row">
+    <button class="util-btn on" id="btnOrbLock" onclick="toggleOrbLock()">🔐 Kunci Ilmu Orb: ON</button>
+    <button class="util-btn" id="btnRemediate" onclick="openQuiz('remediate')">🔁 Ulang Kaji (<span id="missedCount">0</span>)</button>
+    <button class="util-btn" id="btnAutoFire" onclick="toggleAutoFire()">🔥 Auto-Fire [E]: OFF</button>
+    <button class="util-btn" id="btnCoop" onclick="toggleCoop()">👥 Co-op P2: OFF</button>
+    <button class="util-btn on" id="btnSound" onclick="toggleSound()">🔊 SFX: ON</button>
+    <button class="util-btn on" id="btnBgm" onclick="toggleBgm()">🎵 Muzik: ON</button>
+    <button class="util-btn" onclick="openCustomModal()">➕ Soalan Guru</button>
+    <button class="util-btn" onclick="showReportModal()">📊 Laporan PBD</button>
+    <button class="util-btn warn" onclick="resetAllPlayerData(false)">🗑️ Padam Data & Reset</button>
+  </div>
+</div>
+
+<!-- MODAL KUIZ PENDIDIKAN -->
+<div class="modal-bg" id="quizModal">
+  <div class="modal-card">
+    <div class="quiz-header">
+      <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+        <span class="subj-tag" id="quizTag">🔬 SAINS</span>
+        <span class="diff-tag diff-asas" id="quizDiffTag">🟢 ASAS</span>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <span id="quizTimerDisplay" style="font-size:12px; font-weight:900; color:#4ade80;">⏱️ 0.0s</span>
+        <button class="util-btn" style="background:#be123c;border:none;" onclick="closeQuiz()">✕</button>
+      </div>
+    </div>
+
+    <div class="lifeline-bar">
+      <button class="life-btn" id="btnHint" onclick="useHintLifeline()">💡 Petunjuk Guru (15🪵)</button>
+      <button class="life-btn" id="btnFifty" onclick="useFiftyLifeline()">✂️ 50:50 (20🪨)</button>
+      <span style="font-size:11px; color:#94a3b8;">Tekan A/B/C/D atau 1–4</span>
+    </div>
+
+    <div class="quiz-hint" id="quizHintBox"></div>
+    <div class="quiz-q" id="quizQuestion">Soalan...</div>
+    <div class="quiz-opts" id="quizOptions"></div>
+    <div class="quiz-explain" id="quizExplain"></div>
+  </div>
+</div>
+
+<!-- MODAL TAMBAH SOALAN GURU -->
+<div class="modal-bg" id="customModal">
+  <div class="modal-card">
+    <h3 style="color:#facc15; margin-bottom:6px;">✏️ BANK SOALAN GURU (DIKONGSI SEBILIK)</h3>
+    <p style="font-size:12px; color:#cbd5e1; margin-bottom:8px;">
+      Format setiap baris: <b>Soalan | Pilihan A | Pilihan B | Pilihan C | Pilihan D | Jawapan(1-4) | Penerangan</b>
+    </p>
+    <textarea id="customInput" class="input-field" rows="5" placeholder="Contoh: Apakah ibu negeri Sarawak? | Kuching | Sibu | Miri | Bintulu | 1 | Kuching ialah ibu negeri Sarawak."></textarea>
+    <div style="display:flex; gap:8px; justify-content:space-between; margin-top:10px; flex-wrap:wrap;">
+      <button class="util-btn" style="background:#7f1d1d; border-color:#ef4444;" onclick="clearCustomQuestions()">🗑️ Padam Custom</button>
+      <div style="display:flex; gap:8px;">
+        <button class="util-btn" onclick="closeCustomModal()">Batal</button>
+        <button class="primary-btn" onclick="saveCustomQuestions()">💾 Simpan & Kongsi Sebilik</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LAPORAN PRESTASI PBD, TUKAR PASUKAN & TAMAT -->
+<div class="modal-bg" id="endModal">
+  <div class="modal-card" style="text-align:center;">
+    <h2 id="endTitle" style="color:#4ade80; margin-bottom:4px;">📊 REKOD PENTAKSIRAN & PRESTASI</h2>
+    <p id="endDesc" style="font-size:13px; color:#cbd5e1;">Ringkasan pencapaian pembelajaran:</p>
+
+    <div id="autoResetBox" style="display:none;">
+      <span class="auto-reset-pill" id="autoResetLabel">⏳ Peta akan di-reset automatik dalam 12s...</span>
+      <button class="util-btn" style="margin-left:6px;" onclick="cancelAutoReset()">⏸️ Jeda Reset</button>
+    </div>
+
+    <div id="roundTeamSwitchBox" class="team-switch-box" style="display:none;">
+      <div style="font-size:11.5px; font-weight:800; color:#cbd5e1;">
+        ⚔️ Pasukan Pusingan Seterusnya: <span id="nextTeamLabel" style="color:#38bdf8;">🔵 Pasukan Biru</span>
+      </div>
+      <div class="team-switch-row">
+        <button type="button" class="team-choice-btn active-blue" id="btnPickNextBlue" onclick="selectNextRoundTeam('blue')">🔵 Main Pasukan Biru</button>
+        <button type="button" class="team-choice-btn" id="btnPickNextRed" onclick="selectNextRoundTeam('red')">🔴 Main Pasukan Merah</button>
+      </div>
+    </div>
+
+    <div class="report-box" id="reportStats"></div>
+
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+      <button class="secondary-btn" onclick="exportReportCSV()">📥 Muat Turun Rekod CSV</button>
+      <button class="util-btn" id="btnResumeGame" style="display:none; padding:9px 15px;" onclick="document.getElementById('endModal').style.display='none'">▶️ Sambung Main</button>
+      <button class="primary-btn" onclick="triggerNewRound()">🔄 Pusingan Baharu (Reset Peta)</button>
+      <button class="util-btn warn" style="padding:10px 15px; font-weight:800;" onclick="resetAllPlayerData(true)">🗑️ Padam Semua Rekod & Main Semula</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+function lerpAngle(a, b, t) {
+  let diff = ((b - a + Math.PI) % (Math.PI * 2)) - Math.PI;
+  if (diff < -Math.PI) diff += Math.PI * 2;
+  return a + diff * t;
+}
+function smoothFactor(base, dt) { return 1 - Math.pow(1 - base, dt); }
+
+const QUESTION_BANK = {
+  SAINS: [
+    { lvl: 'KSSR', diff: 'Asas', q: "Apakah proses penukaran tenaga cahaya kepada tenaga kimia oleh tumbuhan hijau?", q_dlp: "What is the process of converting light energy into chemical energy by green plants?", opts: ["Fotosintesis (Photosynthesis)", "Respirasi (Respiration)", "Transpirasi (Transpiration)", "Pencernaan (Digestion)"], ans: 0, hint: "Klorofil pada daun menyerap cahaya matahari.", exp: "Fotosintesis menggunakan cahaya matahari, air dan karbon dioksida untuk menghasilkan glukosa dan oksigen." },
+    { lvl: 'KSSR', diff: 'Asas', q: "Planet manakah yang paling hampir dengan Matahari dalam Sistem Suria?", q_dlp: "Which planet is closest to the Sun in the Solar System?", opts: ["Zuhrah (Venus)", "Utarid (Mercury)", "Marikh (Mars)", "Bumi (Earth)"], ans: 1, hint: "Planet pertama dalam urutan Sistem Suria.", exp: "Utarid (Mercury) ialah planet pertama dan paling hampir dengan Matahari." },
+    { lvl: 'KSSR', diff: 'Sederhana', q: "Sebuah kereta bergerak sejauh 180 km dalam masa 3 jam. Berapakah kelajuannya?", q_dlp: "A car travels 180 km in 3 hours. What is its speed?", opts: ["50 km/j", "60 km/j", "90 km/j", "540 km/j"], ans: 1, hint: "Gunakan rumus: Kelajuan = Jarak ÷ Masa.", exp: "Kelajuan = 180 km ÷ 3 jam = 60 km/j." },
+    { lvl: 'KSSR', diff: 'KBAT', q: "Mengapakah tayar kenderaan mempunyai bunga (alur) yang mendalam?", q_dlp: "Why do vehicle tyres have deep treads (grooves)?", opts: ["Mengurangkan jisim tayar", "Menambahkan daya geseran dan cengkaman di jalan basah", "Menyejukkan enjin kereta", "Mengurangkan daya tarikan graviti"], ans: 1, hint: "Fikirkan tentang daya yang menentang gerakan supaya tidak tergelincir.", exp: "Bunga tayar meningkatkan daya geseran dan mengalirkan air supaya kenderaan tidak tergelincir." },
+    { lvl: 'KSSM', diff: 'Asas', q: "Organel manakah yang berfungsi sebagai pusat penjanaan tenaga (ATP) dalam sel?", q_dlp: "Which organelle acts as the powerhouse generating energy (ATP) in a cell?", opts: ["Mitokondria (Mitochondria)", "Kloroplas (Chloroplast)", "Vakuol (Vacuole)", "Dinding sel (Cell wall)"], ans: 0, hint: "Terdapat dalam kedua-dua sel haiwan dan sel tumbuhan.", exp: "Mitokondria menjalankan respirasi sel untuk membebaskan tenaga ATP." },
+    { lvl: 'KSSM', diff: 'Sederhana', q: "Apakah hasil tindak balas peneutralan antara asid hidroklorik dan natrium hidroksida?", q_dlp: "What are the products of neutralisation between hydrochloric acid and sodium hydroxide?", opts: ["Garam dan air (Salt and water)", "Gas hidrogen", "Karbon dioksida", "Endapan logam"], ans: 0, hint: "Asid + Alkali → ? + ?", exp: "Tindak balas peneutralan menghasilkan garam (natrium klorida) dan air." },
+    { lvl: 'KSSM', diff: 'Sederhana', q: "Ketumpatan besi ialah 7.9 g/cm³ manakala air ialah 1.0 g/cm³. Apakah yang berlaku apabila paku besi dimasukkan ke dalam air?", q_dlp: "Density of iron is 7.9 g/cm³ and water is 1.0 g/cm³. What happens when an iron nail is placed in water?", opts: ["Terapung di permukaan", "Tenggelam ke dasar", "Larut dalam air", "Terapung di tengah"], ans: 1, hint: "Bandingkan nilai ketumpatan objek dengan cecair.", exp: "Objek yang lebih tumpat daripada air (7.9 > 1.0) akan tenggelam ke dasar." },
+    { lvl: 'KSSM', diff: 'KBAT', q: "Gas manakah yang menyalakan semula kayu uji berbara?", q_dlp: "Which gas relights a glowing wooden splinter?", opts: ["Oksigen (Oxygen)", "Karbon dioksida (Carbon dioxide)", "Nitrogen (Nitrogen)", "Hidrogen (Hydrogen)"], ans: 0, hint: "Gas ini diperlukan untuk pembakaran.", exp: "Oksigen menyokong pembakaran dan menyalakan semula kayu uji berbara." }
+  ],
+  MATH: [
+    { lvl: 'KSSR', diff: 'Asas', q: "Tukarkan pecahan 3/5 kepada peratus (%).", q_dlp: "Convert the fraction 3/5 into percentage (%).", opts: ["35%", "50%", "60%", "75%"], ans: 2, hint: "Darabkan 3/5 dengan 100%.", exp: "(3 ÷ 5) × 100% = 60%." },
+    { lvl: 'KSSR', diff: 'Asas', q: "Manakah antara berikut merupakan nombor perdana (prime number)?", q_dlp: "Which of the following is a prime number?", opts: ["21", "27", "29", "33"], ans: 2, hint: "Hanya boleh dibahagi tepat dengan 1 dan dirinya sendiri.", exp: "29 ialah nombor perdana (21=3×7, 27=3×9, 33=3×11)." },
+    { lvl: 'KSSR', diff: 'Sederhana', q: "Nisbah murid lelaki kepada perempuan ialah 2 : 3. Jika ada 12 lelaki, berapa orang perempuan?", q_dlp: "The ratio of boys to girls is 2 : 3. If there are 12 boys, how many girls are there?", opts: ["15", "18", "20", "24"], ans: 1, hint: "Cari nilai bagi 1 bahagian dahulu (12 ÷ 2).", exp: "1 bahagian = 6, maka 3 bahagian = 3 × 6 = 18 orang perempuan." },
+    { lvl: 'KSSR', diff: 'KBAT', q: "Harga asal sebuah beg ialah RM80. Selepas diskaun 25%, berapakah harga baharunya?", q_dlp: "Original price of a bag is RM80. After a 25% discount, what is the new price?", opts: ["RM55", "RM60", "RM65", "RM75"], ans: 1, hint: "25% daripada RM80 ialah 1/4 daripada RM80.", exp: "Diskaun = 25% × 80 = RM20. Harga baharu = RM80 − RM20 = RM60." },
+    { lvl: 'KSSM', diff: 'Asas', q: "Hitung nilai bagi (-4) × (-6) + 2.", q_dlp: "Calculate the value of (-4) × (-6) + 2.", opts: ["-22", "22", "26", "-26"], ans: 2, hint: "Negatif darab negatif menghasilkan positif.", exp: "(-4) × (-6) = +24, kemudian 24 + 2 = 26." },
+    { lvl: 'KSSM', diff: 'Sederhana', q: "Selesaikan persamaan linear: 3x + 5 = 20", q_dlp: "Solve the linear equation: 3x + 5 = 20", opts: ["x = 3", "x = 5", "x = 15", "x = 25"], ans: 1, hint: "Tolakkan 5 daripada kedua-dua belah dahulu.", exp: "3x = 20 − 5 → 3x = 15 → x = 5." },
+    { lvl: 'KSSM', diff: 'Sederhana', q: "Berapakah luas segi tiga dengan tapak 12 cm dan tinggi 8 cm?", q_dlp: "What is the area of a triangle with base 12 cm and height 8 cm?", opts: ["96 cm²", "48 cm²", "20 cm²", "40 cm²"], ans: 1, hint: "Luas segi tiga = 1/2 × tapak × tinggi.", exp: "Luas = 1/2 × 12 × 8 = 48 cm²." },
+    { lvl: 'KSSM', diff: 'KBAT', q: "Cari Faktor Sepunya Terbesar (FSTB / HCF) bagi 18 dan 24.", q_dlp: "Find the Highest Common Factor (HCF) of 18 and 24.", opts: ["3", "6", "12", "72"], ans: 1, hint: "Nombor terbesar yang boleh membahagi tepat 18 dan 24.", exp: "Faktor 18: {1,2,3,6,9,18}; Faktor 24: {1,2,3,4,6,8,12,24}. FSTB = 6." }
+  ],
+  SEJARAH: [
+    { lvl: 'KSSR', diff: 'Asas', q: "Bilakah tarikh pengisytiharan Kemerdekaan Persekutuan Tanah Melayu?", q_dlp: "When was the Independence of the Federation of Malaya proclaimed?", opts: ["16 September 1963", "31 Ogos 1957", "1 Februari 1948", "31 Ogos 1963"], ans: 1, hint: "Disambut setiap tahun sebagai Hari Kebangsaan.", exp: "Kemerdekaan Tanah Melayu diisytiharkan pada 31 Ogos 1957 di Stadium Merdeka." },
+    { lvl: 'KSSR', diff: 'Asas', q: "Siapakah Perdana Menteri Malaysia yang pertama (Bapa Kemerdekaan)?", q_dlp: "Who was the first Prime Minister of Malaysia (Father of Independence)?", opts: ["Tun Abdul Razak", "Tunku Abdul Rahman", "Tun Hussein Onn", "Tun Dr. Mahathir"], ans: 1, hint: "Beliau melaungkan 'Merdeka!' sebanyak 7 kali.", exp: "Tunku Abdul Rahman Putra Al-Haj ialah Perdana Menteri pertama Malaysia." },
+    { lvl: 'KSSR', diff: 'Sederhana', q: "Pembentukan Malaysia pada 16 September 1963 menggabungkan Tanah Melayu, Singapura, Sabah dan...", q_dlp: "The formation of Malaysia on 16 September 1963 united Malaya, Singapore, Sabah and...", opts: ["Brunei", "Sarawak", "Johor", "Pulau Pinang"], ans: 1, hint: "Negeri Bumi Kenyalang.", exp: "Sarawak dan Sabah bersama-sama membentuk Persekutuan Malaysia pada 16 Sept 1963." },
+    { lvl: 'KSSR', diff: 'KBAT', q: "Apakah prinsip ketiga dalam Rukun Negara?", q_dlp: "What is the third principle of Rukun Negara?", opts: ["Kepercayaan kepada Tuhan", "Kesetiaan kepada Raja dan Negara", "Keluhuran Perlembagaan", "Kedaulatan Undang-undang"], ans: 2, hint: "Berkaitan dengan undang-undang tertinggi negara.", exp: "Prinsip ke-3 Rukun Negara ialah Keluhuran Perlembagaan." },
+    { lvl: 'KSSM', diff: 'Asas', q: "Siapakah pengasas Kesultanan Melayu Melaka sekitar tahun 1400?", q_dlp: "Who founded the Melaka Malay Sultanate around the year 1400?", opts: ["Parameswara", "Tun Perak", "Hang Tuah", "Sultan Mansur Shah"], ans: 0, hint: "Putera dari Palembang yang menyaksikan peristiwa pelanduk menendang anjing.", exp: "Parameswara mengasaskan kerajaan Melaka di muara Sungai Bertam." },
+    { lvl: 'KSSM', diff: 'Sederhana', q: "Apakah peranan utama Bendahara Tun Perak semasa zaman kegemilangan Melaka?", q_dlp: "What was the main role of Bendahara Tun Perak during Melaka's golden age?", opts: ["Ketua pedagang asing", "Penasihat Sultan dan panglima perang yang bijaksana", "Ketua pelabuhan", "Penulis hikayat"], ans: 1, hint: "Jawatan tertinggi selepas Sultan dalam sistem pembesar empat lipatan.", exp: "Tun Perak ialah Bendahara terulung yang meluaskan empayar dan mempertahankan Melaka daripada serangan Siam." },
+    { lvl: 'KSSM', diff: 'KBAT', q: "Mengapakah kedudukan geografi Melaka strategik sebagai pusat perdagangan antarabangsa?", q_dlp: "Why was Melaka's geographical location strategic as an international trade centre?", opts: ["Terletak di tengah laluan perdagangan Timur–Barat dan terlindung daripada angin monsun", "Mempunyai banyak gunung berapi", "Terletak di Lautan Pasifik", "Beriklim sejuk sepanjang tahun"], ans: 0, hint: "Fikirkan tentang Selat Melaka dan perlindungan semula jadi.", exp: "Selat Melaka menjadi laluan utama pedagang China dan India serta terlindung daripada tiupan angin monsun." }
+  ],
+  ASK: [
+    { lvl: 'KSSR', diff: 'Asas', q: "Manakah antara berikut merupakan peranti output komputer?", q_dlp: "Which of the following is a computer output device?", opts: ["Tetikus (Mouse)", "Papan kekunci (Keyboard)", "Pengimbas (Scanner)", "Pencetak (Printer)"], ans: 3, hint: "Mengeluarkan maklumat dari komputer kepada pengguna.", exp: "Pencetak mengeluarkan paparan maklumat daripada komputer ke atas kertas." },
+    { lvl: 'KSSR', diff: 'Sederhana', q: "Simbol carta alir (flowchart) berbentuk berlian (diamond) mewakili...", q_dlp: "A diamond-shaped flowchart symbol represents...", opts: ["Mula / Tamat", "Proses", "Pilihan / Keputusan (Decision)", "Input / Output"], ans: 2, hint: "Mempunyai dua cabang keluar seperti 'Ya' atau 'Tidak'.", exp: "Simbol berlian digunakan untuk syarat keputusan (Ya / Tidak)." },
+    { lvl: 'KSSM', diff: 'Asas', q: "Teknik pemikiran komputasional untuk memecahkan masalah besar kepada bahagian kecil ialah...", q_dlp: "The computational thinking technique of breaking down a complex problem into smaller parts is...", opts: ["Leraian (Decomposition)", "Pengecaman Corak (Pattern Recognition)", "Peniskalaan (Abstraction)", "Pengitlakan (Generalisation)"], ans: 0, hint: "Kata dasarnya ialah 'lerai'.", exp: "Leraian (Decomposition) memecahkan masalah kompleks supaya mudah diurus dan diselesaikan." },
+    { lvl: 'KSSM', diff: 'Sederhana', q: "Tukarkan nombor perduaan (binary) 1010₂ kepada nombor perpuluhan (base 10).", q_dlp: "Convert the binary number 1010₂ into a decimal number (base 10).", opts: ["8", "10", "12", "14"], ans: 1, hint: "Nilai tempat dari kanan: 1, 2, 4, 8.", exp: "1×8 + 0×4 + 1×2 + 0×1 = 8 + 2 = 10." },
+    { lvl: 'KSSM', diff: 'Sederhana', q: "Apakah maksud pemboleh ubah (variable) dalam pengaturcaraan?", q_dlp: "What is a variable in programming?", opts: ["Ralat sintaks", "Ruang storan memori untuk menyimpan nilai data", "Gelung tanpa henti", "Perkakasan rangkaian"], ans: 1, hint: "Seperti kotak berlabel yang menyimpan markah atau nama.", exp: "Pemboleh ubah ialah ruang storan yang menyimpan nilai data dan boleh berubah semasa program berjalan." },
+    { lvl: 'KSSM', diff: 'KBAT', q: "Dalam perwakilan aksara ASCII, jika 'A' = 65 (01000001₂), apakah nilai perpuluhan bagi 'D'?", q_dlp: "In ASCII character representation, if 'A' = 65, what is the decimal value for 'D'?", opts: ["66", "67", "68", "69"], ans: 2, hint: "Kira urutan huruf: A(65), B(66), C(67), D(?).", exp: "A=65, B=66, C=67, maka D = 68." }
+  ],
+  CUSTOM: []
+};
+
+try {
+  const savedCustom = localStorage.getItem('omega_edu_custom_q');
+  if (savedCustom) QUESTION_BANK.CUSTOM = JSON.parse(savedCustom);
+} catch (err) {}
+
+const WORLD = 2200;
+const BLUE_CORE_POS = { x: 260, y: WORLD / 2 };
+const RED_CORE_POS  = { x: WORLD - 260, y: WORLD / 2 };
+
+const CLASS_DEFS = {
+  Basic:       { tier: 1, barrels: [{ ang: 0, w: 12, l: 26, dmg: 16, spd: 9, cd: 16 }], fov: 1.0 },
+  Twin:        { tier: 2, barrels: [{ ang: -0.14, w: 10, l: 26, dmg: 12, spd: 9.5, cd: 13 }, { ang: 0.14, w: 10, l: 26, dmg: 12, spd: 9.5, cd: 13 }], fov: 1.0 },
+  Sniper:      { tier: 2, barrels: [{ ang: 0, w: 10, l: 36, dmg: 35, spd: 14, cd: 27 }], fov: 0.86 },
+  MachineGun:  { tier: 2, barrels: [{ ang: 0, w: 16, l: 24, dmg: 11, spd: 9, cd: 8, spread: 0.22 }], fov: 1.0 },
+  FlankGuard:  { tier: 2, barrels: [{ ang: 0, w: 12, l: 26, dmg: 15, spd: 9, cd: 15 }, { ang: Math.PI, w: 12, l: 24, dmg: 15, spd: 9, cd: 15 }], fov: 1.0 },
+  PentaShot:   { tier: 3, barrels: [-0.36, -0.18, 0, 0.18, 0.36].map(a => ({ ang: a, w: 10, l: 26, dmg: 13, spd: 10, cd: 14 })), fov: 0.95 },
+  Railgun:     { tier: 3, barrels: [{ ang: 0, w: 12, l: 42, dmg: 64, spd: 18, cd: 31, pierce: true }], fov: 0.82 },
+  Streamliner: { tier: 3, barrels: [{ ang: 0, w: 13, l: 30, dmg: 12, spd: 11.5, cd: 5, spread: 0.08 }], fov: 0.95 },
+  OctoTank:    { tier: 3, barrels: [0,1,2,3,4,5,6,7].map(i => ({ ang: (i * Math.PI) / 4, w: 10, l: 24, dmg: 13, spd: 9, cd: 15 })), fov: 0.95 }
+};
+
+const MAX_LEVEL = 25;
+const EVO_TREE = {
+  Basic: ['Twin', 'Sniper', 'MachineGun', 'FlankGuard'],
+  Twin: ['PentaShot', 'OctoTank', 'Streamliner'],
+  Sniper: ['Railgun', 'Streamliner'],
+  MachineGun: ['Streamliner', 'PentaShot', 'OctoTank'],
+  FlankGuard: ['OctoTank', 'PentaShot', 'Railgun'],
+  PentaShot: ['OctoTank', 'Streamliner'],
+  Railgun: ['Streamliner', 'PentaShot'],
+  Streamliner: ['OctoTank', 'Railgun'],
+  OctoTank: ['PentaShot', 'Streamliner']
+};
+
+const BUILD_SPECS = {
+  1: { name: 'Dinding Kubu', wood: 15, stone: 10, hp: 260, r: 22, color: '#94a3b8' },
+  2: { name: 'Lombong Kristal', wood: 30, stone: 25, hp: 160, r: 24, color: '#facc15' },
+  3: { name: 'Menara Laser', wood: 40, stone: 35, hp: 180, r: 22, color: '#38bdf8' },
+  4: { name: 'Menara Krio', wood: 45, stone: 40, hp: 180, r: 22, color: '#a855f7' }
+};
+
+let audioCtx = null, noiseBuffer = null, bgmTimer = null, bgmStep = 0;
+function getAudioContext() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  } catch (err) { return null; }
+}
+function ensureSfxAudio() { return (!game || game.soundOn === false) ? null : getAudioContext(); }
+function startBgmScheduler() {
+  if (bgmTimer) return;
+  const dayNotes = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 293.66, 392.00];
+  const nightNotes = [146.83, 155.56, 174.61, 146.83, 130.81, 146.83, 110.00, 130.81];
+  bgmTimer = setInterval(() => {
+    if (!game || game.bgmOn === false || game.over || game.paused || document.getElementById('setupModal').style.display === 'flex') return;
+    const ctxA = getAudioContext();
+    if (!ctxA || ctxA.state !== 'running') return;
+    try {
+      const now = ctxA.currentTime, isN = !!game.isNight, notes = isN ? nightNotes : dayNotes;
+      const freq = notes[bgmStep % notes.length]; bgmStep++;
+      const o = ctxA.createOscillator(), g = ctxA.createGain();
+      o.type = isN ? 'triangle' : 'sine'; o.frequency.setValueAtTime(freq, now);
+      g.gain.setValueAtTime(0.001, now); g.gain.linearRampToValueAtTime(isN ? 0.018 : 0.015, now + 0.04);
+      g.gain.exponentialRampToValueAtTime(0.0008, now + 0.42);
+      o.connect(g); g.connect(ctxA.destination); o.start(now); o.stop(now + 0.44);
+    } catch (err) {}
+  }, 520);
+}
+function playSfx(freq, type = 'sine', dur = 0.08, vol = 0.04) {
+  const ctxA = ensureSfxAudio(); if (!ctxA) return;
+  try {
+    const o = ctxA.createOscillator(), g = ctxA.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, ctxA.currentTime);
+    g.gain.setValueAtTime(vol, ctxA.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctxA.currentTime + dur);
+    o.connect(g); g.connect(ctxA.destination); o.start(); o.stop(ctxA.currentTime + dur);
+  } catch (err) {}
+}
+function playShootSfx(tankClass, isRemote = false) {
+  const ctxA = ensureSfxAudio(); if (!ctxA) return;
+  try {
+    const now = ctxA.currentTime, scale = isRemote ? 0.35 : 1.0;
+    const o = ctxA.createOscillator(), g = ctxA.createGain();
+    if (tankClass === 'Sniper' || tankClass === 'Railgun') {
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(820, now); o.frequency.exponentialRampToValueAtTime(165, now + 0.095);
+      g.gain.setValueAtTime(0.032 * scale, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.095);
+      o.connect(g); g.connect(ctxA.destination); o.start(now); o.stop(now + 0.095);
+    } else if (tankClass === 'MachineGun' || tankClass === 'Streamliner') {
+      o.type = 'triangle'; o.frequency.setValueAtTime(520 + Math.random() * 60, now); o.frequency.exponentialRampToValueAtTime(210, now + 0.045);
+      g.gain.setValueAtTime(0.022 * scale, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+      o.connect(g); g.connect(ctxA.destination); o.start(now); o.stop(now + 0.045);
+    } else {
+      o.type = 'triangle'; o.frequency.setValueAtTime(420, now); o.frequency.exponentialRampToValueAtTime(145, now + 0.065);
+      g.gain.setValueAtTime(0.028 * scale, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.065);
+      o.connect(g); g.connect(ctxA.destination); o.start(now); o.stop(now + 0.065);
+    }
+  } catch (err) {}
+}
+function playExplosionSfx(isBig = false) {
+  const ctxA = ensureSfxAudio(); if (!ctxA) return;
+  try {
+    const now = ctxA.currentTime, dur = isBig ? 0.38 : 0.18;
+    if (!noiseBuffer) {
+      const len = Math.floor(ctxA.sampleRate * 0.45);
+      noiseBuffer = ctxA.createBuffer(1, len, ctxA.sampleRate);
+      const data = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    }
+    const noise = ctxA.createBufferSource(); noise.buffer = noiseBuffer;
+    const filter = ctxA.createBiquadFilter(); filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(isBig ? 520 : 680, now); filter.frequency.exponentialRampToValueAtTime(90, now + dur);
+    const g = ctxA.createGain(); g.gain.setValueAtTime(isBig ? 0.08 : 0.04, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    noise.connect(filter); filter.connect(g); g.connect(ctxA.destination); noise.start(now); noise.stop(now + dur);
+  } catch (err) {}
+}
+function playDashSfx() {
+  const ctxA = ensureSfxAudio(); if (!ctxA) return;
+  try {
+    const now = ctxA.currentTime, o = ctxA.createOscillator(), g = ctxA.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(210, now); o.frequency.exponentialRampToValueAtTime(620, now + 0.13);
+    g.gain.setValueAtTime(0.035, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.13);
+    o.connect(g); g.connect(ctxA.destination); o.start(now); o.stop(now + 0.13);
+  } catch (err) {}
+}
+function playBuildSfx() { playSfx(320, 'triangle', 0.05, 0.035); setTimeout(() => playSfx(540, 'sine', 0.07, 0.035), 45); }
+function playOrbCaptureSfx() { [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => setTimeout(() => playSfx(freq, 'triangle', 0.14, 0.045), i * 75)); }
+function playChatSfx() { playSfx(660, 'sine', 0.045, 0.025); setTimeout(() => playSfx(880, 'sine', 0.055, 0.025), 45); }
+function playPingSfx() { playSfx(980, 'sine', 0.09, 0.04); setTimeout(() => playSfx(1320, 'sine', 0.12, 0.035), 80); }
+
+let game = {};
+const camState = { x: BLUE_CORE_POS.x - canvas.width / 2, y: BLUE_CORE_POS.y - canvas.height / 2, zoom: 1.0, initialized: false };
+const keys = {};
+const mouse = { x: canvas.width / 2, y: canvas.height / 2, down: false };
+let bannerTimeout = null, lbCollapsed = false, autoResetTimer = null, autoResetSecs = 12, nextRoundTeam = 'blue';
+
+function showBanner(msg, color = '#fef08a') {
+  const el = document.getElementById('eventBanner');
+  el.textContent = msg; el.style.color = color; el.style.borderColor = color; el.style.display = 'block';
+  clearTimeout(bannerTimeout); bannerTimeout = setTimeout(() => { el.style.display = 'none'; }, 3800);
+}
+window.toggleSound = function() {
+  game.soundOn = !game.soundOn;
+  const btn = document.getElementById('btnSound');
+  btn.textContent = `🔊 SFX: ${game.soundOn ? 'ON' : 'OFF'}`; btn.classList.toggle('on', game.soundOn);
+  if (game.soundOn) playChatSfx();
+};
+window.toggleBgm = function() {
+  game.bgmOn = !game.bgmOn;
+  const btn = document.getElementById('btnBgm');
+  btn.textContent = `🎵 Muzik: ${game.bgmOn ? 'ON' : 'OFF'}`; btn.classList.toggle('on', game.bgmOn);
+  if (game.bgmOn) { getAudioContext(); startBgmScheduler(); }
+};
+window.toggleLeaderboard = function() {
+  lbCollapsed = !lbCollapsed;
+  document.getElementById('leaderboardList').style.display = lbCollapsed ? 'none' : 'flex';
+  document.getElementById('btnToggleLb').textContent = lbCollapsed ? '+' : '−';
+};
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+function appendChatFeed(sender, text, isMe = false, team = 'blue') {
+  const feed = document.getElementById('chatFeed'); if (!feed) return;
+  const item = document.createElement('div'); item.className = 'chat-msg-item';
+  const teamCol = team === 'red' ? '#fb7185' : '#38bdf8', teamIcon = team === 'red' ? '🔴' : '🔵';
+  item.style.borderLeftColor = isMe ? '#4ade80' : teamCol;
+  item.innerHTML = `<b style="color:${isMe ? '#86efac' : teamCol};">${teamIcon} ${escapeHtml(sender)}:</b> ${escapeHtml(text)}`;
+  feed.appendChild(item);
+  while (feed.children.length > 3) feed.removeChild(feed.firstChild);
+  setTimeout(() => { if (item.parentNode === feed) feed.removeChild(item); }, 6500);
+}
+window.sendQuickChat = function(msg) {
+  if (!game || !game.tanks || !game.tanks[0]) return;
+  const cleanMsg = String(msg || '').trim().slice(0, 42); if (!cleanMsg) return;
+  const p1 = game.tanks[0];
+  p1.activeChat = { text: cleanMsg, expires: performance.now() + 4500 };
+  netState.lastChatMsg = cleanMsg; netState.lastChatTs = Date.now();
+  appendChatFeed(game.studentName || 'Anda', cleanMsg, true, game.myTeam);
+  playChatSfx(); syncPlayerMetaToRoom();
+};
+window.sendCustomChat = function() {
+  const inp = document.getElementById('inpQuickChat'); if (!inp) return;
+  const val = inp.value.trim(); if (val) { sendQuickChat(val); inp.value = ''; }
+  inp.blur();
+};
+function triggerMinimapPing(wx, wy, team, sender, broadcast = false) {
+  if (!game || !game.pings) return;
+  game.pings.push({ x: wx, y: wy, team, sender, life: 160, maxLife: 160 });
+  playPingSfx();
+  appendChatFeed(sender, `📍 Isyarat Peta (${Math.round(wx)}, ${Math.round(wy)})!`, broadcast, team);
+  if (broadcast && window.fbReady && netState.roomKey) {
+    window.fbSet(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/latestPing`), {
+      x: Math.round(wx), y: Math.round(wy), team, sender, ts: Date.now()
+    }).catch(() => {});
+  }
+}
+function updateRoomLeaderboard() {
+  const listEl = document.getElementById('leaderboardList');
+  if (!listEl || !game || !game.tanks || !game.tanks[0]) return;
+  const p1 = game.tanks[0];
+  const entries = [{
+    name: `${game.studentName} (Anda)`, team: game.myTeam || 'blue',
+    correct: game.quizCorrect || 0, total: game.quizTotal || 0,
+    streak: game.streak || 1, lvl: p1.lvl || 1, isMe: true
+  }];
+  Object.values(netState.remotePlayers || {}).forEach(p => {
+    if (!p) return;
+    entries.push({
+      name: p.name || 'Pemain', team: p.team || 'blue',
+      correct: typeof p.quizCorrect === 'number' ? p.quizCorrect : 0,
+      total: typeof p.quizTotal === 'number' ? p.quizTotal : 0,
+      streak: typeof p.streak === 'number' ? p.streak : 1,
+      lvl: typeof p.lvl === 'number' ? p.lvl : 1, isMe: false
+    });
+  });
+  entries.sort((a, b) => (b.correct - a.correct) || (b.lvl - a.lvl));
+  const medals = ['🥇', '🥈', '🥉', '4.', '5.'];
+  listEl.innerHTML = entries.slice(0, 5).map((e, i) => `
+    <div class="lb-row ${e.isMe ? 'me' : ''}">
+      <span class="lb-name">${medals[i]} ${e.team === 'red' ? '🔴' : '🔵'} ${escapeHtml(e.name)}</span>
+      <span class="lb-score">${e.correct}/${e.total}${e.streak > 1 ? ` 🔥x${e.streak}` : ''} • Lv.${e.lvl}</span>
+    </div>
+  `).join('');
+}
+async function resolvePlayerTeam(teamPref, serverRegion, roomCode) {
+  if (teamPref === 'BLUE') return 'blue';
+  if (teamPref === 'RED') return 'red';
+  const cleanCode = sanitizeRoomKey(roomCode), rKey = sanitizeRoomKey(`${serverRegion}_${cleanCode}`);
+  if (window.fbReady) {
+    try {
+      const snap = await window.fbGet(window.fbRef(window.fbDb, `omega_dom_v2/${rKey}/players`));
+      const val = snap.val() || {}; let blueCnt = 0, redCnt = 0;
+      Object.values(val).forEach(p => { if (p) { if (p.team === 'red') redCnt++; else blueCnt++; } });
+      if (blueCnt < redCnt) return 'blue'; if (redCnt < blueCnt) return 'red';
+    } catch (err) {}
+  }
+  return Math.random() < 0.5 ? 'blue' : 'red';
+}
+window.startMission = async function() {
+  const sName = document.getElementById('inpStudentName').value.trim() || 'Ejen Ilmu';
+  const sClass = document.getElementById('inpStudentClass').value.trim() || 'Kelas Bestari';
+  const teamPref = document.getElementById('inpTeamPref').value;
+  const auraBadge = document.getElementById('inpAuraBadge').value;
+  const lvlFilter = document.getElementById('inpLevelFilter').value;
+  const langMode = document.getElementById('inpLangMode').value;
+  const serverRegion = document.getElementById('inpServerRegion').value;
+  const roomCode = document.getElementById('inpRoomCode').value;
+  getAudioContext(); startBgmScheduler();
+  const assignedTeam = await resolvePlayerTeam(teamPref, serverRegion, roomCode);
+  nextRoundTeam = assignedTeam;
+  document.getElementById('setupModal').style.display = 'none';
+  resetGame({ sName, sClass, teamPref, assignedTeam, auraBadge, lvlFilter, langMode, serverRegion, roomCode }, netState.roundNumber || 1);
+  initGlobalMultiplayer(serverRegion, roomCode);
+  playOrbCaptureSfx();
+  const teamLabel = assignedTeam === 'red' ? '🔴 PASUKAN MERAH (Kubu Timur)' : '🔵 PASUKAN BIRU (Kubu Barat)';
+  showBanner(`🚀 ${sName} menyertai ${teamLabel}!`, assignedTeam === 'red' ? '#fb7185' : '#38bdf8');
+};
+function getMyCore() { return game.cores[game.myTeam || 'blue']; }
+window.selectNextRoundTeam = function(teamKey) {
+  nextRoundTeam = teamKey === 'red' ? 'red' : 'blue';
+  const lbl = document.getElementById('nextTeamLabel'), btnB = document.getElementById('btnPickNextBlue'), btnR = document.getElementById('btnPickNextRed');
+  if (lbl) { lbl.textContent = nextRoundTeam === 'red' ? '🔴 Pasukan Merah' : '🔵 Pasukan Biru'; lbl.style.color = nextRoundTeam === 'red' ? '#fb7185' : '#38bdf8'; }
+  if (btnB) btnB.classList.toggle('active-blue', nextRoundTeam === 'blue');
+  if (btnR) btnR.classList.toggle('active-red', nextRoundTeam === 'red');
+  playChatSfx();
+};
+function stopAutoResetCountdown() {
+  if (autoResetTimer) { clearInterval(autoResetTimer); autoResetTimer = null; }
+  const box = document.getElementById('autoResetBox'); if (box) box.style.display = 'none';
+}
+window.cancelAutoReset = function() {
+  stopAutoResetCountdown();
+  showBanner('⏸️ Auto-reset dijeda. Klik "Pusingan Baharu" bila sudah bersedia.', '#38bdf8');
+};
+function startAutoResetCountdown() {
+  stopAutoResetCountdown(); autoResetSecs = 12;
+  const box = document.getElementById('autoResetBox'), lbl = document.getElementById('autoResetLabel');
+  if (box) box.style.display = 'block';
+  if (lbl) lbl.textContent = `⏳ Peta akan di-reset automatik dalam ${autoResetSecs}s...`;
+  autoResetTimer = setInterval(() => {
+    autoResetSecs--;
+    if (lbl) lbl.textContent = `⏳ Peta akan di-reset automatik dalam ${Math.max(0, autoResetSecs)}s...`;
+    if (autoResetSecs <= 0) { stopAutoResetCountdown(); triggerNewRound(); }
+  }, 1000);
+}
+function resetFirebaseRoomToRound(nextRound, nowTs) {
+  if (!window.fbReady || !netState.roomKey) return;
+  const basePath = `omega_dom_v2/${netState.roomKey}`;
+  window.fbRemove(window.fbRef(window.fbDb, `${basePath}/structures`)).catch(() => {});
+  window.fbSet(window.fbRef(window.fbDb, `${basePath}/dominators`), {
+    0: { id: 0, name: 'ALPHA', owner: 'neutral', hp: 850, maxHp: 850 },
+    1: { id: 1, name: 'BETA', owner: 'neutral', hp: 850, maxHp: 850 },
+    2: { id: 2, name: 'GAMMA', owner: 'neutral', hp: 850, maxHp: 850 },
+    3: { id: 3, name: 'DELTA', owner: 'neutral', hp: 850, maxHp: 850 },
+    core_blue: { id: 99, owner: 'core_blue', hp: 100, maxHp: 100 },
+    core_red: { id: 98, owner: 'core_red', hp: 100, maxHp: 100 }
+  }).catch(() => {});
+  window.fbSet(window.fbRef(window.fbDb, `${basePath}/roundState`), { round: nextRound, resetTs: nowTs, triggeredBy: game.studentName || 'Ejen Ilmu' }).catch(() => {});
+}
+window.resetAllPlayerData = function(skipConfirm = false) {
+  const p1 = (game && game.tanks && game.tanks[0]) ? game.tanks[0] : { lvl: 1 };
+  const wins = netState.teamWins || { blue: 0, red: 0 };
+  if (!skipConfirm) {
+    const ok = confirm(
+      `Adakah anda pasti mahu memadamkan SEMUA rekod permainan?\n\n` +
+      `• Tahap Tangki (Lv.${p1.lvl}) → Lv.1\n` +
+      `• Rekod Kuiz (${game.quizCorrect || 0}/${game.quizTotal || 0}) → 0/0\n` +
+      `• Skor Kemenangan Siri (🔵 ${wins.blue} — ${wins.red} 🔴) → 0 — 0\n` +
+      `• Pusingan (#${netState.roundNumber || 1}) → #1`
+    );
+    if (!ok) return;
+  }
+
+  stopAutoResetCountdown();
+  netState.roundNumber = 1;
+  netState.lastRecordedWinRound = 0;
+  netState.teamWins = { blue: 0, red: 0 };
+  const nowTs = Date.now();
+  netState.lastRoundResetTs = nowTs;
+
+  if (window.fbReady && netState.roomKey) {
+    const basePath = `omega_dom_v2/${netState.roomKey}`;
+    window.fbSet(window.fbRef(window.fbDb, `${basePath}/teamWins`), {
+      blue: 0, red: 0, lastRound: 0, ts: nowTs
+    }).catch(() => {});
+    resetFirebaseRoomToRound(1, nowTs);
+  }
+
+  const chosenTeam = nextRoundTeam || game.myTeam || 'blue';
+  const freshProf = {
+    sName: game.studentName || 'Ejen Ilmu',
+    sClass: game.studentClass || 'Kelas Bestari',
+    teamPref: chosenTeam.toUpperCase(),
+    assignedTeam: chosenTeam,
+    auraBadge: game.auraBadge || '#facc15',
+    lvlFilter: game.levelFilter || 'ALL',
+    langMode: game.langMode || 'BM',
+    serverRegion: game.serverRegion || 'GLOBAL_ASIA',
+    roomCode: game.roomCode || 'GLOBAL01'
+  };
+
+  resetGame(freshProf, 1);
+  playOrbCaptureSfx();
+  showBanner('🗑️ Semua rekod (Tahap, Kuiz & Kemenangan) telah dipadam! Permainan bermula semula dari Pusingan #1.', '#4ade80');
+};
+window.triggerNewRound = function() {
+  stopAutoResetCountdown();
+  const nextRound = (netState.roundNumber || 1) + 1; netState.roundNumber = nextRound;
+  const nowTs = Date.now(); netState.lastRoundResetTs = nowTs;
+  const chosenTeam = nextRoundTeam || game.myTeam || 'blue';
+  const overrideProf = {
+    sName: game.studentName || 'Ejen Ilmu', sClass: game.studentClass || 'Kelas Bestari',
+    teamPref: chosenTeam.toUpperCase(), assignedTeam: chosenTeam, auraBadge: game.auraBadge || '#facc15',
+    lvlFilter: game.levelFilter || 'ALL', langMode: game.langMode || 'BM',
+    serverRegion: game.serverRegion || 'GLOBAL_ASIA', roomCode: game.roomCode || 'GLOBAL01'
+  };
+  resetFirebaseRoomToRound(nextRound, nowTs);
+  resetGame(overrideProf, nextRound); playOrbCaptureSfx();
+  const teamTxt = chosenTeam === 'red' ? '🔴 Pasukan Merah' : '🔵 Pasukan Biru';
+  showBanner(`🔄 PUSINGAN #${nextRound} BERMULA! Anda berjuang untuk ${teamTxt}!`, chosenTeam === 'red' ? '#fb7185' : '#4ade80');
+};
+function resetGame(profileOverride = null, roundNum = null) {
+  stopAutoResetCountdown();
+  const activeRound = roundNum || netState.roundNumber || 1; netState.roundNumber = activeRound;
+  const prevSound = typeof game.soundOn === 'boolean' ? game.soundOn : true;
+  const prevBgm = typeof game.bgmOn === 'boolean' ? game.bgmOn : true;
+  const prevProfile = profileOverride || {
+    sName: game.studentName || 'Ejen Ilmu', sClass: game.studentClass || 'Kelas Bestari',
+    teamPref: game.teamPref || 'AUTO', assignedTeam: nextRoundTeam || game.myTeam || 'blue',
+    auraBadge: game.auraBadge || '#facc15', lvlFilter: game.levelFilter || 'ALL',
+    langMode: game.langMode || 'BM', serverRegion: game.serverRegion || 'GLOBAL_ASIA', roomCode: game.roomCode || 'GLOBAL01'
+  };
+  const myTeam = prevProfile.assignedTeam || 'blue'; nextRoundTeam = myTeam;
+  const enemyTeam = myTeam === 'blue' ? 'red' : 'blue';
+  document.getElementById('endModal').style.display = 'none';
+  document.getElementById('evoPanel').style.display = 'none';
+  document.getElementById('quizModal').style.display = 'none';
+  document.getElementById('chatFeed').innerHTML = '';
+
+  game = {
+    over: false, paused: false, round: activeRound, soundOn: prevSound, bgmOn: prevBgm, animTime: 0,
+    studentName: prevProfile.sName, studentClass: prevProfile.sClass, teamPref: prevProfile.teamPref,
+    myTeam, auraBadge: prevProfile.auraBadge, levelFilter: prevProfile.lvlFilter, langMode: prevProfile.langMode,
+    serverRegion: prevProfile.serverRegion, roomCode: prevProfile.roomCode,
+    subject: document.getElementById('subjectSelect').value, orbQuizLock: true, pendingOrb: null,
+    quizMode: 'manual', quizTotal: 0, quizCorrect: 0, streak: 1, bestStreak: 1, upgradePts: 1, stats: [0, 0, 0, 0],
+    subjStats: { SAINS: { c: 0, t: 0 }, MATH: { c: 0, t: 0 }, SEJARAH: { c: 0, t: 0 }, ASK: { c: 0, t: 0 }, CUSTOM: { c: 0, t: 0 } },
+    missedQueue: [], wood: 130, stone: 110,
+    cores: {
+      blue: { team: 'blue', x: BLUE_CORE_POS.x, y: BLUE_CORE_POS.y, hp: 100, displayHp: 100, maxHp: 100 },
+      red: { team: 'red', x: RED_CORE_POS.x, y: RED_CORE_POS.y, hp: 100, displayHp: 100, maxHp: 100 }
+    },
+    buildMode: 0, autoFire: false, coopP2: false, isNight: false, phaseTimer: 35 * 60, nightCount: 1, mineTimer: 0,
+    particles: [], floatTexts: [], pings: [], powerups: [], bullets: [], buildings: [], resources: [], zombies: [],
+    dominators: [
+      { id: 0, name: 'ALPHA', x: 520, y: 360, owner: 'neutral', hp: 850, displayHp: 850, maxHp: 850, cd: 0 },
+      { id: 1, name: 'BETA', x: WORLD - 520, y: 360, owner: 'neutral', hp: 850, displayHp: 850, maxHp: 850, cd: 0 },
+      { id: 2, name: 'GAMMA', x: 520, y: WORLD - 360, owner: 'neutral', hp: 850, displayHp: 850, maxHp: 850, cd: 0 },
+      { id: 3, name: 'DELTA', x: WORLD - 520, y: WORLD - 360, owner: 'neutral', hp: 850, displayHp: 850, maxHp: 850, cd: 0 }
+    ],
+    tanks: []
+  };
+
+  const teamTag = myTeam === 'red' ? '🔴 MERAH' : '🔵 BIRU';
+  const signTag = (window.signedInAccount && window.signedInAccount.idTag) ? ` [${window.signedInAccount.idTag}]` : ''; document.getElementById('hudStudentInfo').textContent = `${teamTag} • ${game.studentName}${signTag} (${game.studentClass}) • Pusingan #${activeRound}`;
+  const myBase = myTeam === 'red' ? RED_CORE_POS : BLUE_CORE_POS;
+  const enemyBase = myTeam === 'red' ? BLUE_CORE_POS : RED_CORE_POS;
+  const p1Start = { x: myBase.x + (myTeam === 'red' ? -85 : 85), y: myBase.y };
+
+  game.tanks.push({
+    id: 'p1', name: game.studentName.toUpperCase(), team: myTeam, aura: game.auraBadge, isPlayer: true,
+    x: p1Start.x, y: p1Start.y, vx: 0, vy: 0, r: 20, angle: myTeam === 'red' ? Math.PI : 0,
+    hp: 150, displayHp: 150, maxHp: 150, xp: 0, lvl: 1, tankClass: 'Basic',
+    cd: 0, dashCd: 0, dashFrames: 0, shieldTimer: 0, rapidTimer: 0, speed: 3.85, recoils: [], activeChat: null
+  });
+
+  netState.lastSentX = -9999; netState.lastSentY = -9999;
+  camState.x = p1Start.x - canvas.width / 2; camState.y = p1Start.y - canvas.height / 2; camState.zoom = 1.0; camState.initialized = true;
+
+  for (let i = 0; i < 2; i++) {
+    game.tanks.push({
+      id: 'ally_' + i, name: `Rakan ${myTeam === 'red' ? 'Merah' : 'Biru'}-${i + 1}`, team: myTeam, aura: '#94a3b8', isBot: true,
+      x: myBase.x + (i === 0 ? -40 : 40), y: myBase.y + (i === 0 ? -95 : 95), vx: 0, vy: 0, r: 19, angle: 0,
+      hp: 130, displayHp: 130, maxHp: 130, xp: 0, lvl: 1, tankClass: 'Twin', cd: 0, speed: 3.1, respawn: 0, recoils: []
+    });
+  }
+  for (let i = 0; i < 3; i++) {
+    game.tanks.push({
+      id: 'enemy_' + i, name: `Lawan ${enemyTeam === 'red' ? 'Merah' : 'Biru'}-${i + 1}`, team: enemyTeam, aura: '#94a3b8', isBot: true,
+      x: enemyBase.x + (i - 1) * 65, y: enemyBase.y + (i - 1) * 90, vx: 0, vy: 0, r: 19, angle: 0,
+      hp: 130, displayHp: 130, maxHp: 130, xp: 0, lvl: 2, tankClass: i % 2 === 0 ? 'Twin' : 'MachineGun', cd: 0, speed: 2.95, respawn: 0, recoils: []
+    });
+  }
+
+  syncDeterministicArena(`${prevProfile.serverRegion}_${sanitizeRoomKey(prevProfile.roomCode)}_R${activeRound}`);
+  if (window.fbReady && netState.roomKey) {
+    initGlobalMultiplayer(prevProfile.serverRegion, prevProfile.roomCode);
+  }
+  setBuildMode(0); updateHud(); syncPlayerMetaToRoom();
+}
+function spawnResource(kind) {
+  let x, y;
+  do { x = 120 + Math.random() * (WORLD - 240); y = 120 + Math.random() * (WORLD - 240); }
+  while (Math.hypot(x - BLUE_CORE_POS.x, y - BLUE_CORE_POS.y) < 170 || Math.hypot(x - RED_CORE_POS.x, y - RED_CORE_POS.y) < 170);
+  game.resources.push({ kind, x, y, hp: kind === 'capsule' ? 40 : 60, maxHp: kind === 'capsule' ? 40 : 60, r: kind === 'capsule' ? 21 : 23, pulse: Math.random() * Math.PI * 2, hitScale: 1 });
+}
+function spawnPowerup(kind = null) {
+  const types = ['heal', 'shield', 'rapid'], chosen = kind || types[Math.floor(Math.random() * types.length)];
+  let x, y;
+  do { x = 240 + Math.random() * (WORLD - 480); y = 180 + Math.random() * (WORLD - 360); }
+  while (Math.hypot(x - BLUE_CORE_POS.x, y - BLUE_CORE_POS.y) < 180 || Math.hypot(x - RED_CORE_POS.x, y - RED_CORE_POS.y) < 180);
+  game.powerups.push({ kind: chosen, x, y, r: 19, pulse: Math.random() * Math.PI * 2 });
+}
+window.spawnTestZombie = function(forceBoss = false) {
+  if (!game || game.over) return;
+  const p1 = game.tanks && game.tanks[0], baseX = p1 ? p1.x : WORLD / 2, baseY = p1 ? p1.y : WORLD / 2;
+  const ang = Math.random() * Math.PI * 2, dist = 220 + Math.random() * 120;
+  const zx = Math.max(40, Math.min(WORLD - 40, baseX + Math.cos(ang) * dist));
+  const zy = Math.max(40, Math.min(WORLD - 40, baseY + Math.sin(ang) * dist));
+  const isBoss = forceBoss || (Math.random() < 0.25 && !game.zombies.some(z => z.isBoss));
+  const hp = Math.round((isBoss ? 240 : 55) * (1 + ((game.nightCount || 1) - 1) * 0.25));
+  game.zombies.push({ x: zx, y: zy, r: isBoss ? 25 : 15, hp, displayHp: hp, maxHp: hp, speed: isBoss ? 1.15 : 1.75, dmg: isBoss ? 15 : 6, isBoss, shielded: isBoss, slowTimer: 0, atkCd: 0 });
+  spawnParticles(zx, zy, isBoss ? '#facc15' : '#4ade80', 12);
+  addFloatText(zx, zy - 24, isBoss ? '👹 BOSS UJIAN [Z]!' : '🧟 ZOMBI UJIAN [Z]!', isBoss ? '#facc15' : '#4ade80');
+};
+window.upgradeStat = function(idx) {
+  if (!game || game.over || game.upgradePts <= 0 || idx < 0 || idx > 3 || game.stats[idx] >= 5) return;
+  game.upgradePts--; game.stats[idx]++;
+  const p1 = game.tanks[0];
+  if (idx === 3 && p1) { p1.maxHp += 25; p1.hp = Math.min(p1.maxHp, p1.hp + 25); p1.speed += 0.22; }
+  const labels = ['🚀 Laju Peluru', '💥 Kuasa Tembak', '⚡ Kadar Tembak', '🛡️ Nyawa & Gerak'];
+  playSfx(740, 'triangle', 0.12, 0.045);
+  if (p1) addFloatText(p1.x, p1.y - 34, `${labels[idx]} Lv.${game.stats[idx]}!`, '#facc15');
+  updateHud();
+};
+let activeQuestion = null, quizAnswered = false, quizStartTime = 0, quizTimerInterval = null;
+window.changeSubject = function() { game.subject = document.getElementById('subjectSelect').value; };
+window.toggleOrbLock = function() {
+  game.orbQuizLock = !game.orbQuizLock;
+  const btn = document.getElementById('btnOrbLock');
+  btn.textContent = `🔐 Kunci Ilmu Orb: ${game.orbQuizLock ? 'ON' : 'OFF'}`; btn.classList.toggle('on', game.orbQuizLock);
+};
+function pickQuestion(mode) {
+  if (mode === 'remediate' && game.missedQueue.length > 0) return game.missedQueue[0];
+  let subjects = game.subject === 'ALL' ? ['SAINS', 'MATH', 'SEJARAH', 'ASK'] : [game.subject];
+  if (game.subject === 'CUSTOM' && QUESTION_BANK.CUSTOM.length === 0) subjects = ['SAINS', 'MATH', 'SEJARAH', 'ASK'];
+  let pool = [];
+  subjects.forEach(s => (QUESTION_BANK[s] || []).forEach(item => {
+    if (game.levelFilter === 'ALL' || !item.lvl || item.lvl === 'CUSTOM' || item.lvl === game.levelFilter) pool.push({ ...item, subj: s });
+  }));
+  if (pool.length === 0) ['SAINS', 'MATH', 'SEJARAH', 'ASK'].forEach(s => QUESTION_BANK[s].forEach(item => pool.push({ ...item, subj: s })));
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+window.openQuiz = function(mode = 'manual', orbRef = null) {
+  if (game.over || game.paused) return;
+  if (mode === 'remediate' && game.missedQueue.length === 0) { showBanner('🌟 Tiada soalan salah untuk diulang kaji!', '#4ade80'); return; }
+  const shieldedBoss = game.zombies.find(z => z.isBoss && z.shielded);
+  if (mode === 'manual' && shieldedBoss) mode = 'boss_shield';
+  game.paused = true; game.quizMode = mode; game.pendingOrb = orbRef; quizAnswered = false;
+  activeQuestion = pickQuestion(mode);
+  const diffLabel = activeQuestion.diff || 'Asas', lvlTag = activeQuestion.lvl ? ` • ${activeQuestion.lvl}` : '';
+  const tagMap = {
+    orb: `🔮 KUNCI ILMU ORB ${orbRef ? orbRef.name : ''} (${activeQuestion.subj}${lvlTag})`,
+    capsule: `📦 KAPSUL BONUS ILMU (${activeQuestion.subj}${lvlTag})`,
+    boss_shield: `🛡️ PEMECAH PERISAI BOSS (${activeQuestion.subj}${lvlTag})`,
+    remediate: `🔁 MISI PENEBUSAN ULANG KAJI (${activeQuestion.subj}${lvlTag})`,
+    manual: `⚡ KUIZ SUMBER (${activeQuestion.subj}${lvlTag})`
+  };
+  document.getElementById('quizTag').textContent = tagMap[mode] || tagMap.manual;
+  const diffEl = document.getElementById('quizDiffTag');
+  diffEl.className = 'diff-tag ' + (diffLabel === 'KBAT' ? 'diff-kbat' : diffLabel === 'Sederhana' ? 'diff-sederhana' : 'diff-asas');
+  diffEl.textContent = diffLabel === 'KBAT' ? '🔴 KBAT (2x Ganjaran)' : diffLabel === 'Sederhana' ? '🟡 SEDERHANA' : '🟢 ASAS';
+  document.getElementById('quizQuestion').innerText = (game.langMode === 'DLP' && activeQuestion.q_dlp) ? `${activeQuestion.q}\n(${activeQuestion.q_dlp})` : activeQuestion.q;
+  document.getElementById('quizHintBox').style.display = 'none'; document.getElementById('quizExplain').style.display = 'none';
+  document.getElementById('btnHint').disabled = game.wood < 15; document.getElementById('btnFifty').disabled = game.stone < 20;
+  const optsEl = document.getElementById('quizOptions'); optsEl.innerHTML = '';
+  activeQuestion.opts.forEach((opt, i) => {
+    const btn = document.createElement('button'); btn.className = 'quiz-opt'; btn.dataset.idx = i;
+    btn.textContent = `${['A','B','C','D'][i]}. ${opt}`; btn.onclick = () => submitQuizAnswer(i, btn);
+    optsEl.appendChild(btn);
+  });
+  quizStartTime = performance.now(); clearInterval(quizTimerInterval);
+  quizTimerInterval = setInterval(() => {
+    const sec = ((performance.now() - quizStartTime) / 1000).toFixed(1), tEl = document.getElementById('quizTimerDisplay');
+    tEl.textContent = `⏱️ ${sec}s`; tEl.style.color = parseFloat(sec) <= 8.0 ? '#4ade80' : '#facc15';
+  }, 100);
+  document.getElementById('quizModal').style.display = 'flex';
+};
+window.useHintLifeline = function() {
+  if (quizAnswered || game.wood < 15) return;
+  game.wood -= 15; updateHud(); document.getElementById('btnHint').disabled = true;
+  const hb = document.getElementById('quizHintBox'); hb.style.display = 'block';
+  hb.innerHTML = `💡 <b>Petunjuk Guru:</b> ${activeQuestion.hint || 'Teliti kata kunci dalam soalan dengan cermat.'}`;
+};
+window.useFiftyLifeline = function() {
+  if (quizAnswered || game.stone < 20) return;
+  game.stone -= 20; updateHud(); document.getElementById('btnFifty').disabled = true;
+  const wrongIndices = [0, 1, 2, 3].filter(i => i !== activeQuestion.ans).sort(() => Math.random() - 0.5).slice(0, 2);
+  document.querySelectorAll('.quiz-opt').forEach((btn, idx) => { if (wrongIndices.includes(idx)) btn.classList.add('eliminated'); });
+};
+function submitQuizAnswer(idx, btnEl) {
+  if (quizAnswered) return;
+  quizAnswered = true; clearInterval(quizTimerInterval);
+  const elapsed = (performance.now() - quizStartTime) / 1000;
+  game.quizTotal++;
+  const subjKey = activeQuestion.subj || 'SAINS';
+  if (!game.subjStats[subjKey]) game.subjStats[subjKey] = { c: 0, t: 0 };
+  game.subjStats[subjKey].t++;
+  const allBtns = document.querySelectorAll('.quiz-opt');
+  allBtns.forEach(b => b.disabled = true); allBtns[activeQuestion.ans].classList.add('correct');
+  const expBox = document.getElementById('quizExplain'); expBox.style.display = 'block';
+  if (idx === activeQuestion.ans) {
+    game.quizCorrect++; game.subjStats[subjKey].c++; game.upgradePts++;
+    const mult = game.streak; game.streak = Math.min(5, game.streak + 1);
+    if (game.streak > game.bestStreak) game.bestStreak = game.streak;
+    const kbatMult = activeQuestion.diff === 'KBAT' ? 2 : 1, fastBonus = elapsed <= 8.0 ? 15 : 0;
+    const bonusW = ((game.quizMode === 'capsule' ? 65 : 45) * mult * kbatMult) + fastBonus;
+    const bonusS = ((game.quizMode === 'capsule' ? 55 : 40) * mult * kbatMult) + fastBonus;
+    game.wood += bonusW; game.stone += bonusS;
+    const myCore = getMyCore(); myCore.hp = Math.min(myCore.maxHp, myCore.hp + 12); syncCoreHpToRoom(game.myTeam);
+    gainPlayerXp(game.tanks[0], (45 * mult * kbatMult) + (fastBonus ? 20 : 0));
+    if (game.quizMode === 'remediate' && game.missedQueue.length > 0) game.missedQueue.shift();
+    playSfx(820, 'sine', 0.18, 0.06);
+    const speedTag = fastBonus > 0 ? ` • ⚡ Kilat (${elapsed.toFixed(1)}s)!` : '';
+    expBox.innerHTML = `✅ <b>TEPAT! (Streak x${mult}${kbatMult > 1 ? ' • KBAT 2x' : ''}${speedTag})</b><br>+${bonusW}🪵 +${bonusS}🪨, +1 ✨ Mata Naik Taraf & +12% Teras.<br>💡 ${activeQuestion.exp}`;
+    if (game.quizMode === 'orb' && game.pendingOrb) {
+      game.pendingOrb.owner = game.myTeam; game.pendingOrb.hp = game.pendingOrb.maxHp;
+      syncDominatorToRoom(game.pendingOrb); playOrbCaptureSfx();
+      const teamCol = game.myTeam === 'red' ? '#fb7185' : '#38bdf8', teamIcon = game.myTeam === 'red' ? '🔴' : '🔵';
+      addFloatText(game.pendingOrb.x, game.pendingOrb.y - 50, `${teamIcon} ORB ${game.pendingOrb.name} DITAWAN!`, teamCol);
+      checkDominationVictory();
+    } else if (game.quizMode === 'boss_shield') {
+      const boss = game.zombies.find(z => z.isBoss && z.shielded);
+      if (boss) {
+        boss.shielded = false; boss.hp = Math.round(boss.hp * 0.65);
+        playExplosionSfx(true); spawnParticles(boss.x, boss.y, '#facc15', 25);
+        addFloatText(boss.x, boss.y - 35, '💥 PERISAI BOSS PECAH!', '#facc15');
+      }
+    }
+  } else {
+    btnEl.classList.add('wrong'); game.streak = 1;
+    if (!game.missedQueue.some(item => item.q === activeQuestion.q)) game.missedQueue.push(activeQuestion);
+    playSfx(160, 'sawtooth', 0.22, 0.06);
+    expBox.innerHTML = `❌ <b>KURANG TEPAT!</b> Jawapan tepat: <b>${activeQuestion.opts[activeQuestion.ans]}</b>.<br>💡 ${activeQuestion.exp}`;
+    if (game.quizMode === 'orb' && game.pendingOrb) {
+      game.pendingOrb.hp = Math.round(game.pendingOrb.maxHp * 0.35);
+      addFloatText(game.pendingOrb.x, game.pendingOrb.y - 45, '🔒 ORB TERKUNCI! CUBA LAGI!', '#fb7185');
+    }
+  }
+  syncPlayerMetaToRoom(); updateHud();
+  setTimeout(() => { closeQuiz(); }, 2100);
+}
+window.closeQuiz = function() {
+  clearInterval(quizTimerInterval); document.getElementById('quizModal').style.display = 'none';
+  game.paused = false; game.pendingOrb = null;
+};
+window.openCustomModal = function() { game.paused = true; document.getElementById('customModal').style.display = 'flex'; };
+window.closeCustomModal = function() { document.getElementById('customModal').style.display = 'none'; game.paused = false; };
+window.saveCustomQuestions = function() {
+  const raw = document.getElementById('customInput').value.trim();
+  if (raw) {
+    let added = 0;
+    raw.split('\n').forEach(line => {
+      const parts = line.split('|').map(s => s.trim());
+      if (parts.length >= 6) {
+        const ansIdx = Math.max(0, Math.min(3, (parseInt(parts[5], 10) || 1) - 1));
+        QUESTION_BANK.CUSTOM.push({ lvl: 'CUSTOM', diff: 'Sederhana', q: parts[0], opts: [parts[1], parts[2], parts[3], parts[4]], ans: ansIdx, hint: 'Soalan khas disediakan oleh guru.', exp: parts[6] || 'Soalan tambahan guru.' });
+        added++;
+      }
+    });
+    if (added > 0) {
+      try { localStorage.setItem('omega_edu_custom_q', JSON.stringify(QUESTION_BANK.CUSTOM)); } catch (err) {}
+      document.getElementById('subjectSelect').value = 'CUSTOM'; game.subject = 'CUSTOM';
+      if (window.fbReady && netState.roomKey) {
+        window.fbSet(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/customQuestions`), { sender: game.studentName || 'Guru', items: QUESTION_BANK.CUSTOM, ts: Date.now() }).catch(() => {});
+      }
+      showBanner(`✅ ${added} Soalan Guru disimpan & dikongsi ke seluruh bilik!`, '#4ade80');
+    }
+  }
+  closeCustomModal();
+};
+window.clearCustomQuestions = function() {
+  QUESTION_BANK.CUSTOM = [];
+  try { localStorage.removeItem('omega_edu_custom_q'); } catch (err) {}
+  if (window.fbReady && netState.roomKey) window.fbRemove(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/customQuestions`)).catch(() => {});
+  showBanner('🗑️ Senarai soalan custom telah dikosongkan.', '#fb7185');
+};
+window.showReportModal = function(withAutoReset = false) {
+  const acc = game.quizTotal > 0 ? Math.round((game.quizCorrect / game.quizTotal) * 100) : 0;
+  const subjNames = { SAINS: '🔬 Sains', MATH: '📐 Matematik', SEJARAH: '🏛️ Sejarah', ASK: '💻 Asas Sains Komputer', CUSTOM: '✏️ Soalan Guru' };
+  const barColors = { SAINS: '#4ade80', MATH: '#38bdf8', SEJARAH: '#facc15', ASK: '#c084fc', CUSTOM: '#fb923c' };
+  let barsHtml = '';
+  Object.keys(subjNames).forEach(k => {
+    const st = game.subjStats[k] || { c: 0, t: 0 };
+    if (st.t > 0 || ['SAINS','MATH','SEJARAH','ASK'].includes(k)) {
+      const pct = st.t > 0 ? Math.round((st.c / st.t) * 100) : 0;
+      barsHtml += `<div class="bar-row"><div class="bar-label"><span>${subjNames[k]}</span><span>${st.c}/${st.t} (${pct}%)</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${barColors[k]};"></div></div></div>`;
+    }
+  });
+  const missedHtml = game.missedQueue.length > 0
+    ? `<div style="margin-top:10px;"><b>📌 Topik Perlu Ulang Kaji (${game.missedQueue.length}):</b><ul style="margin-left:18px;margin-top:4px;color:#fda4af;">${game.missedQueue.slice(0, 4).map(m => `<li>[${m.subj}] ${m.q}</li>`).join('')}</ul></div>`
+    : `<div style="margin-top:10px; color:#4ade80;">🌟 Cemerlang! Tiada kesilapan konsep direkodkan.</div>`;
+  const wins = netState.teamWins || { blue: 0, red: 0 };
+  if (!game.over) { document.getElementById('endTitle').textContent = '📊 LAPORAN PENTAKSIRAN MURID (PBD)'; document.getElementById('endTitle').style.color = '#38bdf8'; }
+  document.getElementById('endDesc').textContent = `${game.studentName} (${game.studentClass}) • Pasukan ${game.myTeam === 'red' ? 'Merah' : 'Biru'} • Pusingan #${game.round || 1}`;
+  document.getElementById('reportStats').innerHTML = `
+    <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; padding-bottom:6px; border-bottom:1px solid #334155;">
+      <span>🏆 <b>Skor Siri:</b> 🔵 ${wins.blue} — ${wins.red} 🔴</span>
+      <span>🎯 <b>Kuiz:</b> ${game.quizCorrect}/${game.quizTotal} (${acc}%)</span>
+      <span>🔥 <b>Streak:</b> x${game.bestStreak}</span>
+      <span>⭐ <b>Tangki:</b> Lv.${game.tanks[0].lvl}</span>
+    </div>
+    <div style="margin-top:8px; font-weight:800; color:#facc15;">📈 Analisis Penguasaan Mengikut Subjek:</div>
+    ${barsHtml}${missedHtml}`;
+  const switchBox = document.getElementById('roundTeamSwitchBox');
+  if (switchBox) { switchBox.style.display = game.over ? 'block' : 'none'; selectNextRoundTeam(game.myTeam || 'blue'); }
+  document.getElementById('btnResumeGame').style.display = game.over ? 'none' : 'inline-block';
+  document.getElementById('endModal').style.display = 'flex';
+  if (withAutoReset && game.over) startAutoResetCountdown(); else stopAutoResetCountdown();
+};
+window.exportReportCSV = function() {
+  stopAutoResetCountdown();
+  const acc = game.quizTotal > 0 ? Math.round((game.quizCorrect / game.quizTotal) * 100) : 0, s = game.subjStats, wins = netState.teamWins || { blue: 0, red: 0 };
+  const rows = [
+    ['Nama Murid', 'Kelas', 'Pasukan', 'Pusingan', 'Skor Biru', 'Skor Merah', 'Kurikulum', 'Jawapan Tepat', 'Jumlah Soalan', 'Peratus (%)', 'Streak Terbaik', 'Sains', 'Matematik', 'Sejarah', 'ASK', 'Topik Ulang Kaji'],
+    [`"${game.studentName}"`, `"${game.studentClass}"`, game.myTeam.toUpperCase(), game.round || 1, wins.blue, wins.red, game.levelFilter, game.quizCorrect, game.quizTotal, acc, game.bestStreak, `${s.SAINS.c}/${s.SAINS.t}`, `${s.MATH.c}/${s.MATH.t}`, `${s.SEJARAH.c}/${s.SEJARAH.t}`, `${s.ASK.c}/${s.ASK.t}`, `"${game.missedQueue.map(m => m.q).join(' ; ')}"`]
+  ];
+  const link = document.createElement('a');
+  link.setAttribute('href', encodeURI('data:text/csv;charset=utf-8,' + rows.map(r => r.join(',')).join('\n')));
+  link.setAttribute('download', `Laporan_PBD_${game.studentName.replace(/\s+/g, '_')}.csv`);
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+};
+window.setBuildMode = function(m) {
+  game.buildMode = m;
+  for (let i = 0; i <= 5; i++) document.getElementById('mode' + i).classList.toggle('active', i === m);
+};
+window.toggleAutoFire = function() {
+  game.autoFire = !game.autoFire;
+  const btn = document.getElementById('btnAutoFire');
+  btn.textContent = `🔥 Auto-Fire [E]: ${game.autoFire ? 'ON' : 'OFF'}`; btn.classList.toggle('on', game.autoFire);
+};
+window.toggleCoop = function() {
+  game.coopP2 = !game.coopP2;
+  const btn = document.getElementById('btnCoop');
+  btn.textContent = `👥 Co-op P2: ${game.coopP2 ? 'ON' : 'OFF'}`; btn.classList.toggle('on', game.coopP2);
+  const existingP2 = game.tanks.find(t => t.id === 'p2');
+  if (game.coopP2 && !existingP2) {
+    const p1 = game.tanks[0];
+    game.tanks.push({ id: 'p2', name: 'PEMAIN 2 (ARROW)', team: game.myTeam, aura: '#2dd4bf', isP2: true, x: p1.x + 50, y: p1.y, vx: 0, vy: 0, r: 19, angle: 0, hp: 150, displayHp: 150, maxHp: 150, xp: 0, lvl: p1.lvl, tankClass: 'Twin', cd: 0, speed: 3.8, recoils: [] });
+  } else if (!game.coopP2 && existingP2) {
+    game.tanks = game.tanks.filter(t => t.id !== 'p2');
+  }
+};
+function isAnyModalOpen() {
+  return ['setupModal', 'customModal', 'quizModal', 'endModal'].some(id => { const el = document.getElementById(id); return el && el.style.display === 'flex'; });
+}
+window.addEventListener('keydown', e => {
+  if (document.activeElement && document.activeElement.id === 'inpQuickChat') return;
+  if (document.getElementById('setupModal').style.display === 'flex' || document.getElementById('customModal').style.display === 'flex') return;
+  const k = e.key.toLowerCase();
+  if (document.getElementById('quizModal').style.display === 'flex') {
+    if (['a','b','c','d','1','2','3','4'].includes(k)) {
+      const map = { a:0, '1':0, b:1, '2':1, c:2, '3':2, d:3, '4':3 }, btns = document.querySelectorAll('.quiz-opt');
+      if (btns[map[k]] && !btns[map[k]].classList.contains('eliminated')) btns[map[k]].click();
+    }
+    if (k === 'escape') closeQuiz();
+    return;
+  }
+  if (document.getElementById('endModal').style.display === 'flex') {
+    if (k === 'escape' && !game.over) document.getElementById('endModal').style.display = 'none';
+    return;
+  }
+  keys[k] = true;
+  if (['0','1','2','3','4','5'].includes(k)) setBuildMode(parseInt(k));
+  if (['6','7','8','9'].includes(k)) upgradeStat(parseInt(k) - 6);
+  if (k === 'b') setBuildMode(0);
+  if (k === 'q') openQuiz('manual');
+  if (k === 'e') toggleAutoFire();
+  if (k === 'z') spawnTestZombie(e.shiftKey);
+  if (e.code === 'Space') { e.preventDefault(); triggerDash(); }
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+canvas.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+canvas.addEventListener('mousedown', e => {
+  if (e.button === 2) { setBuildMode(0); return; }
+  const size = 165, mx = canvas.width - size - 14, my = canvas.height - size - 14;
+  if (e.clientX >= mx && e.clientX <= mx + size && e.clientY >= my && e.clientY <= my + size) {
+    if (!game.over && !isAnyModalOpen()) {
+      triggerMinimapPing(((e.clientX - mx) / size) * WORLD, ((e.clientY - my) / size) * WORLD, game.myTeam, game.studentName || 'Ejen', true);
+    }
+    return;
+  }
+  mouse.down = true;
+  if (game.buildMode > 0 && !game.over && !game.paused && !isAnyModalOpen()) handleBuildClick();
+});
+canvas.addEventListener('mouseup', () => { mouse.down = false; });
+canvas.addEventListener('contextmenu', e => e.preventDefault());
+function triggerDash() {
+  const p1 = game.tanks[0]; if (!p1 || p1.hp <= 0 || p1.dashCd > 0) return;
+  p1.dashCd = 105; p1.dashFrames = 9; p1.vx = Math.cos(p1.angle) * 11.5; p1.vy = Math.sin(p1.angle) * 11.5;
+  playDashSfx(); spawnParticles(p1.x, p1.y, '#38bdf8', 14);
+}
+function updateCamera(dt) {
+  const p1 = game.tanks[0]; if (!p1) return;
+  const spec = CLASS_DEFS[p1.tankClass] || CLASS_DEFS.Basic;
+  camState.zoom = lerp(camState.zoom, spec.fov, smoothFactor(0.1, dt));
+  const targetX = p1.x - (canvas.width / 2) / camState.zoom, targetY = p1.y - (canvas.height / 2) / camState.zoom;
+  if (!camState.initialized) { camState.x = targetX; camState.y = targetY; camState.initialized = true; }
+  else { const cFactor = smoothFactor(0.16, dt); camState.x = lerp(camState.x, targetX, cFactor); camState.y = lerp(camState.y, targetY, cFactor); }
+}
+function getCamera() { return camState; }
+function screenToWorld(sx, sy) { const cam = getCamera(); return { x: sx / cam.zoom + cam.x, y: sy / cam.zoom + cam.y }; }
+function handleBuildClick() {
+  const wp = screenToWorld(mouse.x, mouse.y), gx = Math.round(wp.x / 44) * 44, gy = Math.round(wp.y / 44) * 44;
+  if (game.buildMode === 5) {
+    const b = game.buildings.find(item => item.team === game.myTeam && Math.hypot(item.x - wp.x, item.y - wp.y) < 30);
+    if (!b || game.wood < 25 || game.stone < 25) return;
+    game.wood -= 25; game.stone -= 25;
+    if (b.tier < 3) { b.tier++; b.maxHp = Math.round(b.maxHp * 1.45); b.hp = b.maxHp; addFloatText(b.x, b.y - 20, `⬆️ TIER ${b.tier}!`, '#4ade80'); }
+    else { b.hp = b.maxHp; addFloatText(b.x, b.y - 20, '🔧 DIBAIKI!', '#38bdf8'); }
+    playBuildSfx(); syncBuildingToRoom(b); updateHud(); return;
+  }
+  const spec = BUILD_SPECS[game.buildMode];
+  if (!spec || game.wood < spec.wood || game.stone < spec.stone) { addFloatText(gx, gy, 'Sumber tak cukup! Tekan [Q] Kuiz', '#facc15'); return; }
+  if (Math.hypot(gx - BLUE_CORE_POS.x, gy - BLUE_CORE_POS.y) < 68 || Math.hypot(gx - RED_CORE_POS.x, gy - RED_CORE_POS.y) < 68 || game.buildings.some(b => Math.hypot(b.x - gx, b.y - gy) < 36)) return;
+  game.wood -= spec.wood; game.stone -= spec.stone;
+  const newB = { syncId: 'bld_' + gx + '_' + gy + '_' + Date.now().toString(36), team: game.myTeam, type: game.buildMode, x: gx, y: gy, r: spec.r, hp: spec.hp, displayHp: spec.hp, maxHp: spec.hp, tier: 1, cd: 0, color: spec.color };
+  game.buildings.push(newB); playBuildSfx(); syncBuildingToRoom(newB); spawnParticles(gx, gy, spec.color, 10); updateHud();
+}
+function gainPlayerXp(tank, amount) {
+  const maxLvl = typeof MAX_LEVEL === 'number' ? MAX_LEVEL : 25;
+  if (tank.lvl >= maxLvl) {
+    tank.lvl = maxLvl;
+    tank.xp = 0;
+    return;
+  }
+  tank.xp += amount;
+  while (tank.lvl < maxLvl) {
+    const nextReq = Math.round(tank.lvl * 85 + (tank.lvl - 1) * 18);
+    if (tank.xp < nextReq) break;
+    tank.xp -= nextReq;
+    tank.lvl++;
+    tank.maxHp += 14;
+    tank.hp = tank.maxHp;
+    if (tank.isPlayer) {
+      game.upgradePts++;
+      playSfx(680, 'triangle', 0.14, 0.045);
+      const maxBadge = tank.lvl === maxLvl ? ' 👑 MAX LV.25!' : '';
+      addFloatText(tank.x, tank.y - 30, `⭐ LV.${tank.lvl}${maxBadge} (+1 Mata Naik Taraf)`, '#facc15');
+      const branches = EVO_TREE[tank.tankClass];
+      const evoMilestones = [3, 6, 12, 18];
+      if (branches && evoMilestones.includes(tank.lvl)) {
+        const panel = document.getElementById('evoPanel'), grid = document.getElementById('evoOptions'); grid.innerHTML = '';
+        branches.forEach(cls => {
+          const btn = document.createElement('button'); btn.className = 'evo-btn'; btn.textContent = `⚡ ${cls}`;
+          btn.onclick = () => { tank.tankClass = cls; tank.recoils = []; panel.style.display = 'none'; playOrbCaptureSfx(); updateHud(); };
+          grid.appendChild(btn);
+        });
+        panel.style.display = 'flex';
+      }
+    }
+  }
+  if (tank.lvl >= maxLvl) {
+    tank.lvl = maxLvl;
+    tank.xp = 0;
+  }
+}
+function fireTank(tank, isRemote = false) {
+  const spec = CLASS_DEFS[tank.tankClass] || CLASS_DEFS.Basic; if (tank.cd > 0) return;
+  const spdMult = tank.isPlayer ? (1 + game.stats[0] * 0.14) : 1;
+  const dmgStatMult = tank.isPlayer ? (1 + game.stats[1] * 0.16) : 1;
+  const reloadStatMult = tank.isPlayer ? Math.pow(0.88, game.stats[2]) : 1;
+  const rapidMult = (tank.rapidTimer && tank.rapidTimer > 0) ? 0.55 : 1;
+  const lvlMult = (1 + (tank.lvl - 1) * 0.08) * dmgStatMult;
+  let maxCd = 16;
+  if (!tank.recoils) tank.recoils = [];
+  spec.barrels.forEach((b, bIdx) => {
+    maxCd = b.cd; tank.recoils[bIdx] = 5.5;
+    const spread = b.spread ? (Math.random() - 0.5) * b.spread : 0, ang = tank.angle + b.ang + spread, finalSpd = b.spd * spdMult;
+    game.bullets.push({ x: tank.x + Math.cos(ang) * (b.l + 4), y: tank.y + Math.sin(ang) * (b.l + 4), vx: Math.cos(ang) * finalSpd, vy: Math.sin(ang) * finalSpd, dmg: Math.round(b.dmg * lvlMult), team: tank.team, owner: tank, r: b.w * 0.45, pierce: !!b.pierce, life: Math.round(62 / spec.fov) });
+  });
+  tank.cd = Math.max(3, maxCd * reloadStatMult * rapidMult);
+  if (tank.isPlayer || tank.isP2 || isRemote) playShootSfx(tank.tankClass, isRemote);
+  if (tank.isPlayer) netState.lastShotTs = Date.now();
+}
+function update(dt = 1) {
+  if (game.over || game.paused || document.getElementById('setupModal').style.display === 'flex') return;
+  game.animTime += 0.05 * dt;
+  const hpLerp = smoothFactor(0.18, dt);
+  game.cores.blue.displayHp = lerp(game.cores.blue.displayHp ?? game.cores.blue.hp, game.cores.blue.hp, hpLerp);
+  game.cores.red.displayHp  = lerp(game.cores.red.displayHp ?? game.cores.red.hp, game.cores.red.hp, hpLerp);
+  const serverNow = Date.now() + (netState.serverOffset || 0), totalSec = Math.floor(serverNow / 1000), secInCycle = totalSec % 60, shouldBeNight = secInCycle >= 35;
+  if (shouldBeNight !== game.isNight) {
+    game.isNight = shouldBeNight;
+    if (game.isNight) { playSfx(145, 'sawtooth', 0.28, 0.045); showBanner(`🌙 MALAM KE-${game.nightCount}! Lindungi Teras Pasukan daripada gelombang Zombs!`, '#e9d5ff'); }
+    else { game.nightCount++; const myC = getMyCore(); myC.hp = Math.min(myC.maxHp, myC.hp + 10); syncCoreHpToRoom(game.myTeam); playSfx(580, 'sine', 0.22, 0.045); showBanner(`☀️ SIANG TIBA! +10% Teras Pasukan dipulihkan. Tawan Orb & rebut Power-Up!`, '#fde047'); }
+  }
+  const remSec = game.isNight ? (60 - secInCycle) : (35 - secInCycle); game.phaseTimer = Math.max(1, remSec) * 60;
+  if (game.isNight) {
+    const waveSlot = Math.floor(totalSec / 3);
+    if (netState.lastWaveSlot !== waveSlot) {
+      netState.lastWaveSlot = waveSlot;
+      const rng = createSeededRng(hashRoomSeed(`${netState.roomKey}_R${game.round}_${waveSlot}`));
+      const side = Math.floor(rng() * 2), zx = 350 + rng() * (WORLD - 700), zy = side === 0 ? 45 : WORLD - 45;
+      const isBoss = rng() < 0.18 && !game.zombies.some(z => z.isBoss);
+      const hp = Math.round((isBoss ? 240 : 55) * (1 + (game.nightCount - 1) * 0.25));
+      game.zombies.push({ x: zx, y: zy, r: isBoss ? 25 : 15, hp, displayHp: hp, maxHp: hp, speed: isBoss ? 1.15 : 1.75, dmg: isBoss ? 15 : 6, isBoss, shielded: isBoss, slowTimer: 0, atkCd: 0 });
+      if (isBoss) showBanner('👹 BOSS BERPERISAI MUNCUL! Tekan [Q] untuk memecahkan perisainya!', '#fb7185');
+    }
+  }
+  game.mineTimer += dt;
+  if (game.mineTimer >= 180) {
+    game.mineTimer -= 180;
+    game.buildings.forEach(b => { if (b.team === game.myTeam && b.type === 2) { game.wood += 6 * b.tier; game.stone += 5 * b.tier; } });
+  }
+  const moveSmooth = smoothFactor(0.28, dt), recoilDecay = Math.pow(0.76, dt), myBase = game.myTeam === 'red' ? RED_CORE_POS : BLUE_CORE_POS;
+  game.tanks.forEach(t => {
+    if (t.hp <= 0) {
+      if (t.isPlayer) { t.hp = t.maxHp; t.displayHp = t.maxHp; t.x = myBase.x + (game.myTeam === 'red' ? -80 : 80); t.y = myBase.y + 60; t.vx = 0; t.vy = 0; }
+      else { t.respawn = (t.respawn || 300) - dt; if (t.respawn <= 0) { t.hp = t.maxHp; t.displayHp = t.maxHp; const sp = t.team === 'red' ? RED_CORE_POS : BLUE_CORE_POS; t.x = sp.x; t.y = sp.y + (Math.random() - 0.5) * 140; t.vx = 0; t.vy = 0; } }
+      return;
+    }
+    t.displayHp = lerp(t.displayHp ?? t.hp, t.hp, hpLerp);
+    if (t.recoils) for (let r = 0; r < t.recoils.length; r++) t.recoils[r] = (t.recoils[r] || 0) * recoilDecay;
+    if (t.cd > 0) t.cd = Math.max(0, t.cd - dt); if (t.dashCd > 0) t.dashCd = Math.max(0, t.dashCd - dt);
+    if (t.shieldTimer > 0) t.shieldTimer = Math.max(0, t.shieldTimer - dt); if (t.rapidTimer > 0) t.rapidTimer = Math.max(0, t.rapidTimer - dt);
+    if (t.isPlayer) {
+      if (t.dashFrames > 0) {
+        t.dashFrames -= dt; t.x = Math.max(25, Math.min(WORLD - 25, t.x + t.vx * dt)); t.y = Math.max(25, Math.min(WORLD - 25, t.y + t.vy * dt));
+        if (Math.random() < 0.65) spawnParticles(t.x, t.y, '#7dd3fc', 1);
+      } else {
+        let dx = (keys['d'] ? 1 : 0) - (keys['a'] ? 1 : 0), dy = (keys['s'] ? 1 : 0) - (keys['w'] ? 1 : 0), tvx = 0, tvy = 0;
+        if (dx || dy) { const l = Math.hypot(dx, dy); tvx = (dx / l) * t.speed; tvy = (dy / l) * t.speed; }
+        t.vx = lerp(t.vx || 0, tvx, moveSmooth); t.vy = lerp(t.vy || 0, tvy, moveSmooth);
+        t.x = Math.max(25, Math.min(WORLD - 25, t.x + t.vx * dt)); t.y = Math.max(25, Math.min(WORLD - 25, t.y + t.vy * dt));
+      }
+      const wp = screenToWorld(mouse.x, mouse.y); t.angle = Math.atan2(wp.y - t.y, wp.x - t.x);
+      if ((mouse.down && game.buildMode === 0) || game.autoFire) fireTank(t, false);
+      for (let pIdx = game.powerups.length - 1; pIdx >= 0; pIdx--) {
+        const pu = game.powerups[pIdx];
+        if (Math.hypot(t.x - pu.x, t.y - pu.y) < t.r + pu.r) {
+          game.powerups.splice(pIdx, 1); playOrbCaptureSfx();
+          if (pu.kind === 'heal') { t.hp = Math.min(t.maxHp, t.hp + 55); const mc = getMyCore(); mc.hp = Math.min(mc.maxHp, mc.hp + 8); syncCoreHpToRoom(game.myTeam); addFloatText(t.x, t.y - 32, '💚 +55 HP & +8% TERAS!', '#4ade80'); }
+          else if (pu.kind === 'shield') { t.shieldTimer = 480; addFloatText(t.x, t.y - 32, '🛡️ PERISAI TENAGA (8s)!', '#38bdf8'); }
+          else if (pu.kind === 'rapid') { t.rapidTimer = 420; addFloatText(t.x, t.y - 32, '⚡ TEMBAKAN KILAT (7s)!', '#facc15'); }
+          setTimeout(() => spawnPowerup(), 12000);
+        }
+      }
+    } else if (t.isP2) {
+      let dx = (keys['arrowright'] ? 1 : 0) - (keys['arrowleft'] ? 1 : 0), dy = (keys['arrowdown'] ? 1 : 0) - (keys['arrowup'] ? 1 : 0), tvx = 0, tvy = 0;
+      if (dx || dy) { const l = Math.hypot(dx, dy); tvx = (dx / l) * t.speed; tvy = (dy / l) * t.speed; }
+      t.vx = lerp(t.vx || 0, tvx, moveSmooth); t.vy = lerp(t.vy || 0, tvy, moveSmooth);
+      t.x = Math.max(25, Math.min(WORLD - 25, t.x + t.vx * dt)); t.y = Math.max(25, Math.min(WORLD - 25, t.y + t.vy * dt));
+      const target = findNearestHostile(t.x, t.y, t.team, 460);
+      if (target) { t.angle = lerpAngle(t.angle, Math.atan2(target.y - t.y, target.x - t.x), smoothFactor(0.22, dt)); fireTank(t, false); }
+    } else if (t.isBot) {
+      const targetEnemyCore = t.team === 'blue' ? game.cores.red : game.cores.blue;
+      let goal = findNearestHostile(t.x, t.y, t.team, 440) || game.dominators.find(d => d.owner !== t.team) || targetEnemyCore;
+      const dist = Math.hypot(goal.x - t.x, goal.y - t.y);
+      t.angle = lerpAngle(t.angle, Math.atan2(goal.y - t.y, goal.x - t.x), smoothFactor(0.18, dt));
+      const tvx = dist > 175 ? Math.cos(t.angle) * t.speed : 0, tvy = dist > 175 ? Math.sin(t.angle) * t.speed : 0;
+      t.vx = lerp(t.vx || 0, tvx, moveSmooth); t.vy = lerp(t.vy || 0, tvy, moveSmooth);
+      t.x = Math.max(25, Math.min(WORLD - 25, t.x + t.vx * dt)); t.y = Math.max(25, Math.min(WORLD - 25, t.y + t.vy * dt));
+      if (dist < 420) fireTank(t, false);
+    }
+  });
+  const remotePosLerp = smoothFactor(0.24, dt), remoteAngLerp = smoothFactor(0.28, dt);
+  Object.values(netState.remotePlayers || {}).forEach(p => {
+    if (!p || typeof p.x !== 'number' || typeof p.y !== 'number') return;
+    if (typeof p.renderX !== 'number') { p.renderX = p.x; p.renderY = p.y; p.renderAngle = p.angle || 0; p.displayHp = p.hp ?? 150; }
+    else { p.renderX = lerp(p.renderX, p.x, remotePosLerp); p.renderY = lerp(p.renderY, p.y, remotePosLerp); p.renderAngle = lerpAngle(p.renderAngle || 0, p.angle || 0, remoteAngLerp); p.displayHp = lerp(p.displayHp ?? (p.hp ?? 150), p.hp ?? 150, hpLerp); }
+    if (p.recoils) for (let r = 0; r < p.recoils.length; r++) p.recoils[r] = (p.recoils[r] || 0) * recoilDecay;
+  });
+  const p1 = game.tanks[0];
+  game.buildings.forEach(b => {
+    b.displayHp = lerp(b.displayHp ?? b.hp, b.hp, hpLerp);
+    if (b.cd > 0) { b.cd = Math.max(0, b.cd - dt); return; }
+    if (b.type === 3 || b.type === 4) {
+      const bTeam = b.team || 'blue', target = findNearestHostile(b.x, b.y, bTeam, 275 + b.tier * 25);
+      if (target) {
+        b.cd = b.type === 3 ? 20 : 40; const ang = Math.atan2(target.y - b.y, target.x - b.x);
+        game.bullets.push({ x: b.x, y: b.y, vx: Math.cos(ang)*10, vy: Math.sin(ang)*10, dmg: (b.type===3?18:10)*b.tier, team: bTeam, owner: bTeam === game.myTeam ? p1 : null, r: 5, isCryo: b.type===4, life: 36 });
+      }
+    }
+  });
+  game.dominators.forEach(dom => {
+    dom.displayHp = lerp(dom.displayHp ?? dom.hp, dom.hp, hpLerp);
+    if (dom.cd > 0) { dom.cd = Math.max(0, dom.cd - dt); return; }
+    if (dom.owner === 'neutral') return;
+    const target = findNearestHostile(dom.x, dom.y, dom.owner, 355);
+    if (target) {
+      dom.cd = 38; const ang = Math.atan2(target.y - dom.y, target.x - dom.x);
+      game.bullets.push({ x: dom.x + Math.cos(ang)*44, y: dom.y + Math.sin(ang)*44, vx: Math.cos(ang)*9.5, vy: Math.sin(ang)*9.5, dmg: 35, team: dom.owner, owner: null, r: 9, life: 45 });
+    }
+  });
+  game.resources.forEach(res => { res.hitScale = lerp(res.hitScale || 1, 1, smoothFactor(0.22, dt)); });
+  for (let i = game.zombies.length - 1; i >= 0; i--) {
+    const z = game.zombies[i];
+    z.displayHp = lerp(z.displayHp ?? z.hp, z.hp, hpLerp);
+    if (z.slowTimer > 0) z.slowTimer = Math.max(0, z.slowTimer - dt);
+    if (z.atkCd > 0) z.atkCd = Math.max(0, z.atkCd - dt);
+    const dBlue = Math.hypot(BLUE_CORE_POS.x - z.x, BLUE_CORE_POS.y - z.y), dRed = Math.hypot(RED_CORE_POS.x - z.x, RED_CORE_POS.y - z.y);
+    const targetCore = dBlue <= dRed ? game.cores.blue : game.cores.red;
+    const ang = Math.atan2(targetCore.y - z.y, targetCore.x - z.x), spd = z.speed * (z.slowTimer > 0 ? 0.45 : 1) * dt;
+    const nx = z.x + Math.cos(ang) * spd, ny = z.y + Math.sin(ang) * spd;
+    const hitB = game.buildings.find(b => Math.hypot(b.x - nx, b.y - ny) < z.r + b.r);
+    if (hitB) {
+      if (z.atkCd <= 0) {
+        z.atkCd = 35; hitB.hp -= z.dmg;
+        if (hitB.hp <= 0) { playExplosionSfx(false); spawnParticles(hitB.x, hitB.y, hitB.color, 12); removeBuildingFromRoom(hitB); game.buildings = game.buildings.filter(item => item !== hitB); }
+        else syncBuildingToRoom(hitB);
+      }
+    } else { z.x = nx; z.y = ny; }
+    if (Math.hypot(z.x - targetCore.x, z.y - targetCore.y) < z.r + 38 && z.atkCd <= 0) {
+      z.atkCd = 40; targetCore.hp = Math.max(0, targetCore.hp - (z.isBoss ? 12 : 4));
+      syncCoreHpToRoom(targetCore.team); checkCoreEliminationVictory();
+      if (game.over) return;
+    }
+  }
+  for (let i = game.bullets.length - 1; i >= 0; i--) {
+    const b = game.bullets[i]; b.x += b.vx * dt; b.y += b.vy * dt; b.life -= dt;
+    if (b.life <= 0 || b.x < 0 || b.x > WORLD || b.y < 0 || b.y > WORLD) { game.bullets.splice(i, 1); continue; }
+    let consumed = false;
+    for (let rIdx = game.resources.length - 1; rIdx >= 0; rIdx--) {
+      const res = game.resources[rIdx];
+      if (Math.hypot(res.x - b.x, res.y - b.y) < res.r + b.r) {
+        res.hp -= b.dmg; res.hitScale = 1.16;
+        if (b.owner && b.owner.isPlayer && res.kind !== 'capsule') { if (res.kind === 'wood') game.wood += 4; else game.stone += 4; }
+        if (res.hp <= 0) {
+          game.resources.splice(rIdx, 1); playExplosionSfx(false); spawnParticles(res.x, res.y, res.kind === 'capsule' ? '#facc15' : '#4ade80', 10);
+          setTimeout(() => spawnResource(res.kind), 6000);
+          if (res.kind === 'capsule' && b.owner && b.owner.isPlayer) openQuiz('capsule');
+          else if (b.owner) gainPlayerXp(b.owner, 18);
+        }
+        if (!b.pierce) { consumed = true; break; }
+      }
+    }
+    if (consumed) { game.bullets.splice(i, 1); continue; }
+    for (let zIdx = game.zombies.length - 1; zIdx >= 0; zIdx--) {
+      const z = game.zombies[zIdx];
+      if (Math.hypot(z.x - b.x, z.y - b.y) < z.r + b.r) {
+        const effDmg = z.shielded ? Math.max(2, Math.round(b.dmg * 0.3)) : b.dmg; z.hp -= effDmg;
+        if (b.isCryo) z.slowTimer = 140;
+        if (z.hp <= 0) {
+          playExplosionSfx(z.isBoss); spawnParticles(z.x, z.y, z.isBoss ? '#facc15' : '#4ade80', z.isBoss ? 22 : 12);
+          if (b.owner) gainPlayerXp(b.owner, z.isBoss ? 80 : 22);
+          if (b.owner && b.owner.isPlayer) { game.wood += 6; game.stone += 5; }
+          game.zombies.splice(zIdx, 1);
+        }
+        if (!b.pierce) { consumed = true; break; }
+      }
+    }
+    if (consumed) { game.bullets.splice(i, 1); continue; }
+    for (let bIdx = game.buildings.length - 1; bIdx >= 0; bIdx--) {
+      const bld = game.buildings[bIdx];
+      if (bld.team !== b.team && Math.hypot(bld.x - b.x, bld.y - b.y) < bld.r + b.r) {
+        bld.hp -= b.dmg;
+        if (bld.hp <= 0) { playExplosionSfx(false); spawnParticles(bld.x, bld.y, bld.color, 10); removeBuildingFromRoom(bld); game.buildings.splice(bIdx, 1); }
+        else syncBuildingToRoom(bld);
+        if (!b.pierce) { consumed = true; break; }
+      }
+    }
+    if (consumed) { game.bullets.splice(i, 1); continue; }
+    for (const t of game.tanks) {
+      if (t.hp > 0 && t.team !== b.team && Math.hypot(t.x - b.x, t.y - b.y) < t.r + b.r) {
+        if (!t.shieldTimer || t.shieldTimer <= 0) {
+          t.hp -= b.dmg;
+          if (t.hp <= 0) { playExplosionSfx(false); spawnParticles(t.x, t.y, t.team === 'blue' ? '#38bdf8' : '#fb7185', 16); if (b.owner) gainPlayerXp(b.owner, 60); }
+        }
+        if (!b.pierce) { consumed = true; break; }
+      }
+    }
+    if (consumed) { game.bullets.splice(i, 1); continue; }
+    const opposingCore = b.team === 'blue' ? game.cores.red : game.cores.blue;
+    if (Math.hypot(opposingCore.x - b.x, opposingCore.y - b.y) < 40 + b.r) {
+      opposingCore.hp = Math.max(0, opposingCore.hp - Math.max(1, Math.round(b.dmg * 0.18)));
+      if (b.owner && b.owner.isPlayer) syncCoreHpToRoom(opposingCore.team);
+      checkCoreEliminationVictory();
+      if (!b.pierce) consumed = true;
+    }
+    if (consumed) { game.bullets.splice(i, 1); continue; }
+    for (const dom of game.dominators) {
+      if (dom.owner !== b.team && Math.hypot(dom.x - b.x, dom.y - b.y) < 42 + b.r) {
+        dom.hp -= b.dmg;
+        if (dom.hp <= 0) {
+          if (b.team === game.myTeam && game.orbQuizLock && b.owner && b.owner.isPlayer) { dom.hp = 1; openQuiz('orb', dom); }
+          else {
+            dom.owner = b.team; dom.hp = dom.maxHp; syncDominatorToRoom(dom);
+            if (b.team === game.myTeam) playOrbCaptureSfx();
+            if (b.owner) gainPlayerXp(b.owner, 110);
+            addFloatText(dom.x, dom.y - 50, `⚡ ORB ${dom.name} DITAWAN ${b.team.toUpperCase()}!`, b.team === 'blue' ? '#38bdf8' : '#fb7185');
+            checkDominationVictory();
+          }
+        }
+        if (!b.pierce) { consumed = true; break; }
+      }
+    }
+    if (consumed) { game.bullets.splice(i, 1); continue; }
+  }
+  game.particles.forEach(pt => { pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.life -= dt; });
+  game.particles = game.particles.filter(pt => pt.life > 0);
+  game.floatTexts.forEach(ft => { ft.y -= 0.7 * dt; ft.life -= dt; });
+  game.floatTexts = game.floatTexts.filter(ft => ft.life > 0);
+  game.pings.forEach(pg => { pg.life -= dt; });
+  game.pings = game.pings.filter(pg => pg.life > 0);
+  updateCamera(dt); updateHud();
+}
+function findNearestHostile(x, y, friendlyTeam, maxRange) {
+  let best = null, bestDist = maxRange;
+  for (const z of game.zombies) { const d = Math.hypot(z.x - x, z.y - y); if (d < bestDist) { bestDist = d; best = z; } }
+  for (const t of game.tanks) { if (t.hp > 0 && t.team !== friendlyTeam) { const d = Math.hypot(t.x - x, t.y - y); if (d < bestDist) { bestDist = d; best = t; } } }
+  Object.values(netState.remotePlayers || {}).forEach(p => { if (p && (p.team || 'blue') !== friendlyTeam && typeof p.x === 'number') { const d = Math.hypot(p.x - x, p.y - y); if (d < bestDist) { bestDist = d; best = p; } } });
+  for (const dom of game.dominators) { if (dom.owner !== friendlyTeam) { const d = Math.hypot(dom.x - x, dom.y - y); if (d < bestDist) { bestDist = d; best = dom; } } }
+  return best;
+}
+function recordTeamRoundWin(winTeam) {
+  if (!winTeam || netState.lastRecordedWinRound === game.round) return;
+  netState.lastRecordedWinRound = game.round;
+  if (!netState.teamWins) netState.teamWins = { blue: 0, red: 0 };
+  netState.teamWins[winTeam] = (netState.teamWins[winTeam] || 0) + 1;
+  if (window.fbReady && netState.roomKey) {
+    window.fbSet(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/teamWins`), { blue: netState.teamWins.blue, red: netState.teamWins.red, lastRound: game.round, ts: Date.now() }).catch(() => {});
+  }
+}
+function evaluateFullDominationAndCoreVictory(sourceTrigger = 'combat') {
+  if (game.over) return;
+  const blueCapturedAll = game.dominators.every(d => d.owner === 'blue');
+  const redCapturedAll  = game.dominators.every(d => d.owner === 'red');
+  const redCoreDestroyed  = game.cores.red.hp <= 0;
+  const blueCoreDestroyed = game.cores.blue.hp <= 0;
+
+  let winTeam = null;
+  if (redCoreDestroyed || blueCapturedAll) winTeam = 'blue';
+  else if (blueCoreDestroyed || redCapturedAll) winTeam = 'red';
+
+  if (winTeam) {
+    game.over = true;
+    recordTeamRoundWin(winTeam);
+    const isMyWin = winTeam === game.myTeam;
+    if (isMyWin) playOrbCaptureSfx(); else playExplosionSfx(true);
+    const winLabel = winTeam === 'red' ? 'MERAH' : 'BIRU';
+    const reasonTxt = (winTeam === 'blue' ? redCoreDestroyed : blueCoreDestroyed)
+      ? 'Teras lawan berjaya dimusnahkan!'
+      : 'Semua 4 Capture Point berjaya ditawan!';
+    document.getElementById('endTitle').textContent = isMyWin
+      ? `🏆 KEMENANGAN PASUKAN ${winLabel}! ${reasonTxt}`
+      : `⚔️ PASUKAN ${winLabel} MENANG! ${reasonTxt}`;
+    document.getElementById('endTitle').style.color = isMyWin ? '#4ade80' : '#fb7185';
+    showReportModal(true);
+    return;
+  }
+
+
+}
+function checkDominationVictory() { evaluateFullDominationAndCoreVictory('dom'); }
+function checkCoreEliminationVictory() { evaluateFullDominationAndCoreVictory('core'); }
+function spawnParticles(x, y, color, count) {
+  for (let i = 0; i < count; i++) {
+    const a = Math.random() * Math.PI * 2, s = 1 + Math.random() * 3;
+    game.particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, life: 22, maxLife: 22, size: 3.5 + Math.random() * 2.5, color });
+  }
+}
+function addFloatText(x, y, text, color) { game.floatTexts.push({ x, y, text, color, life: 60, maxLife: 60 }); }
+function drawHpBar(x, y, w, hp, maxHp, color) {
+  const ratio = Math.max(0, Math.min(1, hp / maxHp));
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.85)'; ctx.fillRect(x - w / 2, y, w, 5);
+  ctx.fillStyle = color; ctx.fillRect(x - w / 2, y, w * ratio, 5);
+}
+function drawSpeechBubble(x, y, text) {
+  if (!text) return;
+  ctx.save(); ctx.font = 'bold 11.5px sans-serif';
+  const tw = ctx.measureText(text).width, bw = tw + 16, bh = 22, bx = x - bw / 2, by = y - bh;
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.94)'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f8fafc'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, x, by + bh / 2);
+  ctx.restore();
+}
+function drawTeamCore(coreObj, label, color) {
+  const pulse = 40 + Math.sin(game.animTime) * 2.5;
+  ctx.beginPath(); ctx.arc(coreObj.x, coreObj.y, pulse, 0, Math.PI * 2);
+  ctx.fillStyle = coreObj.team === 'red' ? 'rgba(244, 63, 94, 0.18)' : 'rgba(56, 189, 248, 0.18)'; ctx.fill();
+  ctx.strokeStyle = color; ctx.lineWidth = 4; ctx.stroke();
+  ctx.font = '28px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(coreObj.team === 'red' ? '🔥' : '⚜️', coreObj.x, coreObj.y);
+  ctx.font = 'bold 11px sans-serif'; ctx.fillStyle = color; ctx.fillText(label, coreObj.x, coreObj.y - 50);
+  drawHpBar(coreObj.x, coreObj.y + 46, 74, coreObj.displayHp ?? coreObj.hp, coreObj.maxHp, color);
+}
+function drawRemotePlayers(remoteCtx) {
+  const nowPerf = performance.now();
+  Object.values(netState.remotePlayers || {}).forEach(p => {
+    if (!p || typeof p.x !== 'number' || typeof p.y !== 'number') return;
+    const rx = typeof p.renderX === 'number' ? p.renderX : p.x, ry = typeof p.renderY === 'number' ? p.renderY : p.y;
+    const rAng = typeof p.renderAngle === 'number' ? p.renderAngle : (p.angle || 0);
+    const spec = CLASS_DEFS[p.tankClass] || CLASS_DEFS.Basic, pTeam = p.team === 'red' ? 'red' : 'blue';
+    const bodyCol = pTeam === 'red' ? '#f43f5e' : '#0ea5e9', auraCol = p.aura || '#facc15';
+    remoteCtx.save(); remoteCtx.translate(rx, ry); remoteCtx.rotate(rAng);
+    remoteCtx.fillStyle = '#64748b'; remoteCtx.strokeStyle = '#1e293b'; remoteCtx.lineWidth = 2;
+    spec.barrels.forEach((b, idx) => { const rec = (p.recoils && p.recoils[idx]) || 0; remoteCtx.save(); remoteCtx.rotate(b.ang); remoteCtx.fillRect(-rec, -b.w / 2, b.l, b.w); remoteCtx.strokeRect(-rec, -b.w / 2, b.l, b.w); remoteCtx.restore(); });
+    remoteCtx.restore();
+    remoteCtx.beginPath(); remoteCtx.arc(rx, ry, 23, 0, Math.PI * 2); remoteCtx.strokeStyle = auraCol; remoteCtx.lineWidth = 2; remoteCtx.stroke();
+    remoteCtx.beginPath(); remoteCtx.arc(rx, ry, 19, 0, Math.PI * 2); remoteCtx.fillStyle = bodyCol; remoteCtx.fill(); remoteCtx.strokeStyle = '#f8fafc'; remoteCtx.lineWidth = 2.2; remoteCtx.stroke();
+    remoteCtx.font = 'bold 11px sans-serif'; remoteCtx.textAlign = 'center'; remoteCtx.textBaseline = 'middle';
+    remoteCtx.fillStyle = pTeam === 'red' ? '#fda4af' : '#7dd3fc';
+    remoteCtx.fillText(`${pTeam === 'red' ? '🔴' : '🔵'} ${p.name || 'Pemain'} [Lv.${p.lvl || 1}]`, rx, ry - 31);
+    drawHpBar(rx, ry + 24, 38, p.displayHp ?? p.hp ?? 150, p.maxHp ?? 150, bodyCol);
+    if (p.activeChat && p.activeChat.expires > nowPerf) drawSpeechBubble(rx, ry - 43, p.activeChat.text);
+  });
+}
+function draw() {
+  if (!game.tanks || !game.tanks[0]) return;
+  const nowPerf = performance.now(), cam = getCamera();
+  ctx.fillStyle = game.isNight ? '#070b16' : '#0f172a'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.save(); ctx.scale(cam.zoom, cam.zoom); ctx.translate(-cam.x, -cam.y);
+  const viewW = canvas.width / cam.zoom, viewH = canvas.height / cam.zoom;
+  const startX = Math.max(0, Math.floor(cam.x / 44) * 44), endX = Math.min(WORLD, cam.x + viewW + 44);
+  const startY = Math.max(0, Math.floor(cam.y / 44) * 44), endY = Math.min(WORLD, cam.y + viewH + 44);
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)'; ctx.lineWidth = 1; ctx.beginPath();
+  for (let gx = startX; gx <= endX; gx += 44) { ctx.moveTo(gx, startY); ctx.lineTo(gx, endY); }
+  for (let gy = startY; gy <= endY; gy += 44) { ctx.moveTo(startX, gy); ctx.lineTo(endX, gy); }
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(148, 163, 184, 0.16)'; ctx.setLineDash([12, 12]); ctx.beginPath(); ctx.moveTo(WORLD / 2, 0); ctx.lineTo(WORLD / 2, WORLD); ctx.stroke(); ctx.setLineDash([]);
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 6; ctx.strokeRect(0, 0, WORLD, WORLD);
+  drawTeamCore(game.cores.blue, 'TERAS BIRU', '#38bdf8'); drawTeamCore(game.cores.red, 'TERAS MERAH', '#fb7185');
+  game.dominators.forEach((dom, idx) => {
+    const col = dom.owner === 'blue' ? '#38bdf8' : dom.owner === 'red' ? '#fb7185' : '#94a3b8';
+    const orbPulse = 44 + Math.sin(game.animTime + idx) * 1.8;
+    ctx.beginPath(); ctx.arc(dom.x, dom.y, orbPulse, 0, Math.PI * 2); ctx.fillStyle = '#1e293b'; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.stroke();
+    ctx.fillStyle = col; ctx.font = 'bold 12px sans-serif'; ctx.fillText(`ORB ${dom.name}`, dom.x, dom.y - 5);
+    ctx.font = '10px sans-serif'; ctx.fillText(dom.owner === game.myTeam ? 'DIKAWAL' : `${Math.round(dom.displayHp ?? dom.hp)} HP`, dom.x, dom.y + 11);
+  });
+  game.powerups.forEach(pu => {
+    const sc = 1 + Math.sin(game.animTime * 2 + (pu.pulse || 0)) * 0.08;
+    const col = pu.kind === 'heal' ? '#4ade80' : pu.kind === 'shield' ? '#38bdf8' : '#facc15', icon = pu.kind === 'heal' ? '💚' : pu.kind === 'shield' ? '🛡️' : '⚡';
+    ctx.beginPath(); ctx.arc(pu.x, pu.y, pu.r * sc, 0, Math.PI * 2); ctx.fillStyle = 'rgba(15, 23, 42, 0.92)'; ctx.fill(); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.stroke();
+    ctx.font = '17px sans-serif'; ctx.fillText(icon, pu.x, pu.y);
+  });
+  game.resources.forEach(res => {
+    const sc = (res.hitScale || 1) + (res.kind === 'capsule' ? Math.sin(game.animTime * 1.5 + (res.pulse || 0)) * 0.06 : 0);
+    ctx.beginPath(); ctx.arc(res.x, res.y, res.r * sc, 0, Math.PI * 2);
+    ctx.fillStyle = res.kind === 'capsule' ? '#7e22ce' : (res.kind === 'wood' ? '#15803d' : '#475569'); ctx.fill();
+    ctx.strokeStyle = res.kind === 'capsule' ? '#facc15' : (res.kind === 'wood' ? '#4ade80' : '#cbd5e1'); ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.font = '18px sans-serif'; ctx.fillText(res.kind === 'capsule' ? '📦' : (res.kind === 'wood' ? '🌲' : '🪨'), res.x, res.y);
+  });
+  game.buildings.forEach(b => {
+    const teamRing = b.team === 'red' ? '#fb7185' : '#38bdf8';
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r + 3, 0, Math.PI * 2); ctx.strokeStyle = teamRing; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fillStyle = '#0f172a'; ctx.fill(); ctx.strokeStyle = b.color; ctx.lineWidth = 2.5 + b.tier; ctx.stroke();
+    ctx.font = '18px sans-serif'; ctx.fillText({ 1:'🧱', 2:'⛏️', 3:'⚡', 4:'❄️' }[b.type], b.x, b.y);
+    drawHpBar(b.x, b.y + b.r + 4, 34, b.displayHp ?? b.hp, b.maxHp, teamRing);
+  });
+  game.zombies.forEach(z => {
+    if (z.shielded) { ctx.beginPath(); ctx.arc(z.x, z.y, z.r + 9 + Math.sin(game.animTime * 2) * 1.5, 0, Math.PI * 2); ctx.strokeStyle = '#facc15'; ctx.lineWidth = 3; ctx.setLineDash([6, 4]); ctx.stroke(); ctx.setLineDash([]); }
+    ctx.beginPath(); ctx.arc(z.x, z.y, z.r, 0, Math.PI * 2); ctx.fillStyle = z.slowTimer > 0 ? '#38bdf8' : (z.isBoss ? '#a855f7' : '#22c55e'); ctx.fill();
+    ctx.font = z.isBoss ? '24px sans-serif' : '16px sans-serif'; ctx.fillText(z.isBoss ? '👹' : '🧟', z.x, z.y);
+    drawHpBar(z.x, z.y + z.r + 4, z.isBoss ? 48 : 26, z.displayHp ?? z.hp, z.maxHp, z.shielded ? '#facc15' : '#4ade80');
+  });
+  game.tanks.forEach(t => {
+    if (t.hp <= 0) return;
+    const spec = CLASS_DEFS[t.tankClass] || CLASS_DEFS.Basic;
+    ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(t.angle); ctx.fillStyle = '#64748b'; ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 2;
+    spec.barrels.forEach((b, idx) => { const rec = (t.recoils && t.recoils[idx]) || 0; ctx.save(); ctx.rotate(b.ang); ctx.fillRect(-rec, -b.w/2, b.l, b.w); ctx.strokeRect(-rec, -b.w/2, b.l, b.w); ctx.restore(); });
+    ctx.restore();
+    if (t.shieldTimer && t.shieldTimer > 0) { ctx.beginPath(); ctx.arc(t.x, t.y, t.r + 9, 0, Math.PI * 2); ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3; ctx.setLineDash([5, 3]); ctx.stroke(); ctx.setLineDash([]); }
+    if (t.aura) { ctx.beginPath(); ctx.arc(t.x, t.y, t.r + 4, 0, Math.PI * 2); ctx.strokeStyle = t.aura; ctx.lineWidth = 2; ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.fillStyle = t.isP2 ? '#2dd4bf' : (t.team === 'red' ? '#f43f5e' : '#0ea5e9'); ctx.fill(); ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.5; ctx.stroke();
+    ctx.fillStyle = '#f8fafc'; ctx.font = 'bold 11px sans-serif'; ctx.fillText(`${t.name} [Lv.${t.lvl}]`, t.x, t.y - 31);
+    drawHpBar(t.x, t.y + t.r + 6, 38, t.displayHp ?? t.hp, t.maxHp, t.team === 'red' ? '#fb7185' : '#38bdf8');
+    if (t.activeChat && t.activeChat.expires > nowPerf) drawSpeechBubble(t.x, t.y - 44, t.activeChat.text);
+  });
+  game.bullets.forEach(b => { ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fillStyle = b.isCryo ? '#c084fc' : (b.team === 'red' ? '#fb7185' : '#38bdf8'); ctx.fill(); });
+  game.particles.forEach(pt => { const ratio = Math.max(0, pt.life / (pt.maxLife || 20)); ctx.save(); ctx.globalAlpha = ratio; ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, ((pt.size || 4) * ratio) * 0.6, 0, Math.PI * 2); ctx.fill(); ctx.restore(); });
+  game.floatTexts.forEach(ft => { const alpha = Math.min(1, ft.life / 20); ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = ft.color; ctx.font = 'bold 13px sans-serif'; ctx.fillText(ft.text, ft.x, ft.y); ctx.restore(); });
+  game.pings.forEach(pg => {
+    const progress = 1 - (pg.life / pg.maxLife), radius = 25 + progress * 160;
+    ctx.save(); ctx.globalAlpha = 1 - progress; ctx.strokeStyle = pg.team === 'red' ? '#fb7185' : '#38bdf8'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.arc(pg.x, pg.y, radius, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = '#facc15'; ctx.font = 'bold 12px sans-serif'; ctx.fillText(`📍 ${pg.sender}`, pg.x, pg.y - 16); ctx.restore();
+  });
+  drawRemotePlayers(ctx);
+  ctx.restore();
+
+  const size = 165, mx = canvas.width - size - 14, my = canvas.height - size - 14, scale = size / WORLD;
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.9)'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 2; ctx.fillRect(mx, my, size, size); ctx.strokeRect(mx, my, size, size);
+  ctx.fillStyle = '#38bdf8'; ctx.beginPath(); ctx.arc(mx + BLUE_CORE_POS.x*scale, my + BLUE_CORE_POS.y*scale, 4.5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fb7185'; ctx.beginPath(); ctx.arc(mx + RED_CORE_POS.x*scale, my + RED_CORE_POS.y*scale, 4.5, 0, Math.PI*2); ctx.fill();
+  game.dominators.forEach(d => { ctx.fillStyle = d.owner === 'blue' ? '#38bdf8' : d.owner === 'red' ? '#fb7185' : '#94a3b8'; ctx.beginPath(); ctx.arc(mx + d.x*scale, my + d.y*scale, 5, 0, Math.PI*2); ctx.fill(); });
+  game.tanks.forEach(t => { if (t.hp <= 0) return; ctx.fillStyle = t.isPlayer ? '#4ade80' : (t.team === 'red' ? '#fb7185' : '#38bdf8'); ctx.fillRect(mx + t.x*scale - 2, my + t.y*scale - 2, 4, 4); });
+  Object.values(netState.remotePlayers || {}).forEach(p => { if (!p || typeof p.x !== 'number') return; const rx = typeof p.renderX === 'number' ? p.renderX : p.x, ry = typeof p.renderY === 'number' ? p.renderY : p.y; ctx.fillStyle = p.team === 'red' ? '#fda4af' : '#7dd3fc'; ctx.fillRect(mx + rx * scale - 2, my + ry * scale - 2, 4, 4); });
+  game.pings.forEach(pg => { const progress = 1 - (pg.life / pg.maxLife); ctx.save(); ctx.globalAlpha = 1 - progress; ctx.strokeStyle = '#facc15'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(mx + pg.x * scale, my + pg.y * scale, 4 + progress * 16, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); });
+}
+function updateHud() {
+  const p1 = game.tanks[0]; if (!p1) return;
+  document.getElementById('hudBlueCore').textContent = Math.round(game.cores.blue.hp);
+  document.getElementById('hudRedCore').textContent = Math.round(game.cores.red.hp);
+  document.getElementById('hudWood').textContent = game.wood; document.getElementById('hudStone').textContent = game.stone;
+  document.getElementById('hudLvl').textContent = `${p1.lvl}/${typeof MAX_LEVEL === 'number' ? MAX_LEVEL : 25}`; document.getElementById('hudClass').textContent = p1.tankClass;
+  document.getElementById('hudQuizScore').textContent = `${game.quizCorrect}/${game.quizTotal}`;
+  document.getElementById('hudStreak').textContent = game.streak; document.getElementById('missedCount').textContent = game.missedQueue.length;
+  document.getElementById('hudUpgradePts').textContent = game.upgradePts;
+  const wins = netState.teamWins || { blue: 0, red: 0 }, sBadge = document.getElementById('seriesScoreBadge');
+  if (sBadge) sBadge.textContent = `🏆 🔵 ${wins.blue} — ${wins.red} 🔴`;
+  const statNames = ['🚀 [6] Laju Peluru', '💥 [7] Kuasa Tembak', '⚡ [8] Kadar Tembak', '🛡️ [9] Nyawa & Gerak'];
+  for (let i = 0; i < 4; i++) {
+    const sb = document.getElementById('statBtn' + i), lvl = game.stats[i];
+    sb.textContent = `${statNames[i]} (${lvl}/5)`; const canUp = game.upgradePts > 0 && lvl < 5;
+    sb.disabled = !canUp; sb.classList.toggle('ready', canUp);
+  }
+  document.getElementById('btnRemediate').classList.toggle('warn', game.missedQueue.length > 0);
+  const hasShieldBoss = game.zombies.some(z => z.isBoss && z.shielded);
+  document.getElementById('btnMainQuiz').textContent = hasShieldBoss ? '🛡️ Pecah Perisai [Q]' : '⚡ Kuiz [Q]';
+  const secs = Math.ceil(game.phaseTimer / 60), badge = document.getElementById('timeBadge');
+  badge.className = 'time-pill ' + (game.isNight ? 'night-mode' : 'day-mode');
+  badge.textContent = game.isNight ? `🌙 MALAM KE-${game.nightCount} • ${secs}s` : `☀️ SIANG • ${secs}s`;
+  game.dominators.forEach((d, i) => {
+    const el = document.getElementById('dom' + i);
+    el.className = 'dom-dot ' + (d.owner === 'blue' ? 'dom-blue' : d.owner === 'red' ? 'dom-red' : '');
+    el.textContent = `${d.owner === 'blue' ? '🔵' : d.owner === 'red' ? '🔴' : '⚪'} ${d.name}`;
+  });
+  updateRoomLeaderboard();
+}
+const netState = {
+  roomKey: 'GLOBAL_ASIA_GLOBAL01', roomLabel: 'GLOBAL_ASIA', roundNumber: 1, lastRoundResetTs: 0, lastRecordedWinRound: 0,
+  teamWins: { blue: 0, red: 0 }, playerId: '', myRef: null, serverOffset: 0, lastWaveSlot: -1, lastShotTs: 0, lastSentShotTs: 0,
+  lastChatMsg: '', lastChatTs: 0, lastPingTs: 0, lastCustomSyncTs: 0, lastSentX: -9999, lastSentY: -9999, lastSentAngle: -9999,
+  lastSentClass: '', lastSentLvl: 0, remotePlayers: {}, unsubs: [], tickTimer: null
+};
+function sanitizeRoomKey(raw) { return String(raw || 'GLOBAL01').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '_').slice(0, 32) || 'GLOBAL01'; }
+function hashRoomSeed(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function createSeededRng(seed) {
+  let s = seed >>> 0;
+  return function() { s = (s + 0x6D2B79F5) | 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+function syncDeterministicArena(seedKey) {
+  const rng = createSeededRng(hashRoomSeed(seedKey)); game.resources = [];
+  for (let i = 0; i < 46; i++) {
+    const kind = i % 5 === 0 ? 'capsule' : (i % 2 === 0 ? 'wood' : 'stone'); let x, y;
+    do { x = 120 + rng() * (WORLD - 240); y = 120 + rng() * (WORLD - 240); }
+    while (Math.hypot(x - BLUE_CORE_POS.x, y - BLUE_CORE_POS.y) < 170 || Math.hypot(x - RED_CORE_POS.x, y - RED_CORE_POS.y) < 170);
+    game.resources.push({ kind, x, y, hp: kind === 'capsule' ? 40 : 60, maxHp: kind === 'capsule' ? 40 : 60, r: kind === 'capsule' ? 21 : 23, pulse: rng() * Math.PI * 2, hitScale: 1 });
+  }
+  game.powerups = []; const pTypes = ['heal', 'shield', 'rapid'];
+  for (let i = 0; i < 6; i++) {
+    const kind = pTypes[i % pTypes.length]; let x, y;
+    do { x = 240 + rng() * (WORLD - 480); y = 180 + rng() * (WORLD - 360); }
+    while (Math.hypot(x - BLUE_CORE_POS.x, y - BLUE_CORE_POS.y) < 180 || Math.hypot(x - RED_CORE_POS.x, y - RED_CORE_POS.y) < 180);
+    game.powerups.push({ kind, x, y, r: 19, pulse: rng() * Math.PI * 2 });
+  }
+}
+function syncPlayerMetaToRoom() {
+  if (!window.fbReady || !netState.myRef || !game || !game.tanks || !game.tanks[0]) return;
+  const t = game.tanks[0];
+  window.fbUpdate(netState.myRef, { team: game.myTeam || 'blue', aura: game.auraBadge || '#facc15', quizCorrect: game.quizCorrect || 0, quizTotal: game.quizTotal || 0, streak: game.streak || 1, lvl: t.lvl, tankClass: t.tankClass, chatMsg: netState.lastChatMsg || '', chatTs: netState.lastChatTs || 0, ts: Date.now() }).catch(() => {});
+}
+function cleanupMultiplayerRoom() {
+  netState.unsubs.forEach(fn => { if (typeof fn === 'function') fn(); }); netState.unsubs = [];
+  if (netState.tickTimer) { clearInterval(netState.tickTimer); netState.tickTimer = null; }
+  if (window.fbReady && netState.playerId && netState.roomKey) { try { window.fbRemove(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/players/${netState.playerId}`)); } catch (err) {} }
+  netState.myRef = null; netState.remotePlayers = {};
+}
+function syncBuildingToRoom(b) {
+  if (!window.fbReady || !netState.roomKey || !b) return;
+  if (!b.syncId) b.syncId = 'bld_' + Math.round(b.x) + '_' + Math.round(b.y) + '_' + Math.floor(Math.random() * 9999);
+  window.fbSet(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/structures/${b.syncId}`), { id: b.syncId, team: b.team || game.myTeam, type: b.type, x: Math.round(b.x), y: Math.round(b.y), r: b.r, hp: Math.round(b.hp), maxHp: Math.round(b.maxHp), tier: b.tier, color: b.color }).catch(() => {});
+}
+function removeBuildingFromRoom(b) { if (window.fbReady && netState.roomKey && b && b.syncId) window.fbRemove(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/structures/${b.syncId}`)).catch(() => {}); }
+function syncDominatorToRoom(dom) { if (window.fbReady && netState.roomKey && dom) window.fbSet(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/dominators/${dom.id}`), { id: dom.id, name: dom.name, owner: dom.owner, hp: Math.round(dom.hp), maxHp: Math.round(dom.maxHp) }).catch(() => {}); }
+function syncCoreHpToRoom(teamKey) {
+  if (!window.fbReady || !netState.roomKey || !game || !game.cores[teamKey]) return;
+  const c = game.cores[teamKey];
+  window.fbSet(window.fbRef(window.fbDb, `omega_dom_v2/${netState.roomKey}/dominators/core_${teamKey}`), { id: teamKey === 'red' ? 98 : 99, owner: `core_${teamKey}`, hp: Math.round(c.hp), maxHp: c.maxHp }).catch(() => {});
+}
+function initGlobalMultiplayer(serverRegion, roomCode) {
+  cleanupMultiplayerRoom();
+  const cleanCode = sanitizeRoomKey(roomCode);
+  netState.roomLabel = serverRegion === 'PRIVATE_ROOM' ? `KELAS:${cleanCode}` : `${serverRegion}:${cleanCode}`;
+  netState.roomKey = sanitizeRoomKey(`${serverRegion}_${cleanCode}`); netState.lastWaveSlot = -1;
+  syncDeterministicArena(`${netState.roomKey}_R${netState.roundNumber || 1}`);
+  const hudRoom = document.getElementById('hudRoomStatus');
+  if (!window.fbReady) {
+    if (hudRoom) hudRoom.textContent = `🌐 ${netState.roomLabel} • 🖥️ Mod Arena Lokal (Sedia)`;
+    return;
+  }
+  if (hudRoom) hudRoom.textContent = `🌐 Bilik: ${netState.roomLabel} • Menghubungkan...`;
+  const waitFb = setInterval(async () => {
+    if (!window.fbReady) return;
+    clearInterval(waitFb);
+    let fbUser = window.fbAuth && window.fbAuth.currentUser;
+    if (!fbUser && window.fbSignInAnon) {
+      try { const cred = await window.fbSignInAnon(); fbUser = cred.user; }
+      catch (err) { if (hudRoom) hudRoom.textContent = `⚠️ Sila Sign In atau aktifkan Anonymous Auth di Firebase`; return; }
+    }
+    if (!fbUser || !fbUser.uid) { if (hudRoom) hudRoom.textContent = `🔐 Sila Sign In untuk menyertai bilik multiplayer`; return; }
+    netState.playerId = fbUser.uid; const basePath = `omega_dom_v2/${netState.roomKey}`;
+    try {
+      const [domSnap, rsSnap] = await Promise.all([window.fbGet(window.fbRef(window.fbDb, `${basePath}/dominators`)), window.fbGet(window.fbRef(window.fbDb, `${basePath}/roundState`))]);
+      const dVal = domSnap.val(), rsVal = rsSnap.val();
+      if (rsVal && typeof rsVal.round === 'number') { netState.roundNumber = rsVal.round; netState.lastRoundResetTs = rsVal.resetTs || 0; game.round = rsVal.round; }
+      if (dVal) {
+        const cB = dVal.core_blue && typeof dVal.core_blue.hp === 'number' ? dVal.core_blue.hp : 100;
+        const cR = dVal.core_red && typeof dVal.core_red.hp === 'number' ? dVal.core_red.hp : 100;
+        const orbs = [dVal[0], dVal[1], dVal[2], dVal[3]].filter(Boolean);
+        if ((cR <= 0 && orbs.length === 4 && orbs.every(o => o.owner === 'blue')) || (cB <= 0 && orbs.length === 4 && orbs.every(o => o.owner === 'red'))) {
+          const freshRound = (netState.roundNumber || 1) + 1; netState.roundNumber = freshRound; netState.lastRoundResetTs = Date.now();
+          resetFirebaseRoomToRound(freshRound, netState.lastRoundResetTs); resetGame(null, freshRound);
+        }
+      }
+    } catch (err) {}
+    const p1 = game.tanks[0], myRef = window.fbRef(window.fbDb, `${basePath}/players/${netState.playerId}`); netState.myRef = myRef;
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, '.info/serverTimeOffset'), snap => { netState.serverOffset = snap.val() || 0; }));
+    window.fbSet(myRef, { name: game.studentName || 'Ejen Ilmu', kelas: game.studentClass || 'Kelas Bestari', team: game.myTeam || 'blue', aura: game.auraBadge || '#facc15', x: Math.round(p1.x), y: Math.round(p1.y), angle: Number(p1.angle.toFixed(2)), hp: Math.round(p1.hp), maxHp: Math.round(p1.maxHp), lvl: p1.lvl, tankClass: p1.tankClass, quizCorrect: game.quizCorrect || 0, quizTotal: game.quizTotal || 0, streak: game.streak || 1, chatMsg: netState.lastChatMsg || '', chatTs: netState.lastChatTs || 0, shotTs: 0, ts: Date.now() }).catch(() => {});
+    window.fbOnDisconnect(myRef).remove().catch(() => {});
+    netState.tickTimer = setInterval(() => {
+      if (!game || !game.tanks || !game.tanks[0] || game.over) return;
+      const t = game.tanks[0];
+      if (Math.hypot(t.x - netState.lastSentX, t.y - netState.lastSentY) > 1.2 || Math.abs(t.angle - netState.lastSentAngle) > 0.06 || t.tankClass !== netState.lastSentClass || t.lvl !== netState.lastSentLvl || (netState.lastShotTs || 0) !== (netState.lastSentShotTs || 0)) {
+        netState.lastSentX = t.x; netState.lastSentY = t.y; netState.lastSentAngle = t.angle; netState.lastSentClass = t.tankClass; netState.lastSentLvl = t.lvl; netState.lastSentShotTs = netState.lastShotTs || 0;
+        window.fbUpdate(myRef, { team: game.myTeam || 'blue', aura: game.auraBadge || '#facc15', x: Math.round(t.x), y: Math.round(t.y), angle: Number(t.angle.toFixed(2)), hp: Math.round(t.hp), maxHp: Math.round(t.maxHp), lvl: t.lvl, tankClass: t.tankClass, quizCorrect: game.quizCorrect || 0, quizTotal: game.quizTotal || 0, streak: game.streak || 1, shotTs: netState.lastSentShotTs, ts: Date.now() }).catch(() => {});
+      }
+    }, 95);
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, `${basePath}/players`), snap => {
+      const val = snap.val() || {}, nextMap = {}; let blueTotal = game.myTeam === 'blue' ? 1 : 0, redTotal = game.myTeam === 'red' ? 1 : 0;
+      Object.entries(val).forEach(([pid, data]) => {
+        if (pid === netState.playerId || !data) return;
+        if (data.team === 'red') redTotal++; else blueTotal++;
+        const prev = netState.remotePlayers[pid];
+        if (prev && typeof prev.renderX === 'number') { data.renderX = prev.renderX; data.renderY = prev.renderY; data.renderAngle = prev.renderAngle; data.displayHp = prev.displayHp; data.recoils = prev.recoils || []; data.activeChat = prev.activeChat || null; }
+        else { data.renderX = data.x; data.renderY = data.y; data.renderAngle = data.angle || 0; data.displayHp = data.hp ?? 150; data.recoils = []; data.activeChat = null; }
+        if (data.chatMsg && data.chatTs && (!prev || data.chatTs > (prev.chatTs || 0))) { data.activeChat = { text: data.chatMsg, expires: performance.now() + 4500 }; appendChatFeed(data.name || 'Pemain', data.chatMsg, false, data.team || 'blue'); playChatSfx(); }
+        if (data.shotTs && (!prev || data.shotTs > (prev.shotTs || 0))) { const fakeTank = { x: data.renderX, y: data.renderY, angle: data.angle || 0, team: data.team || 'blue', lvl: data.lvl || 1, tankClass: data.tankClass || 'Basic', cd: 0, recoils: data.recoils }; fireTank(fakeTank, true); data.recoils = fakeTank.recoils; }
+        nextMap[pid] = data;
+      });
+      netState.remotePlayers = nextMap;
+      if (hudRoom) hudRoom.textContent = `🌐 ${netState.roomLabel} • 🔵${blueTotal} vs 🔴${redTotal} Online`;
+      updateRoomLeaderboard();
+    }));
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, `${basePath}/structures`), snap => {
+      const val = snap.val(); if (!game.buildings) return; if (!val) { game.buildings = []; return; }
+      const remoteIds = new Set();
+      Object.values(val).forEach(s => {
+        if (!s || !s.id) return; remoteIds.add(s.id);
+        const existing = game.buildings.find(b => b.syncId === s.id);
+        if (existing) { existing.hp = s.hp; existing.maxHp = s.maxHp; existing.tier = s.tier; }
+        else game.buildings.push({ syncId: s.id, team: s.team || 'blue', type: s.type, x: s.x, y: s.y, r: s.r || 22, hp: s.hp, displayHp: s.hp, maxHp: s.maxHp, tier: s.tier || 1, cd: 0, color: s.color || '#94a3b8' });
+      });
+      game.buildings = game.buildings.filter(b => !b.syncId || remoteIds.has(b.syncId));
+    }));
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, `${basePath}/dominators`), snap => {
+      const val = snap.val(); if (!val || !game.dominators) return;
+      Object.values(val).forEach(d => {
+        if (!d || typeof d.id !== 'number') return;
+        if (d.owner === 'core_blue' && typeof d.hp === 'number') { game.cores.blue.hp = d.hp; checkCoreEliminationVictory(); return; }
+        if (d.owner === 'core_red' && typeof d.hp === 'number') { game.cores.red.hp = d.hp; checkCoreEliminationVictory(); return; }
+        const localDom = game.dominators[d.id];
+        if (localDom) { localDom.owner = d.owner || 'neutral'; localDom.hp = typeof d.hp === 'number' ? d.hp : localDom.maxHp; checkDominationVictory(); }
+      });
+    }));
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, `${basePath}/teamWins`), snap => {
+      const tw = snap.val(); if (!tw) return;
+      netState.teamWins = { blue: typeof tw.blue === 'number' ? tw.blue : 0, red: typeof tw.red === 'number' ? tw.red : 0 }; updateHud();
+    }));
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, `${basePath}/roundState`), snap => {
+      const rs = snap.val(); if (!rs || !rs.resetTs || rs.resetTs <= netState.lastRoundResetTs) return;
+      netState.lastRoundResetTs = rs.resetTs;
+      if (rs.round && rs.round !== netState.roundNumber) { netState.roundNumber = rs.round; resetGame(null, rs.round); playOrbCaptureSfx(); showBanner(`🔄 ${rs.triggeredBy || 'Pemain'} memulakan Pusingan #${rs.round}! Peta telah di-reset.`, '#4ade80'); }
+    }));
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, `${basePath}/latestPing`), snap => {
+      const pg = snap.val(); if (!pg || !pg.ts || pg.ts <= netState.lastPingTs) return;
+      netState.lastPingTs = pg.ts;
+      if (pg.sender !== (game.studentName || 'Ejen Ilmu')) triggerMinimapPing(pg.x, pg.y, pg.team || 'blue', pg.sender || 'Rakan', false);
+    }));
+    netState.unsubs.push(window.fbOnValue(window.fbRef(window.fbDb, `${basePath}/customQuestions`), snap => {
+      const cq = snap.val(); if (!cq || !Array.isArray(cq.items) || !cq.ts || cq.ts <= netState.lastCustomSyncTs) return;
+      netState.lastCustomSyncTs = cq.ts; QUESTION_BANK.CUSTOM = cq.items;
+      try { localStorage.setItem('omega_edu_custom_q', JSON.stringify(QUESTION_BANK.CUSTOM)); } catch (err) {}
+      if (cq.sender !== (game.studentName || 'Guru')) showBanner(`📚 ${cq.sender} berkongsi ${cq.items.length} Soalan Guru untuk bilik ini!`, '#facc15');
+    }));
+  }, 250);
+}
+window.addEventListener('beforeunload', cleanupMultiplayerRoom);
+let lastFrameTime = performance.now();
+function loop(now = performance.now()) {
+  const dt = Math.min(2.5, Math.max(0.25, (now - lastFrameTime) / 16.6667));
+  lastFrameTime = now; update(dt); draw(); requestAnimationFrame(loop);
+}
+resetGame();
+requestAnimationFrame(loop);
+</script>
+<script>
+  window.addEventListener("DOMContentLoaded", () => {
+    const nick = sessionStorage.getItem("saintis_nickname");
+    const skl = sessionStorage.getItem("saintis_sekolah");
+    const keyId = sessionStorage.getItem("saintis_key");
+    const inpName = document.getElementById("inpStudentName");
+    const inpClass = document.getElementById("inpStudentClass");
+    const authText = document.getElementById("authStatusText");
+    if (nick) {
+      if (!window.signedInAccount) {
+        window.signedInAccount = {
+          method: "ZEP Auth",
+          name: nick,
+          kelas: skl || "Kelas Bestari",
+          idTag: keyId ? `ZEP-${String(keyId).slice(0, 6).toUpperCase()}` : "ZEP-AUTH"
+        };
+        try { localStorage.setItem("omega_edu_signin_acc", JSON.stringify(window.signedInAccount)); } catch (e) {}
+      }
+      if (inpName) inpName.value = nick;
+      if (skl && inpClass) inpClass.value = skl;
+      if (authText) authText.textContent = `✅ Sesi Aktif dari login.html: ${nick}`;
+    }
+  });
+</script>
+</body>
+</html>

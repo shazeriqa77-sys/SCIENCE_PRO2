@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#020602">
+    <title>Ask a Teacher - ZEP Portal [100% Hacker Edition]</title>
+    
+    <!-- PUSAT KAWALAN TEMA HACKER MATRIX, MOD GELAP & SYNTH SFX -->
+    <script>
+        let sfxAktif = localStorage.getItem("zep_sfx") !== "off";
+
+        document.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("theme") === "dark") {
+                document.body.classList.add("dark-mode");
+                const btn = document.getElementById("btnDarkMode");
+                if (btn) btn.innerText = "☀️ Mod Terang";
+            }
+
+            // AKTIFKAN MOD HACKER MATRIX SECARA LALAI (DEFAULT ON)
+            if (localStorage.getItem("zep_matrix") !== "off") {
+                aktifkanModHacker(false);
+            }
+            kemaskiniButangSFX();
+        });
+
+        function toggleDarkMode() {
+            mainBunyiKlik();
+            if (document.body.classList.contains("matrix-mode")) {
+                document.body.classList.remove("matrix-mode");
+                localStorage.setItem("zep_matrix", "off");
+                const kanvas = document.getElementById("zepMatrixRain");
+                if (kanvas) kanvas.style.display = "none";
+            }
+            document.body.classList.toggle("dark-mode");
+            const isDark = document.body.classList.contains("dark-mode");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            const btn = document.getElementById("btnDarkMode");
+            if (btn) btn.innerText = isDark ? "☀️ Mod Terang" : "🌙 Mod Gelap";
+        }
+
+        function toggleAudioFX() {
+            sfxAktif = !sfxAktif;
+            localStorage.setItem("zep_sfx", sfxAktif ? "on" : "off");
+            kemaskiniButangSFX();
+            if (sfxAktif) mainBunyiKlik();
+        }
+
+        function kemaskiniButangSFX() {
+            const btn = document.getElementById("btnAudioFX");
+            if (btn) btn.innerText = sfxAktif ? "🔊 SFX" : "🔇 Muted";
+        }
+
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let ctxAudio = null;
+
+        function mainBunyiKlik() {
+            if (!sfxAktif) return;
+            try {
+                if (!ctxAudio) ctxAudio = new AudioCtx();
+                const osc = ctxAudio.createOscillator();
+                const gain = ctxAudio.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(680, ctxAudio.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1150, ctxAudio.currentTime + 0.075);
+                gain.gain.setValueAtTime(0.06, ctxAudio.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctxAudio.currentTime + 0.075);
+                osc.connect(gain);
+                gain.connect(ctxAudio.destination);
+                osc.start();
+                osc.stop(ctxAudio.currentTime + 0.08);
+            } catch (e) {}
+        }
+    </script>
+
+    <!-- PUSAT KAWALAN FIREBASE & TRANSMISI SOALAN -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, get } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAtbX6wmdNwmXkgUvewnfRRXRTfyq5IZ8",
+            authDomain: "jejak-sejarah-tingkatan-2.firebaseapp.com",
+            databaseURL: "https://jejak-sejarah-tingkatan-2-default-rtdb.firebaseio.com",
+            projectId: "jejak-sejarah-tingkatan-2",
+            storageBucket: "jejak-sejarah-tingkatan-2.firebasestorage.app",
+            messagingSenderId: "92872994798",
+            appId: "1:92872994798:web:9c205538a5eb8f388e68ff",
+            measurementId: "G-8RZ21D4FXY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let namaSaintisAktif = "";
+        let semuaMesejFirebase = [];
+
+        function elakXSS(teks) {
+            const div = document.createElement("div");
+            div.textContent = teks || "";
+            return div.innerHTML;
+        }
+
+        function getSafeKey(nama) {
+            return String(nama || "guest").trim().toLowerCase().replace(/[.#$\[\]\/ ]/g, "_");
+        }
+
+        window.showToast = function(message, type = 'info') {
+            const container = document.getElementById("toast-container");
+            if (!container) return;
+            const toast = document.createElement("div");
+            toast.className = `toast-msg ${type}`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            // 1. Auto-fill nama & segerak profil saintis
+            onAuthStateChanged(auth, async (user) => {
+                const butangLogin = document.getElementById("btnLogMasuk");
+                let namaAktif = user ? (user.displayName || user.email.split('@')[0]) : (sessionStorage.getItem("saintis_nickname") || "");
+
+                if (namaAktif) {
+                    namaSaintisAktif = namaAktif;
+                    const inputNama = document.getElementById("namaPengirim");
+                    const inputEmel = document.getElementById("emailPengirim");
+                    if (inputNama && !inputNama.value) inputNama.value = namaAktif;
+                    if (inputEmel && user && user.email && !inputEmel.value) inputEmel.value = user.email;
+
+                    // Tarik Avatar & XP
+                    let avatar = "🔬";
+                    let xp = 0;
+                    try {
+                        const kunci = user ? user.uid : getSafeKey(namaAktif);
+                        const snap = await get(ref(db, "kawan_sistem_v2/" + kunci));
+                        if (snap.exists()) {
+                            const d = snap.val();
+                            avatar = d.avatar || "🔬";
+                            xp = d.xp ?? d.markah ?? 0;
+                            if (d.nama_asal || d.nama) {
+                                namaSaintisAktif = d.nama_asal || d.nama;
+                                if (inputNama) inputNama.value = namaSaintisAktif;
+                            }
+                        }
+                    } catch (e) {}
+
+                    document.getElementById("navUserAvatar").innerText = avatar;
+                    document.getElementById("navUserName").innerText = namaSaintisAktif;
+                    document.getElementById("dropHeaderNama").innerText = namaSaintisAktif.toUpperCase();
+                    document.getElementById("dropHeaderXP").innerText = `⚡ ${xp} LAB XP`;
+                    document.getElementById("hudUserStatus").innerText = `${avatar} AGENT: ${namaSaintisAktif.toUpperCase()} [${xp} XP]`;
+
+                    if (butangLogin) {
+                        butangLogin.innerText = `Logout (${namaSaintisAktif}) 🚪`;
+                        butangLogin.href = "#";
+                        butangLogin.onclick = (e) => {
+                            e.preventDefault();
+                            if (confirm("Adakah kitak pasti mahu log keluar?")) {
+                                signOut(auth).then(() => {
+                                    sessionStorage.clear();
+                                    location.reload();
+                                });
+                            }
+                        };
+                    }
+                    window.paparLogTransmisi();
+                }
+            });
+
+            // 2. Simpan Borang Pertanyaan ke Firebase
+            document.getElementById("borangHubungi").addEventListener("submit", function(event) {
+                event.preventDefault();
+                mainBunyiKlik();
+
+                const btnHantar = document.getElementById("btnSubmitMesej");
+                btnHantar.disabled = true;
+                btnHantar.innerText = "⏳ MENGHANTAR TRANSMISI...";
+
+                const namaPelajar = document.getElementById("namaPengirim").value.trim();
+                const emelPelajar = document.getElementById("emailPengirim").value.trim();
+                const babPelajar = document.getElementById("babSoalan").value;
+                const teksMesej = document.getElementById("mesejPengirim").value.trim();
+                const masaKini = new Date().toLocaleString("en-MY");
+                
+                const rujukanFolder = ref(db, "mesej_sains_hubungi");
+                const rekodBaru = push(rujukanFolder);
+                
+                set(rekodBaru, {
+                    nama: namaPelajar,
+                    emel: emelPelajar,
+                    bab: babPelajar,
+                    mesej: teksMesej,
+                    tarikh: masaKini,
+                    status: "Menunggu Jawapan"
+                }).then(() => {
+                    showToast(`Transmisi berjaya dihantar, ${namaPelajar}! 🚀`, "success");
+                    document.getElementById("mesejPengirim").value = "";
+                    btnHantar.disabled = false;
+                    btnHantar.innerText = "✈️ SEND TRANSMISSION";
+                }).catch((error) => {
+                    showToast("Ralat penghantaran: " + error.message, "error");
+                    btnHantar.disabled = false;
+                    btnHantar.innerText = "✈️ SEND TRANSMISSION";
+                });
+            });
+
+            // 3. Dengar Live Transmission Log dari Firebase
+            onValue(ref(db, "mesej_sains_hubungi"), (snapshot) => {
+                const data = snapshot.val() || {};
+                semuaMesejFirebase = Object.entries(data).map(([id, val]) => ({
+                    id,
+                    ...val
+                })).reverse(); // Paling baharu di atas
+                window.paparLogTransmisi();
+            });
+        });
+
+        window.paparLogTransmisi = function() {
+            const bekas = document.getElementById("senaraiLogTransmisi");
+            const modTapis = document.getElementById("filterLogMesej")?.value || "ALL";
+            if (!bekas) return;
+
+            let senarai = semuaMesejFirebase;
+            if (modTapis === "MINE" && namaSaintisAktif) {
+                senarai = senarai.filter(m => String(m.nama || "").trim().toLowerCase() === namaSaintisAktif.trim().toLowerCase());
+            }
+
+            if (senarai.length === 0) {
+                bekas.innerHTML = `<div style="text-align:center; padding:25px; opacity:0.75;">Tiada rekod transmisi soalan ditemui. Hantar soalan pertama anda di atas! 📡</div>`;
+                return;
+            }
+
+            let html = "";
+            senarai.slice(0, 12).forEach(item => {
+                const adaBalasan = item.balasan && String(item.balasan).trim() !== "";
+                const badgeStatus = adaBalasan 
+                    ? `<span class="status-replied">✅ DIJAWAB CIKGU</span>` 
+                    : `<span class="status-pending">⏳ DALAM SEMAKAN</span>`;
+
+                html += `
+                    <div class="log-card">
+                        <div class="log-header">
+                            <div>
+                                <strong class="log-sender">👨‍🔬 ${elakXSS(item.nama || "Anonymous")}</strong>
+                                <span class="log-chapter">${elakXSS(item.bab || "General")}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                ${badgeStatus}
+                                <span style="font-size:11px; opacity:0.7;">${elakXSS(item.tarikh || "")}</span>
+                            </div>
+                        </div>
+                        <div class="log-question">"${elakXSS(item.mesej)}"</div>
+                        ${adaBalasan ? `
+                            <div class="log-reply">
+                                <strong>👨‍🏫 Balasan Cikgu:</strong> ${elakXSS(item.balasan)}
+                            </div>
+                        ` : ""}
+                    </div>
+                `;
+            });
+            bekas.innerHTML = html;
+        };
+    </script>
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body { 
+            margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #f0f8ff; 
+            color: #333333;
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* HEADER */
+        .header-container { 
+            position: relative;
+            z-index: 2;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-wrap: wrap;
+            gap: 18px;
+            padding: 22px 20px; 
+            background: linear-gradient(135deg, #0052D4, #4364F7, #6FB1FC); 
+            border-bottom: 4px solid rgba(255, 255, 255, 0.5); 
+            box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3); 
+            text-align: center;
+        }
+
+        .cyber-tag-header {
+            display: inline-block;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.35);
+            color: #00f2fe;
+            border: 1px solid rgba(0, 242, 254, 0.45);
+            margin-bottom: 6px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        /* NAVBAR UNIFORM 42PX */
+        .navbar { 
+            background-color: #1a2a6c; 
+            display: flex; 
+            justify-content: flex-start; 
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+        }
+
+        .navbar a { 
+            color: #e0e0e0; 
+            text-decoration: none; 
+            padding: 0 14px; 
+            height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13.5px; 
+            font-weight: bold; 
+            white-space: nowrap;
+            border-radius: 8px;
+            transition: background 0.3s, color 0.3s; 
+        }
+
+        .navbar a:hover, .navbar a.active-link { 
+            background-color: #00c6ff !important; 
+            color: #0d1b2a !important; 
+        }
+        
+        .dropdown { position: relative; display: inline-flex; align-items: center; }
+        .dropdown-content { display: none; position: absolute; top: 100%; left: 0; background-color: #ffffff; min-width: 280px; box-shadow: 0px 8px 16px rgba(0,0,0,0.2); z-index: 101; border-radius: 0 0 8px 8px; overflow: hidden; max-height: 400px; overflow-y: auto; }
+        .dropdown-content a { color: #333; padding: 12px 16px; display: block; font-size: 14px; border-bottom: 1px solid #eee; font-weight: normal; text-align: left; height: auto; border-radius: 0; }
+        .dropdown-content a:hover { background-color: #e3f2fd; padding-left: 24px; color: #0052D4; font-weight: bold; }
+        .dropdown:hover .dropdown-content { display: block; }
+
+        .btn-dark-toggle, .btn-nav-action {
+            background-color: #334155;
+            color: #ffffff;
+            border: 1.5px solid #00c6ff;
+            height: 42px;
+            padding: 0 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.25s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+        .btn-dark-toggle:hover, .btn-nav-action:hover { background-color: #00c6ff; color: #0d1b2a; }
+
+        .btn-matrix-trigger {
+            border-color: #00ff41 !important;
+            color: #00ff41 !important;
+            background-color: #041a08 !important;
+        }
+        .btn-matrix-trigger:hover { background-color: #00ff41 !important; color: #020602 !important; }
+
+        .kbd-badge {
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        /* PILL PROFIL KANAN */
+        .nav-right-user {
+            margin-left: auto;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar-btn-pandai {
+            background: linear-gradient(135deg, #00c6ff, #0052D4);
+            color: #ffffff;
+            border: 2px solid #ffffff;
+            border-radius: 25px;
+            padding: 4px 14px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
+        }
+        .avatar-btn-pandai:hover { transform: scale(1.03); }
+
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 115%;
+            right: 0;
+            background: #ffffff;
+            min-width: 230px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            z-index: 1000;
+            border: 1px solid #e2e8f0;
+            flex-direction: column;
+        }
+        .user-dropdown-menu.show { display: flex !important; }
+
+        .user-dropdown-header {
+            background: linear-gradient(135deg, #1a2a6c, #0052D4);
+            color: white;
+            padding: 14px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .user-dropdown-item {
+            display: flex !important;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px !important;
+            color: #333333 !important;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            border-bottom: 1px solid #f1f5f9;
+            height: auto !important;
+            border-radius: 0 !important;
+            justify-content: flex-start !important;
+        }
+        .user-dropdown-item:hover { background-color: #e3f2fd !important; color: #0052D4 !important; }
+
+        /* MAIN CONTENT */
+        .main-content { 
+            position: relative;
+            z-index: 2;
+            padding: 35px 25px; 
+            flex: 1; 
+            background-color: white; 
+            margin: 28px auto; 
+            max-width: 1060px;
+            width: 92%;
+            border-radius: 18px; 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08); 
+            text-align: center; 
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .cyber-hud-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 16px;
+            border-radius: 12px;
+            background: #f0f9ff;
+            border: 1.5px solid #bae6fd;
+            margin-bottom: 24px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #0369a1;
+        }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #00ff41;
+            box-shadow: 0 0 8px #00ff41;
+            margin-right: 6px;
+            animation: pulseGlow 1.5s infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+
+        .susunan-hubungi { display: flex; flex-wrap: wrap; gap: 25px; margin-top: 25px; text-align: left; justify-content: center; }
+
+        .kotak-info { 
+            flex: 1; 
+            min-width: 300px; 
+            background-color: #e3f2fd; 
+            padding: 26px; 
+            border-radius: 14px; 
+            border-left: 6px solid #0052D4; 
+            transition: background 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .kotak-info h3 { margin-top: 0; color: #1a2a6c; font-size: 20px; }
+        .kotak-info p { font-size: 15px; color: #444; line-height: 1.7; margin-bottom: 12px; }
+        
+        .butang-whatsapp { 
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: #25D366; 
+            color: white !important; 
+            padding: 12px 22px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            border-radius: 30px; 
+            font-size: 15px; 
+            box-shadow: 0 4px 10px rgba(37,211,102,0.3); 
+            transition: 0.3s; 
+            margin-top: 8px; 
+        }
+        .butang-whatsapp:hover { background-color: #128C7E; transform: translateY(-3px); }
+
+        /* FAQ MINI ACCORDION */
+        .faq-box {
+            margin-top: 22px;
+            padding-top: 16px;
+            border-top: 1px dashed rgba(0, 82, 212, 0.3);
+        }
+        .faq-item {
+            margin-bottom: 8px;
+            border-radius: 8px;
+            padding: 9px 12px;
+            background: rgba(255, 255, 255, 0.65);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .faq-item summary { font-weight: bold; outline: none; }
+        .faq-item p { margin: 6px 0 0 0 !important; font-size: 12.5px !important; opacity: 0.9; }
+
+        .kotak-borang { 
+            flex: 1.15; 
+            min-width: 300px; 
+            background-color: #f8fbff; 
+            padding: 26px; 
+            border-radius: 14px; 
+            border: 2px solid #bce0fd; 
+            transition: background 0.3s, border-color 0.3s;
+        }
+        .kotak-borang label { font-weight: bold; color: #1a2a6c; display: block; margin-bottom: 6px; font-size: 14px; }
+        .kotak-borang input, .kotak-borang select, .kotak-borang textarea { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 16px; 
+            border: 1.5px solid #bbb; 
+            border-radius: 8px; 
+            font-family: inherit; 
+            font-size: 14.5px; 
+            background-color: white;
+            transition: background 0.3s, color 0.3s, border-color 0.3s; 
+        }
+        .kotak-borang input:focus, .kotak-borang select:focus, .kotak-borang textarea:focus { 
+            border-color: #0052D4; 
+            outline: none; 
+            box-shadow: 0 0 6px rgba(0,82,212,0.3); 
+        }
+        
+        .butang-hantar { 
+            background-color: #0052D4; 
+            color: white; 
+            border: none; 
+            padding: 14px; 
+            font-size: 15px; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            width: 100%; 
+            transition: 0.3s; 
+            box-shadow: 0 4px 10px rgba(0,82,212,0.25); 
+        }
+        .butang-hantar:hover { background-color: #003cc8; transform: translateY(-2px); }
+
+        /* LIVE TRANSMISSION LOG (Q&A FEED) */
+        .kotak-log-transmisi {
+            margin-top: 35px;
+            background: #f8fbff;
+            border: 2px solid #bae6fd;
+            border-radius: 14px;
+            padding: 24px;
+            text-align: left;
+        }
+        .log-top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 2px solid rgba(0, 198, 255, 0.3);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .log-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #0052D4;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .log-chapter {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 9px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: bold;
+            margin-left: 6px;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .status-replied {
+            background: #dcfce7;
+            color: #15803d;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .log-question {
+            font-size: 14.5px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+        .log-reply {
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #ecfdf5;
+            border: 1px solid #6ee7b7;
+            color: #065f46;
+            font-size: 14px;
+        }
+
+        /* COMMAND PALETTE (Ctrl+K) */
+        .cmd-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 23, 0.82);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 12vh;
+        }
+        .cmd-box {
+            background: #041204;
+            border: 1.5px solid #00ff41;
+            width: 92%;
+            max-width: 500px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 0 35px rgba(0, 255, 65, 0.35);
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+        }
+        .cmd-input-wrap {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.35);
+            gap: 10px;
+        }
+        .cmd-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff41;
+            font-size: 15px;
+            font-family: inherit;
+        }
+        .cmd-list { max-height: 300px; overflow-y: auto; padding: 8px; }
+        .cmd-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: #00ff41;
+            text-decoration: none;
+        }
+        .cmd-item:hover { background: #00ff41; color: #020602; font-weight: bold; }
+
+        /* MOD GELAP STANDARD */
+        body.dark-mode { background-color: #0f172a !important; color: #f1f5f9 !important; }
+        body.dark-mode .main-content { background-color: #1e293b !important; color: #f1f5f9 !important; box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
+        body.dark-mode .main-content h2, body.dark-mode .kotak-info h3, body.dark-mode .kotak-borang label { color: #38bdf8 !important; }
+        body.dark-mode .main-content p, body.dark-mode .kotak-info p { color: #cbd5e1 !important; }
+        body.dark-mode .cyber-hud-bar { background: #0f172a !important; border-color: #38bdf8 !important; color: #38bdf8 !important; }
+        body.dark-mode .kotak-info { background-color: #0f172a !important; border-left-color: #38bdf8 !important; }
+        body.dark-mode .faq-item { background: #1e293b !important; color: #f1f5f9 !important; }
+        body.dark-mode .kotak-borang, body.dark-mode .kotak-log-transmisi { background-color: #0f172a !important; border-color: #334155 !important; }
+        body.dark-mode .log-card { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #1e293b !important; color: #ffffff !important; border-color: #334155 !important; }
+        body.dark-mode .dropdown-content { background-color: #1e293b !important; }
+        body.dark-mode .dropdown-content a { color: #f1f5f9 !important; border-bottom: 1px solid #334155; }
+        body.dark-mode .dropdown-content a:hover { background-color: #334155 !important; color: #38bdf8 !important; }
+
+        /* =========================================================
+           100% HACKER / MATRIX TERMINAL EDITION (DEFAULT ACTIVE)
+           ========================================================= */
+        body.matrix-mode {
+            background-color: #020602 !important;
+            color: #00ff41 !important;
+            font-family: 'Courier New', Courier, monospace !important;
+        }
+
+        body.matrix-mode::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.14) 0px,
+                rgba(0, 0, 0, 0.14) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 9998;
+        }
+
+        body.matrix-mode .header-container {
+            background: linear-gradient(135deg, rgba(0, 22, 0, 0.94), rgba(0, 52, 0, 0.92), rgba(2, 8, 2, 0.96)) !important;
+            border-bottom: 2px solid #00ff41 !important;
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.28) !important;
+        }
+        body.matrix-mode .header-container h1 {
+            color: #00ff41 !important;
+            text-shadow: 0 0 12px rgba(0, 255, 65, 0.85) !important;
+        }
+
+        body.matrix-mode .navbar {
+            background-color: rgba(3, 15, 3, 0.95) !important;
+            border-bottom: 1.5px solid #00ff41 !important;
+        }
+        body.matrix-mode .navbar a.active-link,
+        body.matrix-mode .navbar a:hover,
+        body.matrix-mode .btn-nav-action:hover,
+        body.matrix-mode .btn-dark-toggle:hover {
+            background-color: #00ff41 !important;
+            color: #020602 !important;
+            box-shadow: 0 0 12px #00ff41 !important;
+        }
+        body.matrix-mode .avatar-btn-pandai {
+            background: #041d08 !important;
+            color: #00ff41 !important;
+            border: 2px solid #00ff41 !important;
+        }
+
+        body.matrix-mode .main-content {
+            background-color: rgba(4, 14, 4, 0.88) !important;
+            backdrop-filter: blur(4px);
+            border: 1.5px solid #00ff41 !important;
+            box-shadow: 0 0 28px rgba(0, 255, 65, 0.18) !important;
+            color: #00ff41 !important;
+        }
+
+        body.matrix-mode .cyber-hud-bar,
+        body.matrix-mode .kotak-info,
+        body.matrix-mode .kotak-borang,
+        body.matrix-mode .kotak-log-transmisi,
+        body.matrix-mode .user-dropdown-menu,
+        body.matrix-mode .dropdown-content {
+            background: rgba(3, 18, 5, 0.92) !important;
+            border: 1.5px solid #00ff41 !important;
+            color: #00ff41 !important;
+        }
+
+        body.matrix-mode .faq-item,
+        body.matrix-mode .log-card {
+            background: rgba(0, 32, 7, 0.85) !important;
+            border: 1px solid rgba(0, 255, 65, 0.45) !important;
+            border-left: 4px solid #00ff41 !important;
+            color: #00ff41 !important;
+        }
+
+        body.matrix-mode .log-reply {
+            background: rgba(0, 45, 55, 0.85) !important;
+            border-color: #00f2fe !important;
+            color: #00f2fe !important;
+        }
+
+        body.matrix-mode h2, body.matrix-mode h3, body.matrix-mode p, body.matrix-mode label, body.matrix-mode strong {
+            color: #00ff41 !important;
+        }
+
+        body.matrix-mode .log-chapter {
+            background: #020d03 !important;
+            border: 1px solid #00f2fe !important;
+            color: #00f2fe !important;
+        }
+
+        body.matrix-mode input, body.matrix-mode select, body.matrix-mode textarea {
+            background: #020d03 !important;
+            color: #00ff41 !important;
+            border: 1.5px solid #00ff41 !important;
+            font-family: 'Courier New', monospace !important;
+        }
+
+        body.matrix-mode .butang-hantar {
+            background: #00ff41 !important;
+            color: #020602 !important;
+            box-shadow: 0 0 18px rgba(0, 255, 65, 0.55) !important;
+        }
+
+        body.matrix-mode .dropdown-content a,
+        body.matrix-mode .user-dropdown-item {
+            color: #00ff41 !important;
+            border-bottom-color: rgba(0, 255, 65, 0.25) !important;
+        }
+        body.matrix-mode .dropdown-content a:hover,
+        body.matrix-mode .user-dropdown-item:hover {
+            background: #00ff41 !important;
+            color: #020602 !important;
+        }
+
+        body.matrix-mode .footer {
+            background-color: #020902 !important;
+            border-top: 1.5px solid #00ff41 !important;
+            color: #00ff41 !important;
+        }
+
+        .footer { position: relative; z-index: 2; background-color: #0d1b2a; color: #ccc; text-align: center; padding: 25px 20px; font-size: 14px; line-height: 1.6; margin-top: auto; }
+        .footer span.highlight { color: #00c6ff; font-weight: bold; }
+
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 10002; display: flex; flex-direction: column; gap: 10px; }
+        .toast-msg { background: #041806; color: #00ff41; padding: 12px 18px; border-radius: 8px; box-shadow: 0 0 18px rgba(0, 255, 65, 0.35); font-size: 13.5px; font-weight: bold; display: flex; align-items: center; border: 1px solid #00ff41; border-left: 5px solid #00ff41; font-family: 'Courier New', monospace; }
+        .toast-msg.success { border-left-color: #00f2fe; color: #00f2fe; }
+        .toast-msg.error { border-left-color: #ff4b2b; color: #ff6b6b; border-color: #ff4b2b; }
+    </style>
+</head>
+<body>
+
+    <!-- KANVAS HUJAN KOD MATRIX -->
+    <canvas id="zepMatrixRain" style="position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:1; pointer-events:none; opacity:0.42; display:none;"></canvas>
+
+    <div class="header-container">
+        <img src="logosains.png" style="height: 115px; width: auto;" alt="Logo" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2083/2083285.png'; this.style.height='90px';">
+        <div>
+            <div class="cyber-tag-header">[COMMS.LINK // ASK_A_TEACHER_TERMINAL]</div>
+            <h1 style="color: white; margin: 0; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); font-size: clamp(24px, 4vw, 40px);">SCIENCE PORTAL SUPPORT</h1>
+        </div>
+    </div>
+
+    <!-- Menu Navigasi (Selaras dengan semua halaman) -->
+    <nav class="navbar">
+        <a href="index.html">Main Lab</a>
+        <a href="videos.html">Student Videos 📹</a>
+        <div class="dropdown">
+            <a href="#">Science Notes Form 2 ▼</a>
+            <div class="dropdown-content">
+                <a href="science_chap1.html">Chapter 1: Biodiversity</a>
+                <a href="science_chap2.html">Chapter 2: Ecosystem</a>
+                <a href="science_chap3.html">Chapter 3: Nutrition</a>
+                <a href="science_chap4.html">Chapter 4: Human Health</a>
+                <a href="science_chap5.html">Chapter 5: Water and Solution</a>
+                <a href="science_chap6.html">Chapter 6: Acids and Alkalis</a>
+                <a href="science_chap7.html">Chapter 7: Energy and Power</a>
+                <a href="science_chap8.html">Chapter 8: Rate of Reaction</a>
+                <a href="science_chap9.html">Chapter 9: Speed</a>
+                <a href="science_chap10.html">Chapter 10: Sound Waves</a>
+                <a href="science_chap11.html">Chapter 11: Stars and Galaxies</a>
+                <a href="science_chap12.html">Chapter 12: The Solar System</a>
+                <a href="science_chap13.html">Chapter 13: Meteoroid, Asteroid and Comet</a>
+            </div>
+        </div>
+        <a href="interactive_lab.html">Interactive Lab</a>
+        <a href="performance.html">Scientist Analytics</a>
+        <a href="contact.html" class="active-link">Ask a Teacher</a>
+        <a href="login.html" id="btnLogMasuk">Login 👨‍🔬</a>
+
+        <button onclick="bukaCommandPalette()" class="btn-nav-action" title="Pintasan Pantas">
+            ⚡ Arahan <span class="kbd-badge">Ctrl+K</span>
+        </button>
+
+        <button onclick="aktifkanModHacker(true)" class="btn-nav-action btn-matrix-trigger" id="btnMatrixMode" title="Togol Mod Hacker Matrix">
+            🟢 Matrix
+        </button>
+
+        <button onclick="toggleDarkMode()" class="btn-dark-toggle" id="btnDarkMode">🌙 Mod Gelap</button>
+
+        <button onclick="toggleAudioFX()" class="btn-nav-action" id="btnAudioFX" title="Kesan Bunyi Synth">🔊 SFX</button>
+
+        <!-- Pill Profil Kanan -->
+        <div class="nav-right-user">
+            <button class="avatar-btn-pandai" onclick="toggleUserDropdown(event)">
+                <span id="navUserAvatar">🔬</span>
+                <span id="navUserName">Saintis ZEP</span>
+                <span style="font-size: 10px;">▼</span>
+            </button>
+
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+                <div class="user-dropdown-header">
+                    <div style="font-weight: bold; font-size: 14px;" id="dropHeaderNama">SAINTIS ZEP</div>
+                    <div style="font-size: 11px; opacity: 0.9; margin-top: 2px;" id="dropHeaderXP">⚡ 0 LAB XP</div>
+                </div>
+                <a href="profile.html" class="user-dropdown-item"><span>👨‍🔬</span> My Scientist Profile</a>
+                <a href="performance.html" class="user-dropdown-item"><span>🏆</span> Global Leaderboard</a>
+                <a href="interactive_lab.html" class="user-dropdown-item"><span>🚀</span> Interactive Lab</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- KANDUNGAN UTAMA -->
+    <div class="main-content">
+
+        <!-- CYBER TELEMETRY HUD BAR -->
+        <div class="cyber-hud-bar">
+            <span id="hudUserStatus">🔬 AGENT: GUEST SCIENTIST [COMMS READY]</span>
+            <span><span class="pulse-dot"></span>TEACHER UPLINK: ACTIVE</span>
+        </div>
+
+        <h2 style="color: #1a2a6c; border-bottom: 2px solid #00ff41; padding-bottom: 10px; display: inline-block; margin-top: 0;">
+            📞 Ask a Teacher & Science Team
+        </h2>
+        <p style="color: #555; font-size: 16px;">Got questions about Form 2 Science experiments, concepts, or stuck in the ZEP Lab Game? Send a direct transmission!</p>
+
+        <div class="susunan-hubungi">
+            <!-- Bahagian Kiri: Maklumat Hubungan & FAQ Pantas -->
+            <div class="kotak-info">
+                <div>
+                    <h3>📡 Science Development Team</h3>
+                    <p>
+                        🏫 <strong>School:</strong> SMK MATANG JAYA (Sarawak)<br>
+                        📧 <strong>Email:</strong> support.science@contoh.edu.my<br>
+                        🕒 <strong>Uplink Hours:</strong> Monday - Friday (8:00 AM - 5:00 PM)
+                    </p>
+                    <p style="margin-top: 15px; font-weight: bold;">
+                        Need an urgent response? Open direct WhatsApp channel:
+                    </p>
+                    <a href="https://wa.me/60123456789?text=Hello%20Teacher,%20I%20have%20a%20question%20regarding%20the%20Science%20Portal" target="_blank" class="butang-whatsapp">
+                        💬 Chat on WhatsApp
+                    </a>
+                </div>
+
+                <!-- MINI FAQ PANTAS -->
+                <div class="faq-box">
+                    <div style="font-weight: bold; font-size: 13px; margin-bottom: 8px;">⚡ QUICK FAQ (KLIK UNTUK JAWAPAN PANTAS):</div>
+                    <details class="faq-item">
+                        <summary>❓ Bagaimana cara kumpul Lab XP & naik Rank?</summary>
+                        <p>Selesaikan misi dalam <strong>ZEP Lab Game</strong> atau main cabaran pantas <strong>Time Attack 60 Saat</strong> di Interactive Lab.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>❓ Kenapa rekod saya belum muncul di Leaderboard?</summary>
+                        <p>Pastikan anda sudah Log Masuk atau menggunakan nama panggilan yang sama sebelum memulakan permainan.</p>
+                    </details>
+                    <details class="faq-item">
+                        <summary>❓ Di mana hendak rujuk nota penuh 13 Bab?</summary>
+                        <p>Klik menu <strong>Science Notes Form 2 ▼</strong> pada bar navigasi di atas untuk akses terus ke setiap bab.</p>
+                    </details>
+                </div>
+            </div>
+
+            <!-- Bahagian Kanan: Borang Pertanyaan Firebase -->
+            <div class="kotak-borang">
+                <form id="borangHubungi">
+                    <label for="namaPengirim">Agent / Student Name:</label>
+                    <input type="text" id="namaPengirim" placeholder="E.g: Fatimah Az-Zahra" required>
+                    
+                    <label for="emailPengirim">Email (Optional):</label>
+                    <input type="email" id="emailPengirim" placeholder="E.g: fatimah@moe-dl.edu.my">
+                    
+                    <label for="babSoalan">Select Chapter / Topic:</label>
+                    <select id="babSoalan" required>
+                        <option value="General Question / Feedback">General Question / Feedback</option>
+                        <option value="Chapter 1: Biodiversity">Chapter 1: Biodiversity</option>
+                        <option value="Chapter 2: Ecosystem">Chapter 2: Ecosystem</option>
+                        <option value="Chapter 3: Nutrition">Chapter 3: Nutrition</option>
+                        <option value="Chapter 4: Human Health">Chapter 4: Human Health</option>
+                        <option value="Chapter 5: Water and Solution">Chapter 5: Water and Solution</option>
+                        <option value="Chapter 6: Acids and Alkalis">Chapter 6: Acids and Alkalis</option>
+                        <option value="Chapter 7: Energy and Power">Chapter 7: Energy and Power</option>
+                        <option value="Chapter 8: Rate of Reaction">Chapter 8: Rate of Reaction</option>
+                        <option value="Chapter 9: Speed">Chapter 9: Speed</option>
+                        <option value="Chapter 10: Sound Waves">Chapter 10: Sound Waves</option>
+                        <option value="Chapter 11: Stars and Galaxies">Chapter 11: Stars and Galaxies</option>
+                        <option value="Chapter 12: The Solar System">Chapter 12: The Solar System</option>
+                        <option value="Chapter 13: Meteoroid, Asteroid and Comet">Chapter 13: Meteoroid, Asteroid and Comet</option>
+                    </select>
+
+                    <label for="mesejPengirim">Your Question / Message:</label>
+                    <textarea id="mesejPengirim" rows="4" placeholder="Type your science question or feedback here..." required></textarea>
+                    
+                    <button type="submit" id="btnSubmitMesej" class="butang-hantar">✈️ SEND TRANSMISSION</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- BAHAGIAN BAWAH: LIVE TRANSMISSION LOG & BALASAN CIKGU -->
+        <div class="kotak-log-transmisi">
+            <div class="log-top-bar">
+                <h3 style="margin: 0; font-size: 18px;">📡 Live Transmission Log & Teacher Replies</h3>
+                <select id="filterLogMesej" onchange="paparLogTransmisi()" style="padding: 6px 12px; border-radius: 8px; font-weight: bold; font-size: 13px;">
+                    <option value="ALL">🌐 Semua Soalan Terkini</option>
+                    <option value="MINE">👤 Soalan Saya Sahaja</option>
+                </select>
+            </div>
+            <div id="senaraiLogTransmisi">
+                <div style="text-align: center; padding: 20px; opacity: 0.75;">⏳ Menyambung ke pangkalan data mesej...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COMMAND PALETTE (Ctrl + K) -->
+    <div class="cmd-overlay" id="modalCmdPalette" onclick="if(event.target.id==='modalCmdPalette') tutupCommandPalette()">
+        <div class="cmd-box">
+            <div class="cmd-input-wrap">
+                <span>⚡</span>
+                <input type="text" id="inputCmdSearch" class="cmd-input" onkeyup="tapisArahanCmd()" placeholder="Taip arahan (cth: Main Lab, Interactive, Analytics)...">
+                <span class="kbd-badge">ESC</span>
+            </div>
+            <div class="cmd-list" id="senaraiArahanCmd"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        All rights reserved &copy; <span class="highlight">Virtual Lab 2026 [100% HACKER EDITION]</span>
+        <div id="toast-container"></div>
+    </footer>
+
+    <!-- ENJIN MATRIX RAIN, COMMAND PALETTE & DROPDOWN -->
+    <script>
+        function toggleUserDropdown(e) {
+            e.stopPropagation();
+            mainBunyiKlik();
+            document.getElementById("userDropdownMenu").classList.toggle("show");
+        }
+        document.addEventListener("click", () => {
+            const menu = document.getElementById("userDropdownMenu");
+            if (menu) menu.classList.remove("show");
+        });
+
+        const senaraiPintasan = [
+            { label: "🏠 Kembali ke Main Lab", url: "index.html" },
+            { label: "🚀 Buka Interactive Lab & Time Attack", url: "interactive_lab.html" },
+            { label: "🏆 Lihat Scientist Analytics", url: "performance.html" },
+            { label: "👨‍🔬 Buka Profil Saintis Saya", url: "profile.html" },
+            { label: "📹 Tonton Student Videos", url: "videos.html" },
+            { label: "🟢 Togol Mod Hacker Matrix", aksi: () => { tutupCommandPalette(); aktifkanModHacker(true); } }
+        ];
+
+        function bukaCommandPalette() {
+            mainBunyiKlik();
+            document.getElementById("modalCmdPalette").style.display = "flex";
+            const input = document.getElementById("inputCmdSearch");
+            input.value = "";
+            tapisArahanCmd();
+            setTimeout(() => input.focus(), 50);
+        }
+
+        function tutupCommandPalette() {
+            document.getElementById("modalCmdPalette").style.display = "none";
+        }
+
+        function tapisArahanCmd() {
+            const q = document.getElementById("inputCmdSearch").value.toLowerCase();
+            const bekas = document.getElementById("senaraiArahanCmd");
+            bekas.innerHTML = "";
+            senaraiPintasan.filter(i => i.label.toLowerCase().includes(q)).forEach(i => {
+                const el = document.createElement(i.url ? "a" : "div");
+                el.className = "cmd-item";
+                if (i.url) el.href = i.url;
+                el.innerHTML = `<span>${i.label}</span><span style="font-size:11px; opacity:0.7;">↵</span>`;
+                if (i.aksi) el.onclick = i.aksi;
+                bekas.appendChild(el);
+            });
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+                e.preventDefault();
+                bukaCommandPalette();
+            } else if (e.key === "Escape") {
+                tutupCommandPalette();
+            }
+        });
+
+        let intervalMatrix = null;
+        function aktifkanModHacker(togol = true) {
+            if (togol) {
+                mainBunyiKlik();
+                document.body.classList.remove("dark-mode");
+                document.body.classList.toggle("matrix-mode");
+            } else {
+                document.body.classList.remove("dark-mode");
+                document.body.classList.add("matrix-mode");
+            }
+
+            const aktif = document.body.classList.contains("matrix-mode");
+            localStorage.setItem("zep_matrix", aktif ? "on" : "off");
+            const kanvas = document.getElementById("zepMatrixRain");
+
+            if (aktif) {
+                kanvas.style.display = "block";
+                mulaHujanMatrix(kanvas);
+            } else {
+                kanvas.style.display = "none";
+                if (intervalMatrix) clearInterval(intervalMatrix);
+            }
+        }
+
+        function mulaHujanMatrix(kanvas) {
+            if (intervalMatrix) clearInterval(intervalMatrix);
+            const ctx = kanvas.getContext("2d");
+            kanvas.width = window.innerWidth;
+            kanvas.height = window.innerHeight;
+
+            const aksara = "01H2OCO2DNAZEP9876543210ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const saizFon = 14;
+            const lajur = Math.floor(kanvas.width / saizFon);
+            const titisan = Array(lajur).fill(1);
+
+            intervalMatrix = setInterval(() => {
+                ctx.fillStyle = "rgba(2, 6, 2, 0.08)";
+                ctx.fillRect(0, 0, kanvas.width, kanvas.height);
+                ctx.fillStyle = "#00ff41";
+                ctx.font = saizFon + "px monospace";
+
+                for (let i = 0; i < titisan.length; i++) {
+                    const teks = aksara[Math.floor(Math.random() * aksara.length)];
+                    ctx.fillText(teks, i * saizFon, titisan[i] * saizFon);
+                    if (titisan[i] * saizFon > kanvas.height && Math.random() > 0.975) {
+                        titisan[i] = 0;
+                    }
+                    titisan[i]++;
+                }
+            }, 45);
+        }
+    </script>
+    <script src="navbar.js"></script>
+</body>
+</html>

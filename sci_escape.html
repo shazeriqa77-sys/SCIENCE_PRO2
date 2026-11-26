@@ -1,0 +1,2824 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sci-Escape GODLIKE: Omega Mega Lab 2D (100-Feature Edition)</title>
+    <script src="soalan_sains.js"></script>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        body {
+            margin: 0; background: #03050c; color: #f8fafc;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; overflow-x: hidden;
+        }
+
+        /* SKRIN 1: LOBI UTAMA GODLIKE */
+        .entry-card {
+            max-width: 720px; width: 95%; margin: 14px auto;
+            background: linear-gradient(165deg, #1e293b, #090d16);
+            border: 2px solid #f59e0b; border-radius: 22px;
+            padding: 20px; box-shadow: 0 20px 60px rgba(245, 158, 11, 0.32);
+            text-align: center;
+        }
+        .entry-card h1 {
+            margin: 0 0 4px 0; font-size: 1.65rem;
+            background: linear-gradient(90deg, #fde047, #f59e0b, #ec4899, #38bdf8);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sub { color: #94a3b8; font-size: 0.83rem; margin-bottom: 10px; }
+
+        .badge-row { display: flex; justify-content: center; gap: 7px; flex-wrap: wrap; margin-bottom: 10px; }
+        .live-badge {
+            background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #6ee7b7;
+            padding: 4px 11px; border-radius: 20px; font-size: 0.78rem; font-weight: bold;
+        }
+        .record-badge {
+            background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24;
+            padding: 4px 11px; border-radius: 20px; font-size: 0.78rem; font-weight: bold;
+        }
+        .crystal-badge {
+            background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; color: #7dd3fc;
+            padding: 4px 11px; border-radius: 20px; font-size: 0.78rem; font-weight: bold;
+        }
+
+        .bounty-bar {
+            background: rgba(124, 58, 237, 0.16); border: 1px solid #a855f7;
+            border-radius: 10px; padding: 6px 10px; font-size: 0.78rem; color: #e9d5ff;
+            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px;
+        }
+
+        .stage-roadmap {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+            margin-bottom: 10px; text-align: left;
+        }
+        .stage-pill {
+            background: #090d16; border: 1px solid #334155; border-radius: 10px;
+            padding: 6px 8px; font-size: 0.7rem; line-height: 1.25;
+        }
+        .stage-pill strong { display: block; font-size: 0.75rem; margin-bottom: 2px; }
+        .st-1 strong { color: #4ade80; }
+        .st-2 strong { color: #fbbf24; }
+        .st-3 strong { color: #f87171; }
+        .st-4 strong { color: #38bdf8; }
+        .st-5 strong { color: #a3e635; }
+        .st-6 strong { color: #e879f9; }
+
+        .input-group { margin-bottom: 10px; text-align: left; }
+        .input-group label { display: block; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 4px; font-weight: bold; }
+        input[type="text"], input[type="password"], select {
+            width: 100%; padding: 9px 12px; border-radius: 11px; border: 1px solid #475569;
+            background: #090d16; color: white; font-size: 0.9rem; font-weight: bold;
+            user-select: text;
+        }
+        select option { background: #0f172a; color: #f8fafc; }
+
+        .profile-sync-tag {
+            margin-top: 5px; font-size: 0.75rem; color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.35);
+            padding: 4px 10px; border-radius: 8px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+        }
+
+        .section-lbl { font-size: 0.8rem; color: #cbd5e1; font-weight: bold; display: block; margin-bottom: 4px; text-align: left; }
+
+        .avatar-picker { display: flex; justify-content: center; gap: 6px; margin: 4px 0 10px 0; flex-wrap: wrap; }
+        .av-opt {
+            font-size: 1.45rem; padding: 4px 8px; border-radius: 11px; cursor: pointer;
+            background: #090d16; border: 2px solid #334155; transition: 0.2s;
+        }
+        .av-opt:hover { border-color: #94a3b8; transform: translateY(-2px); }
+        .av-opt.selected { border-color: #facc15; background: #422006; transform: scale(1.08); box-shadow: 0 0 12px rgba(250, 204, 21, 0.45); }
+
+        .aura-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 4px 0 10px 0; }
+        .aura-opt {
+            background: #090d16; border: 2px solid #334155; border-radius: 10px;
+            padding: 6px 4px; cursor: pointer; font-size: 0.74rem; font-weight: bold; color: #cbd5e1;
+            transition: 0.2s;
+        }
+        .aura-opt.selected { border-color: #38bdf8; background: #0c2d48; color: #7dd3fc; }
+
+        .role-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin: 4px 0 10px 0; }
+        .role-card {
+            background: #090d16; border: 2px solid #334155; border-radius: 12px;
+            padding: 8px 6px; cursor: pointer; transition: 0.2s; text-align: center;
+        }
+        .role-card:hover { border-color: #64748b; }
+        .role-card.selected { border-color: #f59e0b; background: #291d0a; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25); }
+        .role-icon { font-size: 1.35rem; display: block; margin-bottom: 2px; }
+        .role-title { font-size: 0.8rem; font-weight: bold; color: #f8fafc; display: block; }
+        .role-desc { font-size: 0.68rem; color: #94a3b8; display: block; margin-top: 2px; line-height: 1.2; }
+
+        .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .lobby-action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 10px; }
+
+        button {
+            width: 100%; padding: 10px; border: none; border-radius: 11px;
+            font-weight: bold; font-size: 0.92rem; cursor: pointer; color: white;
+            transition: transform 0.15s, opacity 0.15s;
+        }
+        button:hover { opacity: 0.93; transform: translateY(-1px); }
+        .btn-enter {
+            background: linear-gradient(135deg, #f59e0b, #d97706, #7c3aed);
+            font-size: 1.02rem; box-shadow: 0 6px 24px rgba(245, 158, 11, 0.45);
+        }
+        .btn-sub { background: #1e293b; border: 1px solid #475569; font-size: 0.8rem; padding: 8px 6px; }
+        .btn-back { background: #334155; margin-top: 6px; font-size: 0.84rem; padding: 8px; }
+
+        /* SKRIN MAKMAL GODLIKE */
+        #gameScreen {
+            display: none; width: 100%; max-width: 1360px; padding: 6px 12px;
+            flex-direction: column; align-items: center;
+        }
+
+        .hud-bar {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            background: #1e293b; padding: 7px 12px; border-radius: 12px;
+            border: 1px solid #334155; margin-bottom: 5px; flex-wrap: wrap; gap: 5px; font-size: 0.78rem;
+        }
+        .hud-group { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+        .pill { padding: 4px 9px; border-radius: 8px; font-weight: bold; }
+        .p-stage { background: linear-gradient(135deg, #065f46, #047857); color: #a7f3d0; border: 1px solid #34d399; }
+        .p-stage.s2 { background: linear-gradient(135deg, #78350f, #b45309); color: #fde68a; border: 1px solid #f59e0b; }
+        .p-stage.s3 { background: linear-gradient(135deg, #7f1d1d, #b91c1c); color: #fecaca; border: 1px solid #f87171; }
+        .p-stage.s4 { background: linear-gradient(135deg, #0c4a6e, #0284c7); color: #bae6fd; border: 1px solid #38bdf8; }
+        .p-stage.s5 { background: linear-gradient(135deg, #365314, #4d7c0f); color: #d9f99d; border: 1px solid #a3e635; }
+        .p-stage.s6 { background: linear-gradient(135deg, #581c87, #9333ea); color: #f3e8ff; border: 1px solid #e879f9; }
+        .p-online { background: #064e3b; color: #6ee7b7; }
+        .p-mission { background: #0f172a; color: #38bdf8; border: 1px solid #334155; }
+        .p-key { background: #422006; color: #facc15; }
+        .p-laser { background: #450a0a; color: #fca5a5; }
+        .p-time { background: #312e81; color: #e0e7ff; }
+        .p-mvp { background: #4c1d95; color: #ddd6fe; }
+        .p-gadget { background: #1e1b4b; color: #f472b6; border: 1px solid #ec4899; cursor: pointer; }
+        .p-ult { background: #3b0764; color: #f0abfc; border: 1px solid #d946ef; cursor: pointer; }
+        .p-combo { background: #7c2d12; color: #fdba74; border: 1px solid #f97316; display: none; }
+
+        .btn-hud { width: auto; padding: 5px 9px; font-size: 0.76rem; border-radius: 8px; }
+        .btn-hud.locked { opacity: 0.65; cursor: not-allowed; border: 1px solid #f59e0b; }
+
+        .objective-strip {
+            width: 100%; background: rgba(15, 23, 42, 0.94); border: 1px solid #38bdf8;
+            color: #7dd3fc; padding: 5px 12px; border-radius: 8px; font-size: 0.79rem;
+            font-weight: bold; text-align: center; margin-bottom: 5px;
+        }
+
+        .legend-strip {
+            width: 100%; display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
+            font-size: 0.74rem; color: #cbd5e1; margin-bottom: 5px;
+        }
+
+        .warn-banner {
+            display: none; width: 100%; background: #78350f; color: #fef3c7;
+            padding: 5px 12px; border-radius: 8px; font-size: 0.78rem;
+            margin-bottom: 5px; text-align: center; border: 1px solid #f59e0b;
+        }
+
+        canvas {
+            background: #020617; border: 3px solid #f59e0b; border-radius: 14px;
+            width: 100%; max-width: 1300px; height: auto; cursor: crosshair;
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.25);
+        }
+
+        .bottom-controls {
+            width: 100%; display: flex; justify-content: space-between; align-items: center;
+            margin-top: 7px; gap: 6px; flex-wrap: wrap;
+        }
+        .social-box { display: flex; gap: 5px; align-items: center; flex: 1; min-width: 300px; flex-wrap: wrap; }
+        .chat-input {
+            padding: 7px 11px !important; border-radius: 10px !important;
+            font-size: 0.86rem !important; font-weight: normal !important; flex: 1; min-width: 120px;
+        }
+        .btn-send { width: auto; padding: 7px 12px; background: #2563eb; font-size: 0.82rem; }
+        .emote-btn {
+            width: 34px; height: 34px; padding: 0; font-size: 1.05rem; flex-shrink: 0;
+            background: #1e293b; border: 1px solid #475569; border-radius: 9px;
+        }
+        .btn-act {
+            width: auto; padding: 0 10px; height: 34px; font-size: 0.78rem; border-radius: 9px; flex-shrink: 0;
+        }
+
+        .dpad {
+            display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(2, 40px); gap: 4px;
+        }
+        .dpad button {
+            padding: 0; background: #334155; border: 1px solid #64748b; font-size: 1.05rem; border-radius: 9px;
+        }
+        .dpad button:active { background: #f59e0b; }
+
+        .modal {
+            display: none; position: fixed; inset: 0; background: rgba(2, 6, 23, 0.9);
+            align-items: center; justify-content: center; z-index: 200; padding: 14px;
+        }
+        .modal-box {
+            background: #1e293b; border: 2px solid #f59e0b; border-radius: 18px;
+            padding: 20px; max-width: 600px; width: 100%; text-align: center;
+            max-height: 92vh; overflow-y: auto;
+        }
+        .modal-box h2 { margin-top: 0; margin-bottom: 6px; color: #fde047; font-size: 1.2rem; }
+        .q-topic-tag {
+            display: inline-block; background: rgba(56, 189, 248, 0.14); border: 1px solid #38bdf8;
+            color: #7dd3fc; font-size: 0.76rem; font-weight: bold; padding: 3px 10px;
+            border-radius: 20px; margin-bottom: 8px;
+        }
+        .options-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+        .opt-btn {
+            background: #0f172a; border: 1px solid #475569; text-align: left;
+            padding: 10px 13px; border-radius: 10px; color: #f8fafc; cursor: pointer; font-size: 0.92rem;
+        }
+        .opt-btn:hover { background: #312e81; border-color: #f59e0b; }
+        .feedback { margin-top: 10px; font-weight: bold; min-height: 20px; font-size: 0.88rem; line-height: 1.4; }
+        .teacher-section {
+            background: #0f172a; border: 1px solid #334155; border-radius: 12px;
+            padding: 10px; margin-bottom: 9px; text-align: left;
+        }
+        .teacher-section label { font-size: 0.79rem; color: #94a3b8; display: block; margin-bottom: 5px; font-weight: bold; }
+        .mvp-table { width: 100%; border-collapse: collapse; font-size: 0.79rem; color: #e2e8f0; }
+        .mvp-table th, .mvp-table td { padding: 5px 6px; border-bottom: 1px solid #1e293b; text-align: left; }
+        .stage-btn-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 5px; }
+
+        /* MINI-GAME KSSM INTERAKTIF */
+        .minigame-box {
+            background: #090d16; border: 1px solid #38bdf8; border-radius: 12px;
+            padding: 14px; margin-top: 10px; text-align: center;
+        }
+        .mg-btn-row { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; }
+        .mg-chip {
+            width: auto; padding: 8px 14px; background: #1e293b; border: 1px solid #38bdf8;
+            border-radius: 9px; font-size: 0.86rem; color: #e0f2fe;
+        }
+        .mg-chip.active { background: #0284c7; color: #fff; }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 60px); gap: 6px; justify-content: center; margin-top: 8px; }
+        .keypad-grid button { padding: 10px; background: #1e293b; border: 1px solid #475569; }
+
+        /* SHOP & SKILL TREE CARDS */
+        .shop-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; text-align: left; margin-top: 8px; }
+        .shop-item { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 9px; font-size: 0.8rem; }
+        .shop-item strong { color: #fde047; display: block; margin-bottom: 3px; }
+    </style>
+</head>
+<body>
+
+    <!-- SKRIN 1: LOBI UTAMA GODLIKE -->
+    <div class="entry-card" id="entryScreen">
+        <h1>👑 SCI-ESCAPE GODLIKE: OMEGA LAB</h1>
+        <div class="sub">Kempen 6-Tahap • 6 Kelas Saintis • Boss 1000HP • Mini-Game KSSM • 8 Mod Permainan!</div>
+
+        <div class="badge-row">
+            <span class="live-badge" id="liveLobbyCount">🟢 Bilik Omega GODLIKE Sedia</span>
+            <span class="record-badge" id="lobbyRecordText">🏆 Rekod Kempen: Belum Dicipta</span>
+            <span class="crystal-badge" id="lobbyCrystalText">💎 Kristal: 120 | 🎖️ Battle Pass: Tier 1</span>
+        </div>
+
+        <div class="bounty-bar">
+            <span id="dailyBountyLabel">🎯 Misi Harian: Buka 3 Pintu Kuiz (+150 XP & +50 💎)</span>
+            <span id="dailyBountyStatus" style="color:#4ade80; font-weight:bold;">0/3</span>
+        </div>
+
+        <div class="stage-roadmap">
+            <div class="stage-pill st-1"><strong>💡 L1: TERANG</strong>Lampu penuh • 1.0x XP</div>
+            <div class="stage-pill st-2"><strong>🔦 L2: BLACKOUT</strong>Cahaya tengah • 1.5x XP</div>
+            <div class="stage-pill st-3"><strong>☢️ L3: KRITIKAL</strong>Cahaya sempit • 2.0x XP</div>
+            <div class="stage-pill st-4"><strong>🛸 L4: ZERO-G</strong>Inersia licin • 2.2x XP</div>
+            <div class="stage-pill st-5"><strong>🧪 L5: ASID-ALKALI</strong>Banjir kimia • 2.5x XP</div>
+            <div class="stage-pill st-6"><strong>🌌 L6: OMEGA GOD</strong>Gabungan penuh • 3.0x XP</div>
+        </div>
+
+        <div class="input-group">
+            <label>Nama Paparan Saintis Anda:</label>
+            <input type="text" id="playerNameInput" placeholder="Contoh: PROFESSOR AL-FATIH" maxlength="30">
+            <div class="profile-sync-tag">
+                <span id="syncIdLabel">🔗 Sedia untuk Masuk Arena...</span>
+                <span id="syncCurrentXpLabel">⚡ XP Profil: 0 XP</span>
+            </div>
+        </div>
+
+        <span class="section-lbl">1. Pilih Avatar & Haiwan Peliharaan (Cyber-Pet):</span>
+        <div class="avatar-picker" id="avatarPicker">
+            <div class="av-opt selected" data-av="👨‍🔬">👨‍🔬</div>
+            <div class="av-opt" data-av="👩‍🔬">👩‍🔬</div>
+            <div class="av-opt" data-av="🤖">🤖</div>
+            <div class="av-opt" data-av="👽">👽</div>
+            <div class="av-opt" data-av="🦊">🦊</div>
+            <div class="av-opt" data-av="🚀">🚀</div>
+            <div class="av-opt" data-av="🧙‍♂️">🧙‍♂️</div>
+            <div class="av-opt" data-av="🐉">🐉</div>
+        </div>
+
+        <span class="section-lbl">2. Pilih Aura Jejak & Tema Makmal:</span>
+        <div class="aura-picker" id="auraPicker">
+            <div class="aura-opt selected" data-aura="classic">⚡ Klasik</div>
+            <div class="aura-opt" data-aura="cosmic">🔥 Api Kosmik</div>
+            <div class="aura-opt" data-aura="cyber">🧬 Siber Hijau</div>
+            <div class="aura-opt" data-aura="galaxy">✨ Galaksi</div>
+        </div>
+
+        <span class="section-lbl">3. Pilih 6 Kepakaran Saintis (Class Role + Ultimate [R]):</span>
+        <div class="role-grid" id="rolePicker">
+            <div class="role-card selected" data-role="sprinter">
+                <span class="role-icon">⚡</span>
+                <span class="role-title">Sprinter</span>
+                <span class="role-desc">+15% laju & Ulti: Sonic Boom</span>
+            </div>
+            <div class="role-card" data-role="hacker">
+                <span class="role-icon">💻</span>
+                <span class="role-title">Hacker</span>
+                <span class="role-desc">50/50 + Radar Peti & Ulti: Auto-Buka</span>
+            </div>
+            <div class="role-card" data-role="engineer">
+                <span class="role-icon">🛡️</span>
+                <span class="role-title">Engineer</span>
+                <span class="role-desc">Perisai Aegis Rakan & Ulti: Kubah Kebal</span>
+            </div>
+            <div class="role-card" data-role="alchemist">
+                <span class="role-icon">🧪</span>
+                <span class="role-title">Alchemist</span>
+                <span class="role-desc">Kebal Asid L5 & Ulti: Nova Penneutral</span>
+            </div>
+            <div class="role-card" data-role="chronomancer">
+                <span class="role-icon">⏳</span>
+                <span class="role-title">Chronomancer</span>
+                <span class="role-desc">Perlahankan Dron & Ulti: Henti Masa</span>
+            </div>
+            <div class="role-card" data-role="quantum">
+                <span class="role-icon">⚛️</span>
+                <span class="role-title">Quantum Physicist</span>
+                <span class="role-desc">Cipta Portal & Ulti: Lohong Kapsul</span>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <select id="gameModeSelect" title="Pilih Mod Permainan">
+                <option value="campaign">👑 Mod 1: Kempen 6-Level Progresif</option>
+                <option value="saboteur">🗡️ Mod 2: Pengkhianat (Saboteur)</option>
+                <option value="horde">🛡️ Mod 3: Pertahanan Teras (Horde)</option>
+                <option value="teamrace">⚔️ Mod 4: Perlumbaan Merah vs Biru</option>
+                <option value="bossrush">👾 Mod 5: Boss Rush (3 Boss Berturut)</option>
+                <option value="hardcore">💀 Mod 6: Hardcore 1 Nyawa</option>
+                <option value="ghost">👻 Mod 7: Lumba Hantu Rekod (Ghost)</option>
+                <option value="sonar">🦇 Mod 8: Sonar Buta (Echolocator)</option>
+            </select>
+            <select id="mapTypeSelect" title="Jenis Peta & Tema Visual">
+                <option value="classic|default">🗺️ Peta Klasik • Tema Omega</option>
+                <option value="procedural|default">🎲 Peta Prosedural Rawak • Tema Omega</option>
+                <option value="classic|space">🚀 Peta Klasik • Tema Stesen Angkasa</option>
+                <option value="classic|ocean">🌊 Peta Klasik • Tema Makmal Laut Dalam</option>
+                <option value="procedural|neon">🌆 Peta Prosedural • Tema Siber Neon</option>
+            </select>
+        </div>
+
+        <div class="filter-row">
+            <select id="chapterSelect" title="Pilih Bab Soalan Pintu Kuiz">
+                <option value="all">Semua Bab (1 - 13) + Mini-Games</option>
+                <option value="1">Bab 1: Biodiversity</option>
+                <option value="2">Bab 2: Ecosystem</option>
+                <option value="3">Bab 3: Nutrition</option>
+                <option value="4">Bab 4: Human Health</option>
+                <option value="5">Bab 5: Water &amp; Solution</option>
+                <option value="6">Bab 6: Acids &amp; Alkalis</option>
+                <option value="7">Bab 7: Work, Energy &amp; Power</option>
+                <option value="8">Bab 8: Rate of Reaction</option>
+                <option value="9">Bab 9: Speed &amp; Acceleration</option>
+                <option value="10">Bab 10: Sound Waves</option>
+                <option value="11">Bab 11: Stars &amp; Galaxies</option>
+                <option value="12">Bab 12: Solar System</option>
+                <option value="13">Bab 13: Meteoroid &amp; Comet</option>
+            </select>
+            <select id="levelSelect" title="Pilih Tahap Permulaan">
+                <option value="all">Kempen Penuh (Level 1 → 6)</option>
+                <option value="1">Mula Level 1 (Terang)</option>
+                <option value="2">Mula Level 2 (Blackout)</option>
+                <option value="3">Mula Level 3 (Kritikal)</option>
+                <option value="4">Mula Level 4 (Zero-G Drift)</option>
+                <option value="5">Mula Level 5 (Banjir Asid)</option>
+                <option value="6">Mula Level 6 (Omega GODLIKE)</option>
+            </select>
+        </div>
+
+        <div class="lobby-action-grid">
+            <button class="btn-sub" onclick="openShopModal()">🛒 Kedai &amp; Pet (💎)</button>
+            <button class="btn-sub" onclick="openSkillTreeModal()">🧬 Skill Tree &amp; Lencana</button>
+            <button class="btn-sub" onclick="openSpecimenModal()">🃏 Dek Spesimen &amp; Pass</button>
+        </div>
+
+        <button class="btn-enter" onclick="enterGlobalLab()">👑 MASUK MEGA MAKMAL GODLIKE</button>
+        <button class="btn-back" onclick="window.location.href='profile.html'">👤 Lihat Profil Saya</button>
+        <button class="btn-back" onclick="window.location.href='index.html'">🏠 Kembali ke Menu Utama (index.html)</button>
+    </div>
+
+    <!-- SKRIN 2: ARENA ESCAPE GODLIKE -->
+    <div id="gameScreen">
+        <div class="hud-bar">
+            <div class="hud-group">
+                <span class="pill p-stage" id="hudStage">🚩 LEVEL 1/6 (x1.0 XP)</span>
+                <span class="pill p-online" id="hudOnline">🟢 1 Online</span>
+                <span class="pill p-mission" id="hudTerminals">🚪🔐 Kuiz: 0/5</span>
+                <span class="pill p-key" id="hudKey">💳 Kad: Tiada</span>
+                <span class="pill p-laser" id="hudLaser">⚡ Laser: AKTIF</span>
+                <span class="pill p-gadget" id="hudGadget1" onclick="activateGadgetSlot(0)">🎒1: Kosong [E]</span>
+                <span class="pill p-gadget" id="hudGadget2" onclick="activateGadgetSlot(1)">🎒2: Kosong [F]</span>
+                <span class="pill p-ult" id="hudUltimate" onclick="activateClassUltimate()">🔥 Ulti [R]: 0%</span>
+                <span class="pill p-combo" id="hudCombo">🔥 COMBO x2</span>
+                <span class="pill p-mvp" id="hudScore">⭐ XP: 0 (+0) | 💎 120</span>
+                <span class="pill p-time" id="hudSpeedrun">⏱️ 00:00</span>
+            </div>
+            <div class="hud-group">
+                <button class="btn-hud" style="background: #dc2626;" onclick="resetLabDoorsAndGadgets(1)">🔄 Reset L1</button>
+                <button class="btn-hud" id="btnRay" style="background: #7c3aed;" onclick="toggleRaycasting()">🔦 Raycast: ON</button>
+                <button class="btn-hud" id="btnFog" style="background: #334155;" onclick="toggleFog()">💡 Lampu: ON</button>
+                <button class="btn-hud" id="btnMusic" style="background: #334155;" onclick="toggleMusic()">🔊 Muzik</button>
+                <button class="btn-hud" id="btnTeacher" style="background: #0284c7;" onclick="openTeacherModal()">👨‍🏫 God-Eye Guru</button>
+                <button class="btn-hud" style="background: #475569;" onclick="window.location.href='index.html'">🏠</button>
+            </div>
+        </div>
+
+        <div class="objective-strip" id="hudObjectiveBanner">
+            🎯 LEVEL 1: Buka sekurang-kurangnya 5 Pintu Kuiz 🚪🔐 &amp; ambil Kad Akses 💳
+        </div>
+
+        <div class="warn-banner" id="firebaseWarn">
+            ⚠️ Mod Offline Aktif (Firebase tidak dapat dicapai). XP & Kristal disimpan dalam pelayar tempatan.
+        </div>
+
+        <div class="legend-strip">
+            <span>🚪🔐 <b>Pintu Kuiz</b></span>
+            <span>📦 <b>Peti Gajet</b></span>
+            <span>⚗️ <b>Meja Kraf</b></span>
+            <span>🪞 <b>Cermin Laser [C]</b></span>
+            <span>👾 <b>Boss 1000HP</b></span>
+            <span>⌨️ <b>WASD:</b> Gerak | <b>SHIFT:</b> Pecut | <b>E/F:</b> Gajet | <b>R:</b> Ulti | <b>G:</b> Baling Kad | <b>Q:</b> Ping</span>
+        </div>
+
+        <canvas id="mazeCanvas" width="1260" height="630"></canvas>
+
+        <div class="bottom-controls">
+            <div class="social-box">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Taip mesej &amp; tekan Enter..." maxlength="34">
+                <button class="btn-send" onclick="sendChatBubble()">Hantar</button>
+                <button class="emote-btn" onclick="sendEmote('🆘')">🆘</button>
+                <button class="emote-btn" onclick="sendEmote('💡')">💡</button>
+                <button class="emote-btn" onclick="sendEmote('🔥')">🔥</button>
+                <button class="emote-btn" onclick="sendEmote('👑')">👑</button>
+                <button class="btn-act" style="background:#0284c7;" onclick="pingMyLocation()">📍 Ping [Q]</button>
+                <button class="btn-act" style="background:#059669;" onclick="interactNearby()">🔧 Guna/Cermin [C]</button>
+                <button class="btn-act" style="background:#d97706; color:#0f172a;" onclick="throwKeycard()">💳 Baling [G]</button>
+                <button class="btn-act" style="background:#9333ea;" onclick="activateClassUltimate()">🔥 Ulti [R]</button>
+                <button class="btn-act" style="background:#f59e0b; color:#0f172a;" ontouchstart="setSprint(true)" ontouchend="setSprint(false)" onmousedown="setSprint(true)" onmouseup="setSprint(false)">⚡ Pecut</button>
+            </div>
+
+            <div class="dpad">
+                <div></div>
+                <button ontouchstart="setDir('up', true)" ontouchend="setDir('up', false)" onmousedown="setDir('up', true)" onmouseup="setDir('up', false)">▲</button>
+                <div></div>
+                <button ontouchstart="setDir('left', true)" ontouchend="setDir('left', false)" onmousedown="setDir('left', true)" onmouseup="setDir('left', false)">◀</button>
+                <button ontouchstart="setDir('down', true)" ontouchend="setDir('down', false)" onmousedown="setDir('down', true)" onmouseup="setDir('down', false)">▼</button>
+                <button ontouchstart="setDir('right', true)" ontouchend="setDir('right', false)" onmousedown="setDir('right', true)" onmouseup="setDir('right', false)">▶</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SOALAN PINTU KUIZ, MINI-GAME KSSM & BOSS FIREWALL -->
+    <div class="modal" id="terminalModal">
+        <div class="modal-box" id="terminalModalBox">
+            <h2 id="terminalModalTitle">🚪🔐 PINTU BERKUNCI KUIZ — JAWAB UNTUK BUKA</h2>
+            <div style="display:flex; justify-content:center; gap:8px; align-items:center; flex-wrap:wrap;">
+                <div class="q-topic-tag" id="qTopicTag">📚 Sains</div>
+                <button style="width:auto; padding:3px 10px; font-size:0.75rem; background:#0284c7; border-radius:20px;" onclick="speakQuestion()">🔊 Baca Soalan</button>
+            </div>
+            <p id="qPrompt" style="font-size: 1rem; line-height: 1.5; color: #f1f5f9;"></p>
+            <button id="btnHacker5050" style="display: none; background: linear-gradient(135deg, #059669, #047857); padding: 7px 12px; font-size: 0.84rem; margin-bottom: 8px;" onclick="useHacker5050()">💻 Aktifkan Kuasa Hacker (Buang 2 Jawapan Salah)</button>
+            <div id="miniGameContainer"></div>
+            <div class="options-list" id="qOptions"></div>
+            <div class="feedback" id="qFeedback"></div>
+            <button style="margin-top: 12px; background: #475569; padding: 9px; font-size: 0.88rem;" onclick="closeTerminalModal()">Tutup Soalan</button>
+        </div>
+    </div>
+
+    <!-- MODAL KEDAI KRISTAL & CYBER-PETS -->
+    <div class="modal" id="shopModal">
+        <div class="modal-box" style="border-color:#38bdf8;">
+            <h2 style="color:#38bdf8;">🛒 KEDAI KOSMETIK &amp; CYBER-PETS (💎 <span id="shopCrystalBal">120</span>)</h2>
+            <div class="shop-grid" id="shopGrid"></div>
+            <button style="margin-top:12px; background:#475569;" onclick="document.getElementById('shopModal').style.display='none'">Tutup Kedai</button>
+        </div>
+    </div>
+
+    <!-- MODAL SKILL TREE & LENCANA PENCAPAIAN -->
+    <div class="modal" id="skillModal">
+        <div class="modal-box" style="border-color:#a855f7;">
+            <h2 style="color:#e879f9;">🧬 SKILL TREE KEKAL &amp; PENCAPAIAN</h2>
+            <p style="font-size:0.82rem; color:#cbd5e1;">Naik taraf atribut asas saintis anda secara kekal menggunakan Kristal Kuantum (💎 <span id="skillCrystalBal">120</span>):</p>
+            <div class="shop-grid" id="skillGrid"></div>
+            <div style="margin-top:12px; text-align:left; background:#0f172a; padding:10px; border-radius:10px;">
+                <strong style="color:#fde047; font-size:0.84rem;">🏅 Lencana Pencapaian Dibuka:</strong>
+                <div id="badgeListDiv" style="font-size:0.78rem; color:#cbd5e1; margin-top:5px;"></div>
+            </div>
+            <button style="margin-top:12px; background:#475569;" onclick="document.getElementById('skillModal').style.display='none'">Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL DEK SPESIMEN & BATTLE PASS -->
+    <div class="modal" id="specimenModal">
+        <div class="modal-box" style="border-color:#10b981;">
+            <h2 style="color:#6ee7b7;">🃏 DEK KAD SPESIMEN KSSM &amp; SCIENCE PASS</h2>
+            <p id="passProgressText" style="font-size:0.84rem; color:#fde047; font-weight:bold;"></p>
+            <div class="shop-grid" id="specimenGrid"></div>
+            <button style="margin-top:12px; background:#475569;" onclick="document.getElementById('specimenModal').style.display='none'">Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL PANEL KUASA DEWA GURU (GOD-EYE PANEL) -->
+    <div class="modal" id="teacherModal">
+        <div class="modal-box" style="border-color: #38bdf8; max-width: 680px;">
+            <h2 style="color: #38bdf8;">👨‍🏫 PANEL KUASA DEWA GURU (GOD-EYE &amp; ANALITIK PBD)</h2>
+            <div id="teacherLockBox">
+                <p style="font-size: 0.9rem; color: #cbd5e1;">Masukkan PIN Guru untuk membuka kawalan penuh (PIN lalai: <b>1234</b>):</p>
+                <input type="password" id="teacherPinInput" placeholder="Masukkan PIN..." style="text-align: center; margin-bottom: 12px;">
+                <button class="btn-enter" onclick="unlockTeacherPanel()">Buka Panel Kuasa Dewa</button>
+            </div>
+
+            <div id="teacherControlsBox" style="display: none;">
+                <div class="teacher-section">
+                    <label>🛰️ Peta Satelit Interaktif Guru (Klik pada peta untuk jatuhkan Peti Gajet / Dron):</label>
+                    <div style="display:flex; gap:6px; margin-bottom:6px;">
+                        <select id="godSpawnType">
+                            <option value="crate">📦 Jatuhkan Peti Gajet Bantuan</option>
+                            <option value="drone">🛸 Munculkan Dron Peronda Baharu</option>
+                            <option value="flare">🔦 Nyalakan Suar Cahaya Besar</option>
+                        </select>
+                        <button style="width:auto; padding:0 12px; background:#dc2626;" id="btnGlobalFreeze" onclick="toggleGlobalFreeze()">⏸️ Jeda Kelas: OFF</button>
+                        <button style="width:auto; padding:0 12px; background:#9333ea;" onclick="spinTeacherEventWheel()">🎡 Roda Peristiwa</button>
+                    </div>
+                    <canvas id="teacherGodCanvas" width="420" height="276" style="width:100%; max-width:420px; border:1px solid #38bdf8; border-radius:8px; cursor:pointer; display:block; margin:auto;"></canvas>
+                </div>
+
+                <div class="teacher-section">
+                    <label>🏆 Papan Pendahulu MVP, Penganggar PBD (TP1-TP6) &amp; Intervensi:</label>
+                    <table class="mvp-table">
+                        <thead><tr><th>Nama &amp; Pangkat</th><th>Kelas</th><th>XP Sesi</th><th>PBD</th><th>Aksi</th></tr></thead>
+                        <tbody id="mvpTableBody"></tbody>
+                    </table>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:8px;">
+                        <button style="background: #4f46e5; padding: 7px; font-size: 0.8rem;" onclick="exportMVPCSV()">📥 Eksport Laporan PBD (CSV)</button>
+                        <button style="background: #059669; padding: 7px; font-size: 0.8rem;" onclick="generateMvpCertificate()">🏅 Jana Sijil Top-3 MVP</button>
+                    </div>
+                </div>
+
+                <div class="teacher-section">
+                    <label>📊 Peta Haba Kelemahan Topik KSSM (Bab 1 - 13):</label>
+                    <div id="chapterHeatmapDiv" style="font-size:0.75rem; color:#cbd5e1; max-height:95px; overflow-y:auto;">Belum ada data jawapan direkodkan pada sesi ini.</div>
+                </div>
+
+                <div class="teacher-section">
+                    <label>🎮 Lompat Tahap Arena (Level 1 → Level 6):</label>
+                    <div class="stage-btn-row">
+                        <button style="background: #059669; padding: 6px; font-size: 0.76rem;" onclick="resetLabDoorsAndGadgets(1)">💡 L1 Terang</button>
+                        <button style="background: #d97706; padding: 6px; font-size: 0.76rem;" onclick="resetLabDoorsAndGadgets(2)">🔦 L2 Blackout</button>
+                        <button style="background: #dc2626; padding: 6px; font-size: 0.76rem;" onclick="resetLabDoorsAndGadgets(3)">☢️ L3 Kritikal</button>
+                        <button style="background: #0284c7; padding: 6px; font-size: 0.76rem;" onclick="resetLabDoorsAndGadgets(4)">🛸 L4 Zero-G</button>
+                        <button style="background: #4d7c0f; padding: 6px; font-size: 0.76rem;" onclick="resetLabDoorsAndGadgets(5)">🧪 L5 Asid</button>
+                        <button style="background: #9333ea; padding: 6px; font-size: 0.76rem;" onclick="resetLabDoorsAndGadgets(6)">🌌 L6 Omega</button>
+                    </div>
+                </div>
+
+                <div class="teacher-section">
+                    <label>⚡ Penyuntik Soalan Kilat Guru &amp; Siaran Langsung:</label>
+                    <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                        <input type="text" id="broadcastInput" placeholder="Pengumuman kepada semua pelajar...">
+                        <button style="width: auto; padding: 0 14px; background: #0284c7;" onclick="teacherBroadcast()">📢 Siar</button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 5px;">
+                        <input type="text" id="customQText" placeholder="Soalan kilat guru...">
+                        <input type="text" id="customQRight" placeholder="Jawapan Betul">
+                        <input type="text" id="customQWrong" placeholder="Jawapan Salah">
+                        <button style="width: auto; padding: 0 10px; background: #f59e0b; color:#0f172a;" onclick="injectCustomQuestion()">Suntik</button>
+                    </div>
+                </div>
+
+                <div class="teacher-section">
+                    <label>📱 Kod QR Bilik Darjah (Imbas untuk Sertai):</label>
+                    <canvas id="qrCanvas" width="120" height="120" style="background:#fff; padding:6px; border-radius:8px; display:block; margin:auto;"></canvas>
+                </div>
+            </div>
+
+            <button style="margin-top: 10px; background: #475569; padding: 9px; font-size: 0.9rem;" onclick="document.getElementById('teacherModal').style.display='none'">Tutup Panel</button>
+        </div>
+    </div>
+
+    <!-- MODAL ESCAPE BERJAYA, TELEMETRI LALUAN & KAD IMBASAN -->
+    <div class="modal" id="winModal">
+        <div class="modal-box" id="winModalBox" style="border-color: #10b981;">
+            <h2 id="winTitle" style="color: #6ee7b7; font-size: 1.38rem;">🎉 TAHAP BERJAYA DITEMBUSI!</h2>
+            <p id="winDesc" style="color: #cbd5e1; line-height: 1.45; font-size:0.9rem;"></p>
+            <div id="winNextWarning" style="background: rgba(245, 158, 11, 0.14); border: 1px solid #f59e0b; color: #fde68a; padding: 9px; border-radius: 10px; font-size: 0.85rem; font-weight: bold; margin: 8px 0;"></div>
+            <p id="winMvpLine" style="color: #fde047; font-weight: bold; font-size: 0.92rem; margin:4px 0;"></p>
+            <p id="winRecordBadge" style="color: #38bdf8; font-weight: bold; font-size: 0.88rem; margin:4px 0;"></p>
+            <canvas id="telemetryCanvas" width="420" height="230" style="width:100%; max-width:420px; border:1px solid #334155; border-radius:8px; margin:8px auto; display:block;"></canvas>
+            <div id="flashcardReviewBox" style="text-align:left; background:#0f172a; padding:8px 10px; border-radius:8px; font-size:0.78rem; color:#e2e8f0; max-height:95px; overflow-y:auto; margin-bottom:8px; display:none;"></div>
+            <p id="winCountdownText" style="font-size: 0.83rem; color: #94a3b8;">🔄 Memulakan tahap seterusnya dalam 6 saat...</p>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBAtbX6wmdNwmXkgUvewnfRRXRTfyq5IZ8",
+            authDomain: "jejak-sejarah-tingkatan-2.firebaseapp.com",
+            databaseURL: "https://jejak-sejarah-tingkatan-2-default-rtdb.firebaseio.com",
+            projectId: "jejak-sejarah-tingkatan-2",
+            storageBucket: "jejak-sejarah-tingkatan-2.firebasestorage.app",
+            messagingSenderId: "92872994798",
+            appId: "1:92872994798:web:9c205538a5eb8f388e68ff",
+            measurementId: "G-8RZ21D4FXY"
+        };
+
+        const CHAPTER_TITLES = {
+            1: "Bab 1: Biodiversity", 2: "Bab 2: Ecosystem", 3: "Bab 3: Nutrition",
+            4: "Bab 4: Human Health", 5: "Bab 5: Water & Solution", 6: "Bab 6: Acids & Alkalis",
+            7: "Bab 7: Work, Energy & Power", 8: "Bab 8: Rate of Reaction", 9: "Bab 9: Speed & Acceleration",
+            10: "Bab 10: Sound Waves", 11: "Bab 11: Stars & Galaxies", 12: "Bab 12: Solar System",
+            13: "Bab 13: Meteoroid & Comet"
+        };
+
+        // KONFIGURASI 6 LEVEL PROGRESIF GODLIKE
+        const STAGE_CONFIG = {
+            1: { title: "LEVEL 1: MAKMAL UTAMA", shortLabel: "🚩 L1/6 (x1.0 XP)", cls: "", xpMult: 1.0, droneSpeedMult: 1.0, forcedCenterLight: false, innerRadius: 145, outerRadius: 380, radarRangeTiles: 999, zeroG: false, acidFlood: false },
+            2: { title: "LEVEL 2: SEKTOR BLACKOUT", shortLabel: "🔦 L2/6 (x1.5 XP)", cls: "s2", xpMult: 1.5, droneSpeedMult: 1.2, forcedCenterLight: true, innerRadius: 96, outerRadius: 270, radarRangeTiles: 7, zeroG: false, acidFlood: false },
+            3: { title: "LEVEL 3: TERAS KRITIKAL", shortLabel: "☢️ L3/6 (x2.0 XP)", cls: "s3", xpMult: 2.0, droneSpeedMult: 1.4, forcedCenterLight: true, innerRadius: 72, outerRadius: 205, radarRangeTiles: 5, zeroG: false, acidFlood: false },
+            4: { title: "LEVEL 4: GRAVITI SIFAR", shortLabel: "🛸 L4/6 ZERO-G (x2.2 XP)", cls: "s4", xpMult: 2.2, droneSpeedMult: 1.35, forcedCenterLight: false, innerRadius: 130, outerRadius: 340, radarRangeTiles: 999, zeroG: true, acidFlood: false },
+            5: { title: "LEVEL 5: BANJIR ASID-ALKALI", shortLabel: "🧪 L5/6 ASID (x2.5 XP)", cls: "s5", xpMult: 2.5, droneSpeedMult: 1.45, forcedCenterLight: true, innerRadius: 105, outerRadius: 280, radarRangeTiles: 8, zeroG: false, acidFlood: true },
+            6: { title: "LEVEL 6: TERAS OMEGA GODLIKE", shortLabel: "🌌 L6/6 OMEGA (x3.0 XP)", cls: "s6", xpMult: 3.0, droneSpeedMult: 1.65, forcedCenterLight: true, innerRadius: 75, outerRadius: 215, radarRangeTiles: 6, zeroG: true, acidFlood: true }
+        };
+
+        const XP_REWARDS = {
+            QUIZ_CORRECT: 30, QUIZ_COMBO: 45, LIGHTNING_BONUS: 15, BYPASS_GADGET: 15,
+            KEYCARD_PICKUP: 20, FINAL_DOOR: 20, COOP_PLATE: 10, GADGET_CRATE: 10,
+            LASER_SWITCH: 5, ESCAPE_BONUS: 60, GRAND_CHAMPION_BONUS: 150
+        };
+
+        // PEMBOLEH UBAH TERAS DIISYTIHARKAN AWAL
+        let app = null, auth = null, db = null, fbMod = null;
+        const GLOBAL_ROOM = "sci_arena_rooms/global_lab_godlike_v3";
+        let bestRecord = { time: 99999, team: "Legenda Alfa", path: [] };
+        let currentAuthUid = "", resolvedProfilePath = "", currentProfileXp = 0;
+        let myScore = 0, myRoundActions = 0, laserXpClaimedRound = -1, comboStreak = 0;
+        let currentStage = 1, userPickedExplicitStage = false, campaignStartTime = Date.now();
+        let activeGameMode = "campaign", activeMapType = "classic", activeTheme = "default";
+        let isSaboteur = false, globalFreeze = false, reactorHp = 1000, reactorMaxHp = 1000;
+        let currentMutator = "", mutatorUntil = 0;
+
+        // EKONOMI KRISTAL, SKILL TREE, CYBER-PETS & KOLEKSI SPESIMEN
+        let metaSave = JSON.parse(localStorage.getItem("sci_escape_godlike_meta") || "null") || {
+            crystals: 120,
+            unlockedPets: ["none"],
+            equippedPet: "none",
+            unlockedBorders: ["none"],
+            equippedBorder: "none",
+            title: "Saintis Omega",
+            skills: { boots: 0, stamina: 0, torch: 0, magnet: 0 },
+            badges: ["Pemula Omega"],
+            specimens: ["Sel Tumbuhan"],
+            dailyBountyCount: 0,
+            dailyBountyClaimed: false
+        };
+        function saveMeta() {
+            localStorage.setItem("sci_escape_godlike_meta", JSON.stringify(metaSave));
+            const cEl = document.getElementById("lobbyCrystalText");
+            if (cEl) {
+                const passTier = Math.min(30, 1 + Math.floor((currentProfileXp + myScore) / 100));
+                cEl.innerText = `💎 Kristal: ${metaSave.crystals} | 🎖️ Battle Pass: Tier ${passTier}`;
+            }
+            const bSt = document.getElementById("dailyBountyStatus");
+            if (bSt) bSt.innerText = metaSave.dailyBountyClaimed ? "✅ Selesai!" : `${Math.min(3, metaSave.dailyBountyCount)}/3`;
+        }
+        saveMeta();
+
+        function escapeHTML(str) {
+            if (!str) return "";
+            const div = document.createElement("div");
+            div.textContent = String(str);
+            return div.innerHTML;
+        }
+        function getProfileSafeKey(rawName) {
+            return (rawName || "").replace(/^@+/, "").trim().toLowerCase().replace(/[^a-z0-9_]+/g, "_").replace(/^_+|_+$/g, "");
+        }
+        function detectLoggedInUser() {
+            const keysToCheck = ["saintis_nickname", "saintis_username", "currentUser", "username", "activeUser"];
+            for (const k of keysToCheck) {
+                const v = sessionStorage.getItem(k) || localStorage.getItem(k);
+                if (v) {
+                    try {
+                        const parsed = JSON.parse(v);
+                        if (parsed && (parsed.name || parsed.username || parsed.id)) return parsed.name || parsed.username || parsed.id;
+                    } catch (_) { return v; }
+                }
+            }
+            return "";
+        }
+
+        const nameInputEl = document.getElementById("playerNameInput");
+        const detectedName = detectLoggedInUser();
+        if (detectedName) nameInputEl.value = detectedName;
+
+        function updateLobbySyncBadge() {
+            const idLbl = document.getElementById("syncIdLabel");
+            const xpLbl = document.getElementById("syncCurrentXpLabel");
+            if (currentAuthUid) {
+                idLbl.innerText = `🔗 Akaun UID: ${currentAuthUid.slice(0, 10)}... ✅`;
+                xpLbl.innerText = `⚡ XP Profil: ${currentProfileXp} XP`;
+            } else {
+                const key = getProfileSafeKey(nameInputEl.value);
+                idLbl.innerText = key ? `🔗 @${key} (Sedia Masuk)` : "🔗 Sedia untuk Masuk Arena";
+                xpLbl.innerText = `⚡ XP Profil: ${currentProfileXp} XP`;
+            }
+            saveMeta();
+        }
+        nameInputEl.addEventListener("input", updateLobbySyncBadge);
+        updateLobbySyncBadge();
+
+        // SAMBUNGAN FIREBASE SECARA DINAMIK (TIDAK MENYEKAT PERMAINAN JIKA OFFLINE)
+        (async function initFirebaseBackground() {
+            try {
+                const [appSdk, authSdk, dbSdk] = await Promise.all([
+                    import("https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js"),
+                    import("https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js"),
+                    import("https://www.gstatic.com/firebasejs/13.1.0/firebase-database.js")
+                ]);
+                fbMod = { ...appSdk, ...authSdk, ...dbSdk };
+                app = fbMod.initializeApp(firebaseConfig);
+                auth = fbMod.getAuth(app);
+                db = fbMod.getDatabase(app);
+
+                fbMod.onAuthStateChanged(auth, (user) => {
+                    if (user && user.uid) {
+                        currentAuthUid = user.uid;
+                        resolvedProfilePath = `kawan_sistem_v2/${user.uid}`;
+                        fbMod.onValue(fbMod.ref(db, resolvedProfilePath), (snap) => {
+                            const data = snap.val() || {};
+                            currentProfileXp = Number(data.xp) || 0;
+                            if (!nameInputEl.value.trim()) {
+                                const autoName = data.nama_asal || data.nama || data.name || data.username || user.displayName || "";
+                                if (autoName) nameInputEl.value = autoName;
+                            }
+                            updateLobbySyncBadge();
+                            updateHUD();
+                        }, () => updateLobbySyncBadge());
+                    } else {
+                        currentAuthUid = "";
+                        updateLobbySyncBadge();
+                    }
+                });
+
+                fbMod.onValue(fbMod.ref(db, `${GLOBAL_ROOM}/players`), snap => {
+                    const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+                    const badge = document.getElementById("liveLobbyCount");
+                    if (badge) badge.innerText = count > 0 ? `🟢 ${count} Saintis di dalam Omega Lab` : `🟢 Bilik Omega GODLIKE Sedia!`;
+                }, () => {});
+
+                fbMod.onValue(fbMod.ref(db, `${GLOBAL_ROOM}/best_record`), snap => {
+                    if (snap.exists() && snap.val().time) {
+                        bestRecord = snap.val();
+                        const recEl = document.getElementById("lobbyRecordText");
+                        if (recEl) recEl.innerText = `🏆 Rekod Kempen: ${formatTime(bestRecord.time)} (${bestRecord.team})`;
+                    }
+                }, () => {});
+            } catch (e) {
+                console.warn("Mod Offline Sedia:", e);
+            }
+        })();
+
+        function formatTime(sec) {
+            const m = String(Math.floor(sec / 60)).padStart(2, "0");
+            const s = String(sec % 60).padStart(2, "0");
+            return `${m}:${s}`;
+        }
+        function getRankTitle(score) {
+            if (score >= 600) return "🌌 GODLIKE";
+            if (score >= 350) return "👑 LEGENDA";
+            if (score >= 180) return "🎓 Prof";
+            if (score >= 80) return "🔬 Pakar";
+            return "🧪 Novis";
+        }
+
+        let selectedAvatar = "👨‍🔬";
+        document.querySelectorAll(".av-opt").forEach(el => {
+            el.onclick = () => {
+                document.querySelectorAll(".av-opt").forEach(x => x.classList.remove("selected"));
+                el.classList.add("selected");
+                selectedAvatar = el.dataset.av;
+            };
+        });
+
+        let selectedAura = "classic";
+        document.querySelectorAll(".aura-opt").forEach(el => {
+            el.onclick = () => {
+                document.querySelectorAll(".aura-opt").forEach(x => x.classList.remove("selected"));
+                el.classList.add("selected");
+                selectedAura = el.dataset.aura;
+            };
+        });
+
+        let selectedRole = "sprinter";
+        document.querySelectorAll(".role-card").forEach(el => {
+            el.onclick = () => {
+                document.querySelectorAll(".role-card").forEach(x => x.classList.remove("selected"));
+                el.classList.add("selected");
+                selectedRole = el.dataset.role;
+            };
+        });
+
+        // MODALS LOBI: KEDAI, SKILL TREE & DEK SPESIMEN
+        window.openShopModal = function() {
+            document.getElementById("shopCrystalBal").innerText = metaSave.crystals;
+            const items = [
+                { id: "pet_bot", type: "pet", val: "🤖", name: "Pet: Mini-Bot Pengimbas", cost: 60 },
+                { id: "pet_atom", type: "pet", val: "⚛️", name: "Pet: Atom Elektron Orbit", cost: 90 },
+                { id: "pet_dragon", type: "pet", val: "🐉", name: "Pet: Naga Kosmik Omega", cost: 150 },
+                { id: "brd_fire", type: "border", val: "fire", name: "Bingkai Nama: Api Kosmik", cost: 70 },
+                { id: "brd_bolt", type: "border", val: "bolt", name: "Bingkai Nama: Kilat Plasma", cost: 100 },
+                { id: "brd_galaxy", type: "border", val: "galaxy", name: "Bingkai Nama: Galaksi Agung", cost: 140 }
+            ];
+            document.getElementById("shopGrid").innerHTML = items.map(it => {
+                const owned = it.type === "pet" ? metaSave.unlockedPets.includes(it.val) : metaSave.unlockedBorders.includes(it.val);
+                const equipped = it.type === "pet" ? metaSave.equippedPet === it.val : metaSave.equippedBorder === it.val;
+                return `<div class="shop-item">
+                    <strong>${it.name}</strong>
+                    <span style="color:#94a3b8;">Kos: ${it.cost} 💎</span>
+                    <button style="margin-top:6px; padding:6px; font-size:0.78rem; background:${equipped ? '#059669' : (owned ? '#0284c7' : '#d97706')};"
+                        onclick="buyOrEquipShopItem('${it.type}','${it.val}',${it.cost})">
+                        ${equipped ? "✅ Dipakai" : (owned ? "Pakai Sekarang" : `Beli (${it.cost} 💎)`)}
+                    </button>
+                </div>`;
+            }).join("");
+            document.getElementById("shopModal").style.display = "flex";
+        };
+
+        window.buyOrEquipShopItem = function(type, val, cost) {
+            if (type === "pet") {
+                if (!metaSave.unlockedPets.includes(val)) {
+                    if (metaSave.crystals < cost) return alert("Kristal Kuantum tidak mencukupi!");
+                    metaSave.crystals -= cost;
+                    metaSave.unlockedPets.push(val);
+                }
+                metaSave.equippedPet = val;
+            } else {
+                if (!metaSave.unlockedBorders.includes(val)) {
+                    if (metaSave.crystals < cost) return alert("Kristal Kuantum tidak mencukupi!");
+                    metaSave.crystals -= cost;
+                    metaSave.unlockedBorders.push(val);
+                }
+                metaSave.equippedBorder = val;
+            }
+            saveMeta();
+            openShopModal();
+        };
+
+        window.openSkillTreeModal = function() {
+            document.getElementById("skillCrystalBal").innerText = metaSave.crystals;
+            const skills = [
+                { key: "boots", name: "⚡ But Kuantum (+4% Laju/Lv)", max: 5 },
+                { key: "stamina", name: "🔋 Teras Stamina (+15 Stamina/Lv)", max: 5 },
+                { key: "torch", name: "🔦 Kanta Suluh (+12px Cahaya/Lv)", max: 5 },
+                { key: "magnet", name: "🧲 Magnet Kristal (+20% Kristal/Lv)", max: 5 }
+            ];
+            document.getElementById("skillGrid").innerHTML = skills.map(s => {
+                const lv = metaSave.skills[s.key] || 0;
+                const cost = (lv + 1) * 40;
+                return `<div class="shop-item">
+                    <strong>${s.name}</strong>
+                    <span style="color:#38bdf8;">Tahap: Lv.${lv} / ${s.max}</span>
+                    <button style="margin-top:6px; padding:6px; font-size:0.78rem; background:${lv >= s.max ? '#334155' : '#7c3aed'};"
+                        ${lv >= s.max ? "disabled" : ""} onclick="upgradeSkill('${s.key}', ${cost})">
+                        ${lv >= s.max ? "MAKSIMUM" : `Naik Taraf (${cost} 💎)`}
+                    </button>
+                </div>`;
+            }).join("");
+            document.getElementById("badgeListDiv").innerText = metaSave.badges.join(" • ");
+            document.getElementById("skillModal").style.display = "flex";
+        };
+
+        window.upgradeSkill = function(key, cost) {
+            if ((metaSave.skills[key] || 0) >= 5) return;
+            if (metaSave.crystals < cost) return alert("Kristal tidak mencukupi!");
+            metaSave.crystals -= cost;
+            metaSave.skills[key] = (metaSave.skills[key] || 0) + 1;
+            saveMeta();
+            openSkillTreeModal();
+        };
+
+        window.openSpecimenModal = function() {
+            const passTier = Math.min(30, 1 + Math.floor((currentProfileXp + myScore) / 100));
+            document.getElementById("passProgressText").innerText = `🎖️ Science Battle Pass: Peringkat ${passTier}/30 • Koleksi Kad: ${metaSave.specimens.length}/13`;
+            const allCards = [
+                "Bakteriofaj (Bab 1)", "Siratan Ekosistem (Bab 2)", "Enzim Amilase (Bab 3)", "Antibodi Vaksin (Bab 4)",
+                "Kristal Ais Tulen (Bab 5)", "Skala pH Asid-Alkali (Bab 6)", "Generator Joule (Bab 7)", "Mangkin Tindak Balas (Bab 8)",
+                "Graf Pecutan (Bab 9)", "Gelombang Ultrasonik (Bab 10)", "Galaksi Andromeda (Bab 11)", "Planet Zuhrah (Bab 12)", "Komet Halley (Bab 13)"
+            ];
+            document.getElementById("specimenGrid").innerHTML = allCards.map(c => {
+                const has = metaSave.specimens.includes(c);
+                return `<div class="shop-item" style="opacity:${has ? 1 : 0.45};">
+                    <strong>${has ? "🃏 " + c : "🔒 Kad Misteri"}</strong>
+                    <span style="color:${has ? '#4ade80' : '#94a3b8'};">${has ? "Dimiliki" : "Jawab soalan untuk buka"}</span>
+                </div>`;
+            }).join("");
+            document.getElementById("specimenModal").style.display = "flex";
+        };
+
+        // AUDIO SINTETIK & DEGUPAN JANTUNG MELTDOWN
+        let audioCtx = null, musicEnabled = true, musicStep = 0;
+        function playSound(freq, type = "sine", dur = 0.15, vol = 0.09) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === "suspended") audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + dur);
+            } catch (e) {}
+        }
+
+        setInterval(() => {
+            if (!musicEnabled || document.getElementById("gameScreen").style.display !== "flex") return;
+            const isMeltdown = meltdownUntil > Date.now();
+            if (isMeltdown && meltdownUntil - Date.now() < 15000) {
+                playSound(75, "sine", 0.14, 0.16);
+                setTimeout(() => playSound(62, "sine", 0.18, 0.14), 160);
+            }
+            const podReady = terminalsUnlocked >= REQUIRED_QUIZ_DOORS && bossEntity.hp <= 0;
+            const notes = isMeltdown
+                ? [330, 392, 440, 523.2]
+                : (currentStage >= 5 ? [146.8, 174.6, 220, 174.6] : (podReady ? [220, 261.6, 329.6, 392] : [110, 130.8, 146.8, 130.8]));
+            playSound(notes[musicStep % notes.length], "triangle", 0.24, 0.02);
+            musicStep++;
+        }, 540);
+
+        window.toggleMusic = function() {
+            musicEnabled = !musicEnabled;
+            document.getElementById("btnMusic").innerText = musicEnabled ? "🔊 Muzik" : "🔇 Senyap";
+        };
+
+        let manualFogPref = false, raycastingEnabled = true;
+        window.toggleRaycasting = function() {
+            raycastingEnabled = !raycastingEnabled;
+            document.getElementById("btnRay").innerText = raycastingEnabled ? "🔦 Raycast: ON" : "🔦 Raycast: OFF";
+        };
+
+        function isDarknessActive() {
+            if (activeGameMode === "sonar") return true;
+            const cfg = STAGE_CONFIG[currentStage] || STAGE_CONFIG[1];
+            return cfg.forcedCenterLight || manualFogPref;
+        }
+
+        function syncFogButtonUI() {
+            const btn = document.getElementById("btnFog");
+            if (!btn) return;
+            const cfg = STAGE_CONFIG[currentStage] || STAGE_CONFIG[1];
+            if (cfg.forcedCenterLight || activeGameMode === "sonar") {
+                btn.innerText = `🔒 Cahaya (L${currentStage})`;
+                btn.style.background = "#78350f";
+                btn.classList.add("locked");
+            } else {
+                btn.classList.remove("locked");
+                btn.style.background = manualFogPref ? "#1e293b" : "#334155";
+                btn.innerText = manualFogPref ? "🔦 Tengah: ON" : "💡 Lampu: ON";
+            }
+        }
+
+        window.toggleFog = function() {
+            const cfg = STAGE_CONFIG[currentStage] || STAGE_CONFIG[1];
+            if (cfg.forcedCenterLight || activeGameMode === "sonar") {
+                playSound(180, "sawtooth", 0.15, 0.08);
+                showCanvasBanner(`🔒 Bekalan elektrik terputus pada mod/tahap ini!`, "#d97706", 2800);
+                return;
+            }
+            manualFogPref = !manualFogPref;
+            syncFogButtonUI();
+        };
+
+        // PETA MEGA MAKMAL GODLIKE (35 Kolum x 23 Baris)
+        const TILE = 54;
+        const BASE_MAP = [
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,11,0,1,0,0,0,3,0,14,0,1,0,0,0,11,0,0,0,1,0,0,9,0,0,0,0,0,6,0,1],
+            [1,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,9,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,2,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,16,1,1,1],
+            [1,0,0,0,0,0,15,15,0,0,0,0,0,14,0,0,20,0,0,0,0,0,0,0,0,15,15,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,17,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,13,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,18,0,0,19,0,0,0,0,1],
+            [1,0,8,0,0,11,0,1,0,0,14,0,0,0,0,1,0,0,0,3,0,21,0,1,0,0,0,11,0,0,0,0,8,0,1],
+            [1,0,0,0,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,17,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,1],
+            [1,0,0,11,0,0,0,1,0,0,0,3,0,14,0,0,0,11,0,0,0,0,0,7,0,0,0,12,0,0,5,5,0,0,1],
+            [1,0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,5,5,0,0,1],
+            [1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        function generateProceduralMap(seed) {
+            const m = BASE_MAP.map(r => [...r]);
+            let s = seed || 12345;
+            const rand = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+            const candidateWalls = [
+                [3, 15], [8, 7], [8, 15], [8, 23], [12, 15], [15, 7], [15, 15], [15, 23]
+            ];
+            candidateWalls.forEach(([r, c]) => {
+                if (rand() > 0.45 && m[r] && m[r][c] === 1) m[r][c] = rand() > 0.5 ? 13 : 0;
+            });
+            const extraSpots = [[2, 10], [4, 18], [10, 4], [13, 18], [18, 12], [21, 16]];
+            extraSpots.forEach(([r, c]) => {
+                if (rand() > 0.5 && m[r][c] === 0) m[r][c] = 11;
+            });
+            return m;
+        }
+
+        let PATROL_DRONES = [
+            { x1: 8.5 * TILE,  y1: 7.5 * TILE,  x2: 20.5 * TILE, y2: 7.5 * TILE,  period: 5000, type: "normal" },
+            { x1: 22.5 * TILE, y1: 8.5 * TILE,  x2: 32.5 * TILE, y2: 8.5 * TILE,  period: 4600, type: "stealth" },
+            { x1: 3.5 * TILE,  y1: 15.5 * TILE, x2: 16.5 * TILE, y2: 15.5 * TILE, period: 5200, type: "armored" },
+            { x1: 18.5 * TILE, y1: 16.5 * TILE, x2: 32.5 * TILE, y2: 16.5 * TILE, period: 4800, type: "normal" }
+        ];
+        let hunterDrone = { x: 17.5 * TILE, y: 8.5 * TILE, active: true };
+
+        let bossEntity = {
+            x: 27.5 * TILE, y: 19.5 * TILE,
+            hp: 1000, maxHp: 1000,
+            weaknessBab: 6,
+            lastWaveTime: 0,
+            waveRadius: 0
+        };
+
+        const ROTATING_TURRETS = [
+            { x: 14.5 * TILE, y: 8.0 * TILE, length: 125, speed: 0.9 },
+            { x: 24.5 * TILE, y: 16.0 * TILE, length: 125, speed: -1.1 }
+        ];
+
+        let map = BASE_MAP.map(r => [...r]);
+        let collapsedBridges = {};
+        let mirrorAngle = 0;
+        let mirrorSolved = false;
+
+        const playerId = "p_" + Math.random().toString(36).substring(2, 9);
+        let myName = "Saintis", myProfileKey = "", myTeam = Math.random() > 0.5 ? "red" : "blue";
+        let gadgetSlots = [null, null];
+        let ultimateCharge = 0;
+        let adrenalineUntil = 0, scannerUntil = 0, quantumShieldUntil = 0, empFreezeUntil = 0, chronoSlowUntil = 0;
+        let meltdownUntil = 0, shakeUntil = 0;
+        let decoyClone = null, activeFlares = [], customPortals = [];
+        let cryoCagedUntil = 0, isSpectatorDrone = false;
+        let sonarWaves = [];
+
+        let firebaseConnected = false;
+        let myX = TILE * 2.5, myY = TILE * 2.5, myVx = 0, myVy = 0, myMoveDirX = 0;
+        let myEmote = "", myEmoteTime = 0, myChat = "", myChatTime = 0;
+        let isHacking = false, activeDoorCoords = null;
+        let spawnShieldUntil = 0, engineerShieldReadyAt = 0, teleportCooldownUntil = 0;
+        let maxStamina = 100, stamina = 100;
+        let visualPlayers = {}, floatingTexts = [], shockwaves = [], particles = [];
+        let activePing = null, activityLogs = [], victoryResetTimer = null;
+        let myTelemetryPath = [], missedQuestionsLog = [], chapterStats = {};
+        let customTeacherQuestion = null, gameLoopRunning = false;
+
+        function pushLog(msg) {
+            activityLogs.unshift({ text: msg, time: Date.now() });
+            if (activityLogs.length > 4) activityLogs.pop();
+        }
+        function spawnFloatingText(wx, wy, text, color = "#facc15") {
+            floatingTexts.push({ x: wx, y: wy - 28, vy: -38, text, color, life: 1.35, maxLife: 1.35 });
+        }
+        function spawnShockwave(wx, wy, color = "#38bdf8", maxRadius = 115) {
+            shockwaves.push({ x: wx, y: wy, radius: 10, maxRadius, color, life: 0.55, maxLife: 0.55 });
+        }
+        function spawnParticles(wx, wy, color, count = 16) {
+            for (let i = 0; i < count; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = 40 + Math.random() * 140;
+                particles.push({ x: wx, y: wy, vx: Math.cos(ang) * spd, vy: Math.sin(ang) * spd, life: 0.45 + Math.random() * 0.35, maxLife: 0.8, color });
+            }
+        }
+
+        let terminalsUnlocked = 0;
+        const REQUIRED_QUIZ_DOORS = 5;
+        let hasKeycard = false, cardHolderId = "", laserOffUntil = 0;
+        let roundId = 1, roundStartTime = Date.now(), isPaused = false, roundWonShown = false;
+        let questionPool = [], questionDeck = [], activeChapter = "all", activeLevel = "all";
+        let currentQuestionObj = null, currentQuestionWrongCount = 0, questionOpenedAt = 0;
+        let bannerText = "", bannerUntil = 0, bannerColor = "#0284c7";
+
+        function showCanvasBanner(text, color = "#0284c7", durationMs = 4500) {
+            bannerText = text; bannerColor = color; bannerUntil = Date.now() + durationMs;
+        }
+
+        function announceCurrentStage() {
+            const cfg = STAGE_CONFIG[currentStage] || STAGE_CONFIG[1];
+            const colors = { 1: "#059669", 2: "#d97706", 3: "#dc2626", 4: "#0284c7", 5: "#4d7c0f", 6: "#9333ea" };
+            showCanvasBanner(`🚀 ${cfg.title}! Ganjaran ${cfg.xpMult}x XP!`, colors[currentStage] || "#059669", 5000);
+        }
+
+        function getScaledXP(basePts) {
+            const mult = (STAGE_CONFIG[currentStage] || STAGE_CONFIG[1]).xpMult;
+            const mutMult = (currentMutator === "DOUBLE XP" && Date.now() < mutatorUntil) ? 2 : 1;
+            return Math.round(basePts * mult * mutMult);
+        }
+
+        async function syncXPToProfile(xpAmount) {
+            if (!xpAmount || xpAmount <= 0) return;
+            const uid = currentAuthUid || (auth && auth.currentUser ? auth.currentUser.uid : "");
+            const targetPath = uid ? `kawan_sistem_v2/${uid}` : resolvedProfilePath;
+            if (db && fbMod && targetPath) {
+                fbMod.runTransaction(fbMod.ref(db, `${targetPath}/xp`), curr => (Number(curr) || 0) + xpAmount).catch(() => {});
+            }
+            try {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    const rawVal = localStorage.getItem(k);
+                    if (rawVal && rawVal.includes('"xp"')) {
+                        const obj = JSON.parse(rawVal);
+                        if (obj && typeof obj.xp === "number") { obj.xp += xpAmount; localStorage.setItem(k, JSON.stringify(obj)); }
+                    }
+                }
+            } catch (_) {}
+        }
+
+        function addContributionScore(basePts, customSuffix = "") {
+            const finalPts = getScaledXP(basePts);
+            if (!finalPts || finalPts <= 0) return;
+            myScore += finalPts;
+            myRoundActions++;
+            const crystalGain = Math.round((finalPts / 3) * (1 + (metaSave.skills.magnet || 0) * 0.2));
+            metaSave.crystals += crystalGain;
+            saveMeta();
+            syncXPToProfile(finalPts);
+            const label = customSuffix ? `+${finalPts} XP | +${crystalGain}💎 (${customSuffix})` : `+${finalPts} XP`;
+            spawnFloatingText(myX, myY, label, "#fde047");
+            updateHUD();
+            if (firebaseConnected && db && fbMod) {
+                fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/players/${playerId}`), { score: myScore, combo: comboStreak }).catch(() => {});
+            }
+        }
+
+        const keys = { up: false, down: false, left: false, right: false, sprint: false };
+        window.setDir = (d, s) => { keys[d] = s; };
+        window.setSprint = (s) => { keys.sprint = s; };
+
+        window.pingMyLocation = function() {
+            if (isPaused || roundWonShown) return;
+            const pingObj = { x: Math.round(myX), y: Math.round(myY), by: myName, time: Date.now() };
+            activePing = pingObj;
+            sonarWaves.push({ x: myX, y: myY, r: 10, maxR: 480, life: 1.4 });
+            playSound(1050, "sine", 0.12, 0.08);
+            spawnParticles(myX, myY, "#38bdf8", 18);
+            showCanvasBanner("📍 Isyarat Lokasi & Gelombang Sonar dipancarkan!", "#0284c7", 2200);
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { ping: pingObj }).catch(() => {});
+        };
+
+        // BALING KAD AKSES [G] KEPADA RAKAN BERDEKATAN
+        window.throwKeycard = function() {
+            if (!hasKeycard || cardHolderId !== playerId) {
+                showCanvasBanner("Anda tidak memegang Kad Akses 💳 sekarang!", "#475569", 2000);
+                return;
+            }
+            const allies = Object.entries(visualPlayers);
+            if (allies.length === 0) {
+                showCanvasBanner("Tiada rakan online untuk menerima balingan Kad Akses!", "#d97706", 2500);
+                return;
+            }
+            allies.sort((a, b) => Math.hypot(a[1].vx - myX, a[1].vy - myY) - Math.hypot(b[1].vx - myX, b[1].vy - myY));
+            const [targetId, targetP] = allies[0];
+            cardHolderId = targetId;
+            playSound(920, "triangle", 0.2);
+            spawnParticles(targetP.vx, targetP.vy, "#facc15", 30);
+            showCanvasBanner(`💳 Anda membaling Kad Akses kepada ${targetP.name}!`, "#059669", 3500);
+            pushLog(`💳 ${myName} membaling Kad Akses kepada ${targetP.name}!`);
+            if (firebaseConnected && db && fbMod) {
+                fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { cardHolderId: targetId }).catch(() => {});
+            }
+            updateHUD();
+        };
+
+        // INTERAKSI CERMIN LASER, HOLO-POD & MEJA KRAF [C]
+        window.interactNearby = function() {
+            const c = Math.floor(myX / TILE), r = Math.floor(myY / TILE);
+            for (let dr = -1; dr <= 1; dr++) {
+                for (let dc = -1; dc <= 1; dc++) {
+                    const rr = r + dr, cc = c + dc;
+                    if (!map[rr]) continue;
+                    const t = map[rr][cc];
+                    if (t === 18) {
+                        mirrorAngle = (mirrorAngle + 1) % 2;
+                        playSound(740, "sine", 0.15);
+                        if (mirrorAngle === 1 && !mirrorSolved) {
+                            mirrorSolved = true;
+                            addContributionScore(25, "Teka-Teki Cermin");
+                            showCanvasBanner("🪞 PANCARAN LASER TEPAT KE SENSOR! Peti Gajet rahsia muncul!", "#059669", 4000);
+                            map[10][30] = 11;
+                        } else {
+                            showCanvasBanner(`🪞 Cermin diputar (${mirrorAngle === 0 ? "45° /" : "135° \\"})`, "#0284c7", 1800);
+                        }
+                        return;
+                    }
+                    if (t === 20) {
+                        const roles = ["sprinter", "hacker", "engineer", "alchemist", "chronomancer", "quantum"];
+                        const idx = (roles.indexOf(selectedRole) + 1) % roles.length;
+                        selectedRole = roles[idx];
+                        maxStamina = (selectedRole === "sprinter" ? 150 : 100) + (metaSave.skills.stamina || 0) * 15;
+                        stamina = maxStamina;
+                        playSound(820, "triangle", 0.2);
+                        showCanvasBanner(`🔄 Holo-Pod: Kepakaran ditukar kepada ${selectedRole.toUpperCase()}!`, "#7c3aed", 3000);
+                        return;
+                    }
+                    if (t === 21) {
+                        if (gadgetSlots[0] && gadgetSlots[1]) {
+                            gadgetSlots = ["orbital", null];
+                            syncMyGadgetState();
+                            playSound(980, "triangle", 0.3);
+                            showCanvasBanner("⚗️ KRAF BERJAYA! 2 Gajet digabung menjadi 🛰️ SATELIT ORBITAL (MYTHIC)!", "#9333ea", 4500);
+                            updateHUD();
+                        } else {
+                            showCanvasBanner("⚗️ Meja Kraf memerlukan 2 Gajet dalam Slot 1 & Slot 2 untuk digabung!", "#d97706", 3000);
+                        }
+                        return;
+                    }
+                }
+            }
+        };
+
+        window.addEventListener("keydown", e => {
+            if (document.activeElement && document.activeElement.tagName === "INPUT") {
+                if (e.key === "Enter" && document.activeElement.id === "chatInput") sendChatBubble();
+                return;
+            }
+            const k = e.key.toLowerCase();
+            if (k === "w" || e.key === "ArrowUp") keys.up = true;
+            if (k === "s" || e.key === "ArrowDown") keys.down = true;
+            if (k === "a" || e.key === "ArrowLeft") keys.left = true;
+            if (k === "d" || e.key === "ArrowRight") keys.right = true;
+            if (e.key === "Shift") keys.sprint = true;
+            if (k === "e" || k === "1") activateGadgetSlot(0);
+            if (k === "f" || k === "2") activateGadgetSlot(1);
+            if (k === "r") activateClassUltimate();
+            if (k === "g") throwKeycard();
+            if (k === "c") interactNearby();
+            if (k === "q") pingMyLocation();
+        });
+        window.addEventListener("keyup", e => {
+            const k = e.key.toLowerCase();
+            if (k === "w" || e.key === "ArrowUp") keys.up = false;
+            if (k === "s" || e.key === "ArrowDown") keys.down = false;
+            if (k === "a" || e.key === "ArrowLeft") keys.left = false;
+            if (k === "d" || e.key === "ArrowRight") keys.right = false;
+            if (e.key === "Shift") keys.sprint = false;
+        });
+
+        const BUILTIN_QUESTIONS = [
+            { bab: 1, soalan: "Which organism is classified as an invertebrate without jointed legs?", pilihan: ["Spider", "Earthworm", "Prawn", "Centipede"], jawapanBetul: 1, nota: "Cacing tanah ialah invertebrata tanpa kaki bersegmen." },
+            { bab: 2, soalan: "What is the main source of energy in almost all ecosystems?", pilihan: ["Soil minerals", "The Sun", "Decomposers", "Carbon dioxide"], jawapanBetul: 1, nota: "Matahari membekalkan tenaga cahaya untuk fotosintesis pengeluar." },
+            { bab: 3, soalan: "Which enzyme in saliva breaks down starch into maltose?", pilihan: ["Protease", "Lipase", "Amylase", "Rennin"], jawapanBetul: 2, nota: "Amilase liur mencernakan kanji kepada maltosa." },
+            { bab: 4, soalan: "Which type of immunity is acquired when a person receives a vaccine?", pilihan: ["Artificial active immunity", "Natural passive immunity", "Artificial passive immunity", "Natural active immunity"], jawapanBetul: 0, nota: "Vaksin merangsang badan menghasilkan antibodi sendiri (keimunan aktif buatan)." },
+            { bab: 5, soalan: "What is the boiling point of pure distilled water at standard atmospheric pressure?", pilihan: ["90 °C", "98 °C", "100 °C", "105 °C"], jawapanBetul: 2, nota: "Air tulen mendidih tepat pada 100 °C pada tekanan atmosfera piawai." },
+            { bab: 6, soalan: "What colour does blue litmus paper turn when dipped into an acidic solution?", pilihan: ["Remains blue", "Turns red", "Turns green", "Turns yellow"], jawapanBetul: 1, nota: "Asid menukarkan kertas litmus biru kepada merah." },
+            { bab: 7, soalan: "What is the SI unit for Energy and Work Done?", pilihan: ["Newton (N)", "Joule (J)", "Watt (W)", "Pascal (Pa)"], jawapanBetul: 1, nota: "Unit SI bagi Tenaga dan Kerja ialah Joule (J)." },
+            { bab: 8, soalan: "Which factor INCREASES the rate of chemical reaction?", pilihan: ["Decreasing temperature", "Using smaller particle sizes (larger surface area)", "Removing catalyst", "Diluting reactant concentration"], jawapanBetul: 1, nota: "Saiz zarah kecil memberikan jumlah luas permukaan yang lebih besar." },
+            { bab: 9, soalan: "In a Distance-Time graph, what does the gradient (slope) represent?", pilihan: ["Speed", "Acceleration", "Distance", "Mass"], jawapanBetul: 0, nota: "Kecerunan Graf Jarak-Masa mewakili Laju." },
+            { bab: 10, soalan: "Which property of sound determines its pitch?", pilihan: ["Amplitude", "Frequency", "Speed", "Loudness"], jawapanBetul: 1, nota: "Kelangsingan bunyi bergantung pada frekuensi gelombang." },
+            { bab: 11, soalan: "What is the name of the galaxy that contains our Solar System?", pilihan: ["Andromeda", "Milky Way", "Sombrero", "Triangulum"], jawapanBetul: 1, nota: "Sistem Suria berada di dalam galaksi Bima Sakti (Milky Way)." },
+            { bab: 12, soalan: "Which planet has the highest surface temperature due to runaway greenhouse effect?", pilihan: ["Mercury", "Venus", "Mars", "Jupiter"], jawapanBetul: 1, nota: "Zuhrah (Venus) paling panas kerana atmosfera CO2 yang tebal." },
+            { bab: 13, soalan: "A space rock that lands on Earth's surface is called a:", pilihan: ["Meteoroid", "Meteor", "Meteorite", "Comet"], jawapanBetul: 2, nota: "Meteorit ialah serpihan batu angkasa yang tiba di permukaan Bumi." }
+        ];
+
+        function buildQuestionPool(bab, lvl) {
+            let pool = [];
+            const start = bab === "all" ? 1 : Number(bab);
+            const end = bab === "all" ? 13 : Number(bab);
+            const effectiveLvl = lvl === "all" ? String(Math.min(3, currentStage)) : lvl;
+
+            for (let b = start; b <= end; b++) {
+                let arr = window["soalanBab" + b];
+                if (!arr) { try { arr = eval("typeof soalanBab" + b + " !== 'undefined' ? soalanBab" + b + " : null"); } catch (_) {} }
+                if (!arr || !Array.isArray(arr)) continue;
+                const tagged = arr.map(q => ({ ...q, _bab: b }));
+                if (effectiveLvl === "1") pool = pool.concat(tagged.slice(0, 10));
+                else if (effectiveLvl === "2") pool = pool.concat(tagged.slice(10, 20));
+                else if (effectiveLvl === "3") pool = pool.concat(tagged.slice(20, 30));
+                else pool = pool.concat(tagged);
+            }
+            if (pool.length === 0) {
+                const fallback = bab === "all" ? BUILTIN_QUESTIONS : BUILTIN_QUESTIONS.filter(q => q.bab === Number(bab));
+                pool = (fallback.length > 0 ? fallback : BUILTIN_QUESTIONS).map(q => ({ ...q, _bab: q.bab }));
+            }
+            questionPool = pool;
+            questionDeck = [...questionPool].sort(() => Math.random() - 0.5);
+        }
+
+        function drawNextQuestion() {
+            if (customTeacherQuestion) {
+                const cq = customTeacherQuestion;
+                customTeacherQuestion = null;
+                return cq;
+            }
+            if (!questionDeck || questionDeck.length === 0) questionDeck = [...questionPool].sort(() => Math.random() - 0.5);
+            const rawQ = questionDeck.pop();
+            const indexed = rawQ.pilihan.map((text, idx) => ({ text, isCorrect: idx === rawQ.jawapanBetul }));
+            for (let i = indexed.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [indexed[i], indexed[j]] = [indexed[j], indexed[i]];
+            }
+            return { ...rawQ, pilihan: indexed.map(item => item.text), jawapanBetul: indexed.findIndex(item => item.isCorrect) };
+        }
+
+        window.speakQuestion = function() {
+            if (!currentQuestionObj || !("speechSynthesis" in window)) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(currentQuestionObj.soalan);
+            u.lang = "ms-MY";
+            window.speechSynthesis.speak(u);
+        };
+
+        const GADGET_LABELS = {
+            bypass: "🗝️ Kunci Pintas", emp: "🧲 Bom EMP", adrenaline: "🧪 Adrenalin",
+            scanner: "🔭 Radar", shield: "🛡️ Perisai", acid: "🧫 Kelalang Asid",
+            decoy: "👤 Hologram", flare: "🔦 Suar Cahaya", magnet: "🧲 Sarung Magnet",
+            chrono: "⏰ Jam Krono", portal: "🌀 Pistol Portal", sonic: "🔊 Gelombang Sonik",
+            defib: "⚡ Defibrilator", orbital: "🛰️ SATELIT ORBITAL"
+        };
+
+        function updateHUD() {
+            const stageCfg = STAGE_CONFIG[currentStage] || STAGE_CONFIG[1];
+            const stageEl = document.getElementById("hudStage");
+            if (stageEl) {
+                stageEl.innerText = stageCfg.shortLabel;
+                stageEl.className = "pill p-stage " + (stageCfg.cls || "");
+            }
+            syncFogButtonUI();
+
+            const count = firebaseConnected ? Object.keys(visualPlayers).length + 1 : 1;
+            document.getElementById("hudOnline").innerText = `🟢 ${count} Online`;
+            document.getElementById("hudTerminals").innerText = activeGameMode === "horde"
+                ? `🛡️ Teras HP: ${reactorHp}/${reactorMaxHp}`
+                : `🚪🔐 Kuiz: ${terminalsUnlocked}/${REQUIRED_QUIZ_DOORS}`;
+
+            const keyEl = document.getElementById("hudKey");
+            if (hasKeycard) {
+                keyEl.style.background = "#065f46"; keyEl.style.color = "#6ee7b7";
+                const holderName = cardHolderId === playerId ? "ANDA" : (visualPlayers[cardHolderId]?.name || "Rakan");
+                keyEl.innerText = `💳 Kad: ${holderName} ✅`;
+            } else {
+                keyEl.style.background = "#422006"; keyEl.style.color = "#facc15";
+                keyEl.innerText = "💳 Kad: Tiada";
+            }
+
+            const comboEl = document.getElementById("hudCombo");
+            if (comboStreak >= 2) { comboEl.style.display = "inline-block"; comboEl.innerText = `🔥 COMBO x${comboStreak}`; }
+            else comboEl.style.display = "none";
+
+            document.getElementById("hudScore").innerText = `⭐ XP: ${currentProfileXp + myScore} (+${myScore}) | 💎 ${metaSave.crystals}`;
+            document.getElementById("hudGadget1").innerText = gadgetSlots[0] ? `🎒1: ${GADGET_LABELS[gadgetSlots[0]]} [E]` : "🎒1: Kosong [E]";
+            document.getElementById("hudGadget2").innerText = gadgetSlots[1] ? `🎒2: ${GADGET_LABELS[gadgetSlots[1]]} [F]` : "🎒2: Kosong [F]";
+
+            const ultEl = document.getElementById("hudUltimate");
+            ultEl.innerText = ultimateCharge >= 100 ? "🔥 ULTI SEDIA! [R]" : `🔥 Ulti [R]: ${ultimateCharge}%`;
+            ultEl.style.background = ultimateCharge >= 100 ? "#9333ea" : "#3b0764";
+
+            const objBanner = document.getElementById("hudObjectiveBanner");
+            if (objBanner) {
+                if (isSaboteur) objBanner.innerText = "🗡️ MISI PENGKHIANAT (SABOTEUR): Aktifkan semula laser atau lengahkan pasukan tanpa dikesan!";
+                else if (activeGameMode === "horde") objBanner.innerText = `🛡️ MOD PERTAHANAN TERAS: Jawab Pintu Kuiz untuk menembak Meriam Plasma! HP Teras: ${reactorHp}`;
+                else if (terminalsUnlocked < REQUIRED_QUIZ_DOORS) objBanner.innerText = `${stageCfg.title} | 🎯 Buka ${REQUIRED_QUIZ_DOORS - terminalsUnlocked} lagi Pintu Kuiz 🚪🔐 (${terminalsUnlocked}/${REQUIRED_QUIZ_DOORS})`;
+                else if (!hasKeycard) objBanner.innerText = `${stageCfg.title} | 🎯 Pijak Pad Biru 🟦 & ambil Kad Akses 💳 (Baling kepada rakan dengan [G])!`;
+                else if (map[19][23] === 7) objBanner.innerText = `${stageCfg.title} | 🎯 Bawa Kad Akses 💳 ke Pintu Akhir 🚪 di Tenggara!`;
+                else if (bossEntity.hp > 0) objBanner.innerText = `${stageCfg.title} | 🎯 Tewaskan BOSS FIREWALL (${bossEntity.hp}/${bossEntity.maxHp} HP) untuk buka Kapsul!`;
+                else objBanner.innerText = `${stageCfg.title} | 🎯 Semua syarat lengkap! Masuk ke Kapsul Pelarian 🚀 SEKARANG!`;
+            }
+
+            const speedEl = document.getElementById("hudSpeedrun");
+            if (meltdownUntil > Date.now()) {
+                const rem = Math.ceil((meltdownUntil - Date.now()) / 1000);
+                speedEl.style.background = "#991b1b"; speedEl.style.color = "#fecaca";
+                speedEl.innerText = `☢️ MELTDOWN: ${rem}s!`;
+            } else {
+                speedEl.style.background = "#312e81"; speedEl.style.color = "#e0e7ff";
+                const elapsed = Math.max(0, Math.floor((Date.now() - roundStartTime) / 1000));
+                speedEl.innerText = `⏱️ ${formatTime(elapsed)}`;
+            }
+
+            const laserEl = document.getElementById("hudLaser");
+            if (Date.now() < laserOffUntil) {
+                const sec = Math.ceil((laserOffUntil - Date.now()) / 1000);
+                laserEl.style.background = "#065f46"; laserEl.style.color = "#6ee7b7";
+                laserEl.innerText = `⚡ Laser: PADAM (${sec}s)`;
+            } else {
+                laserEl.style.background = "#450a0a"; laserEl.style.color = "#fca5a5";
+                laserEl.innerText = "⚡ Laser: AKTIF";
+            }
+        }
+
+        let lastLogId = "";
+        function syncWorldTile(r, c, extraUpdates = {}, logText = "") {
+            map[r][c] = 0;
+            const wx = (c + 0.5) * TILE, wy = (r + 0.5) * TILE;
+            spawnParticles(wx, wy, "#38bdf8", 24);
+            spawnShockwave(wx, wy, "#38bdf8", 110);
+            const payload = { ...extraUpdates, [`unlockedTiles/${r}_${c}`]: true };
+            if (logText) {
+                const logId = Math.random().toString(36).slice(2);
+                lastLogId = logId; pushLog(logText);
+                payload.latestLog = { text: logText, id: logId };
+            }
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), payload).catch(() => {});
+        }
+
+        window.enterGlobalLab = function() {
+            const rawName = document.getElementById("playerNameInput").value.trim();
+            myName = rawName.replace(/^@+/, "") || "Saintis_" + Math.floor(100 + Math.random() * 900);
+            myProfileKey = currentAuthUid || getProfileSafeKey(myName);
+            sessionStorage.setItem("saintis_nickname", myName);
+            localStorage.setItem("saintis_nickname", myName);
+
+            activeGameMode = document.getElementById("gameModeSelect").value;
+            const [mType, mTheme] = document.getElementById("mapTypeSelect").value.split("|");
+            activeMapType = mType; activeTheme = mTheme;
+            isSaboteur = (activeGameMode === "saboteur");
+
+            maxStamina = (selectedRole === "sprinter" ? 150 : 100) + (metaSave.skills.stamina || 0) * 15;
+            stamina = maxStamina;
+
+            activeChapter = document.getElementById("chapterSelect").value;
+            activeLevel = document.getElementById("levelSelect").value;
+            userPickedExplicitStage = (activeLevel !== "all");
+            currentStage = userPickedExplicitStage ? Number(activeLevel) : 1;
+            campaignStartTime = Date.now();
+            roundStartTime = Date.now();
+            buildQuestionPool(activeChapter, activeLevel);
+
+            map = activeMapType === "procedural" ? generateProceduralMap(Date.now() % 99999) : BASE_MAP.map(r => [...r]);
+            bossEntity = { x: 27.5 * TILE, y: 19.5 * TILE, hp: activeGameMode === "bossrush" ? 1500 : 1000, maxHp: activeGameMode === "bossrush" ? 1500 : 1000, weaknessBab: 1 + Math.floor(Math.random() * 13), lastWaveTime: Date.now(), waveRadius: 0 };
+            if (activeGameMode === "bossrush") {
+                terminalsUnlocked = REQUIRED_QUIZ_DOORS;
+                hasKeycard = true; cardHolderId = playerId;
+                map[19][23] = 0;
+            }
+
+            myX = TILE * 2.5; myY = TILE * 2.5; myVx = 0; myVy = 0;
+            myTelemetryPath = [{ x: myX, y: myY }];
+            spawnShieldUntil = Date.now() + 3000;
+            pushLog(`🚀 ${myName} memasuki LEVEL ${currentStage} (${activeGameMode.toUpperCase()})!`);
+
+            // TUKAR SKRIN SERTA-MERTA (0 SAAT)
+            document.getElementById("entryScreen").style.display = "none";
+            document.getElementById("gameScreen").style.display = "flex";
+            updateHUD();
+            announceCurrentStage();
+
+            if (!gameLoopRunning) {
+                gameLoopRunning = true;
+                setInterval(updateHUD, 500);
+                setInterval(triggerChaosMutator, 30000);
+                requestAnimationFrame(gameLoop);
+            }
+
+            // SAMBUNG KE FIREBASE DI LATAR BELAKANG
+            connectMultiplayerRoom();
+        };
+
+        async function connectMultiplayerRoom() {
+            if (!db || !fbMod) return;
+            try {
+                const myRef = fbMod.ref(db, `${GLOBAL_ROOM}/players/${playerId}`);
+                await Promise.race([
+                    fbMod.set(myRef, {
+                        name: myName, profileKey: myProfileKey, avatar: selectedAvatar, aura: selectedAura,
+                        role: selectedRole, pet: metaSave.equippedPet, score: 0, combo: 0, team: myTeam,
+                        gadget: "", x: Math.round(myX), y: Math.round(myY), hacking: false,
+                        emote: "", emoteTime: 0, chat: "", chatTime: 0
+                    }),
+                    new Promise((_, rej) => setTimeout(() => rej(new Error("Timeout")), 4000))
+                ]);
+                firebaseConnected = true;
+                fbMod.onDisconnect(myRef).remove();
+
+                fbMod.onValue(fbMod.ref(db, `${GLOBAL_ROOM}/players`), snap => {
+                    const data = snap.val() || {};
+                    Object.entries(data).forEach(([id, p]) => {
+                        if (id === playerId) return;
+                        if (!visualPlayers[id]) visualPlayers[id] = { ...p, vx: p.x, vy: p.y, dirX: 0 };
+                        else {
+                            const dx = p.x - visualPlayers[id].vx;
+                            if (Math.abs(dx) > 0.5) visualPlayers[id].dirX = Math.sign(dx);
+                            if (Math.hypot(dx, p.y - visualPlayers[id].vy) > 220) { visualPlayers[id].vx = p.x; visualPlayers[id].vy = p.y; }
+                            Object.assign(visualPlayers[id], p);
+                        }
+                    });
+                    Object.keys(visualPlayers).forEach(id => { if (!data[id]) delete visualPlayers[id]; });
+                    updateHUD();
+                    refreshTeacherMVPTable();
+                });
+
+                fbMod.onValue(fbMod.ref(db, `${GLOBAL_ROOM}/world`), snap => {
+                    const w = snap.val();
+                    if (!w) {
+                        fbMod.set(fbMod.ref(db, `${GLOBAL_ROOM}/world`), {
+                            roundId: 1, stage: currentStage, campaignStartTime: Date.now(), roundStartTime: Date.now(),
+                            terminalsUnlocked: 0, hasKeycard: false, cardHolderId: "", laserOffUntil: 0,
+                            empFreezeUntil: 0, meltdownUntil: 0, globalFreeze: false, unlockedTiles: {},
+                            escapedBy: "", escapedWinnerId: "", broadcastMsg: "", broadcastTime: 0,
+                            forcedChapter: "all", forcedLevel: "all", ping: null, latestLog: null
+                        }).catch(() => {});
+                        return;
+                    }
+                    globalFreeze = !!w.globalFreeze;
+                    let incomingStage = Number(w.stage) || 1;
+                    if (w.roundId && w.roundId !== roundId) {
+                        roundId = w.roundId; currentStage = incomingStage; roundWonShown = false; myRoundActions = 0;
+                        if (victoryResetTimer) { clearTimeout(victoryResetTimer); victoryResetTimer = null; }
+                        document.getElementById("winModal").style.display = "none";
+                        document.getElementById("terminalModal").style.display = "none";
+                        isPaused = false;
+                        map = activeMapType === "procedural" ? generateProceduralMap(roundId * 777) : BASE_MAP.map(r => [...r]);
+                        terminalsUnlocked = 0; hasKeycard = false; cardHolderId = "";
+                        myX = TILE * 2.5; myY = TILE * 2.5; myVx = 0; myVy = 0;
+                        spawnShieldUntil = Date.now() + 3000; comboStreak = 0;
+                        bossEntity.hp = bossEntity.maxHp; map[19][27] = 12;
+                        buildQuestionPool(activeChapter, activeLevel);
+                        announceCurrentStage();
+                    } else if (incomingStage !== currentStage && !userPickedExplicitStage) {
+                        currentStage = incomingStage;
+                        buildQuestionPool(activeChapter, activeLevel);
+                        announceCurrentStage();
+                    }
+                    if (w.campaignStartTime) campaignStartTime = w.campaignStartTime;
+                    roundStartTime = w.roundStartTime || roundStartTime;
+                    terminalsUnlocked = Math.max(terminalsUnlocked, w.terminalsUnlocked || 0);
+                    if (w.hasKeycard) { hasKeycard = true; cardHolderId = w.cardHolderId || cardHolderId; }
+                    else if (cardHolderId !== playerId) { hasKeycard = false; cardHolderId = ""; }
+                    laserOffUntil = Math.max(laserOffUntil, w.laserOffUntil || 0);
+                    empFreezeUntil = Math.max(empFreezeUntil, w.empFreezeUntil || 0);
+                    meltdownUntil = w.meltdownUntil || 0;
+                    if (w.latestLog && w.latestLog.id !== lastLogId) { lastLogId = w.latestLog.id; pushLog(w.latestLog.text); }
+                    if (w.ping && Date.now() - w.ping.time < 5000) activePing = w.ping;
+                    if (w.broadcastMsg && Date.now() - (w.broadcastTime || 0) < 7000) showCanvasBanner("📢 CIKGU: " + w.broadcastMsg, "#0284c7", 7000);
+                    if (w.customQ && w.customQ.id !== lastCustomQId) {
+                        lastCustomQId = w.customQ.id;
+                        customTeacherQuestion = w.customQ;
+                        showCanvasBanner("⚡ SOALAN KILAT GURU DISUNTIK KE PINTU KUIZ!", "#f59e0b", 4000);
+                    }
+                    if (w.unlockedTiles) {
+                        Object.keys(w.unlockedTiles).forEach(k => {
+                            const [r, c] = k.split("_").map(Number);
+                            if (map[r] && map[r][c] !== undefined) map[r][c] = 0;
+                        });
+                    }
+                    if (w.escapedBy && !roundWonShown) triggerRoundVictory(w.escapedBy, w.escapedDuration || 0, w.escapedWinnerId === playerId);
+                    updateHUD();
+                });
+            } catch (err) {
+                firebaseConnected = false;
+                document.getElementById("firebaseWarn").style.display = "block";
+            }
+        }
+
+        let lastCustomQId = "";
+        function triggerChaosMutator() {
+            if (document.getElementById("gameScreen").style.display !== "flex" || roundWonShown || isPaused) return;
+            const muts = ["⚡ KELAJUAN 2X", "💎 DOUBLE XP", "🎁 GAJET PERCUMA", "🌀 DENYUT SONAR"];
+            currentMutator = muts[Math.floor(Math.random() * muts.length)];
+            mutatorUntil = Date.now() + 12000;
+            if (currentMutator === "🎁 GAJET PERCUMA") giveRandomGadget();
+            showCanvasBanner(`🎲 CHAOS MUTATOR AKTIF (12s): ${currentMutator}!`, "#9333ea", 3500);
+        }
+
+        function syncMyGadgetState() {
+            if (firebaseConnected && db && fbMod) {
+                fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/players/${playerId}`), { gadget: gadgetSlots[0] || gadgetSlots[1] || "" }).catch(() => {});
+            }
+        }
+
+        function giveRandomGadget() {
+            const pool = ["bypass", "emp", "adrenaline", "scanner", "shield", "acid", "decoy", "flare", "magnet", "chrono", "portal", "sonic", "defib"];
+            const picked = pool[Math.floor(Math.random() * pool.length)];
+            if (!gadgetSlots[0]) gadgetSlots[0] = picked;
+            else if (!gadgetSlots[1]) gadgetSlots[1] = picked;
+            else gadgetSlots[0] = picked;
+            syncMyGadgetState();
+            updateHUD();
+            return picked;
+        }
+
+        // KUASA ULTIMATE [R] SETIAP 6 KELAS
+        window.activateClassUltimate = function() {
+            if (ultimateCharge < 100 || roundWonShown) {
+                showCanvasBanner(`🔥 Tenaga Ultimate belum penuh (${ultimateCharge}/100%) — Buka Pintu Kuiz untuk cas!`, "#475569", 2200);
+                return;
+            }
+            ultimateCharge = 0;
+            playSound(980, "triangle", 0.35, 0.16);
+            spawnShockwave(myX, myY, "#e879f9", 240);
+            spawnParticles(myX, myY, "#f0abfc", 45);
+
+            if (selectedRole === "sprinter") {
+                empFreezeUntil = Math.max(empFreezeUntil, Date.now() + 7000);
+                adrenalineUntil = Date.now() + 10000;
+                showCanvasBanner("⚡ ULTI SPRINTER: SONIC BOOM! Dron terpelanting & pecut tanpa had!", "#f59e0b", 4000);
+            } else if (selectedRole === "hacker") {
+                gadgetSlots[0] = "bypass";
+                activateGadgetSlot(0);
+                showCanvasBanner("💻 ULTI HACKER: SYSTEM OVERRIDE! Pintu Kuiz terdekat digodam automatik!", "#10b981", 4000);
+            } else if (selectedRole === "engineer") {
+                quantumShieldUntil = Date.now() + 15000;
+                laserOffUntil = Date.now() + 30000;
+                showCanvasBanner("🛡️ ULTI ENGINEER: KUBAH KUBU! Kebal 15s & semua Laser dipadam 30s!", "#0284c7", 4000);
+            } else if (selectedRole === "alchemist") {
+                giveRandomGadget();
+                stamina = maxStamina;
+                showCanvasBanner("🧪 ULTI ALCHEMIST: NOVA PENNEUTRAL! Stamina penuh & Gajet baharu tercipta!", "#84cc16", 4000);
+            } else if (selectedRole === "chronomancer") {
+                chronoSlowUntil = Date.now() + 12000;
+                if (meltdownUntil > Date.now()) meltdownUntil += 15000;
+                showCanvasBanner("⏳ ULTI CHRONOMANCER: HENTI MASA! Dron diperlahankan 80% & +15s Meltdown!", "#38bdf8", 4000);
+            } else if (selectedRole === "quantum") {
+                customPortals = [{ x: myX, y: myY }, { x: 30.5 * TILE, y: 19.5 * TILE }];
+                showCanvasBanner("⚛️ ULTI QUANTUM: LOHONG KAPSUL! Portal terus ke Bilik Kapsul dibuka!", "#9333ea", 4000);
+            }
+            updateHUD();
+        };
+
+        window.activateGadgetSlot = function(slotIdx) {
+            const g = gadgetSlots[slotIdx];
+            if (!g || roundWonShown) return;
+
+            if (g === "bypass" || g === "orbital") {
+                let bestR = -1, bestC = -1, bestDist = Infinity;
+                for (let r = 0; r < map.length; r++) {
+                    for (let c = 0; c < map[r].length; c++) {
+                        if (map[r][c] === 2) {
+                            const d = Math.hypot((c + 0.5) * TILE - myX, (r + 0.5) * TILE - myY);
+                            if (d < bestDist) { bestDist = d; bestR = r; bestC = c; }
+                        }
+                    }
+                }
+                if (bestR !== -1) {
+                    gadgetSlots[slotIdx] = null; syncMyGadgetState();
+                    terminalsUnlocked++;
+                    playSound(880, "triangle", 0.25, 0.14);
+                    addContributionScore(XP_REWARDS.BYPASS_GADGET, "Kunci Pintas");
+                    syncWorldTile(bestR, bestC, { terminalsUnlocked }, `🗝️ ${myName} membuka Pintu Kuiz guna gajet!`);
+                    if (g === "orbital") {
+                        empFreezeUntil = Date.now() + 12000;
+                        scannerUntil = Date.now() + 15000;
+                        showCanvasBanner("🛰️ SATELIT ORBITAL DILANCARKAN! Pintu dibuka + Peta Terdedah + Dron Beku 12s!", "#9333ea", 4500);
+                    }
+                    if (isPaused) closeTerminalModal();
+                    updateHUD();
+                } else showCanvasBanner("Tiada lagi Pintu Kuiz tertutup!", "#475569", 2200);
+                return;
+            }
+
+            if (isPaused) return;
+            gadgetSlots[slotIdx] = null;
+            syncMyGadgetState();
+            updateHUD();
+
+            if (g === "emp") {
+                empFreezeUntil = Date.now() + 8000; shakeUntil = Date.now() + 400;
+                playSound(240, "sawtooth", 0.35, 0.14); spawnParticles(myX, myY, "#38bdf8", 38);
+                showCanvasBanner("🧲 BOM EMP! Semua Dron dibekukan 8 saat!", "#0284c7", 3500);
+            } else if (g === "adrenaline") {
+                adrenalineUntil = Date.now() + 10000; stamina = maxStamina;
+                showCanvasBanner("🧪 SERUM ADRENALIN! Pecut tanpa had 10 saat!", "#d97706", 3500);
+            } else if (g === "scanner") {
+                scannerUntil = Date.now() + 12000;
+                showCanvasBanner("🔭 PENGIMBAS RADAR! Jarak penglihatan & pengesan Mimic aktif 12s!", "#7c3aed", 3500);
+            } else if (g === "shield") {
+                quantumShieldUntil = Date.now() + 10000;
+                showCanvasBanner("🛡️ PERISAI KUANTUM! Kebal daripada Dron 10 saat!", "#0284c7", 3500);
+            } else if (g === "acid") {
+                const c = Math.floor(myX / TILE), r = Math.floor(myY / TILE);
+                for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++) {
+                    if (map[r + dr] && (map[r + dr][c + dc] === 13 || map[r + dr][c + dc] === 4)) syncWorldTile(r + dr, c + dc);
+                }
+                showCanvasBanner("🧫 KELALANG ASID! Dinding retak & pagar laser berdekatan dilarutkan!", "#65a30d", 3500);
+            } else if (g === "decoy") {
+                decoyClone = { x: myX, y: myY, vx: -myMoveDirX * 160 || 140, vy: 90, until: Date.now() + 9000 };
+                showCanvasBanner("👤 HOLOGRAM UMPAN! Klon larian dilancarkan untuk mengelirukan Dron!", "#0284c7", 3500);
+            } else if (g === "flare") {
+                activeFlares.push({ x: myX, y: myY, until: Date.now() + 18000 });
+                showCanvasBanner("🔦 SUAR CAHAYA DIJATUHKAN! Menerangi kawasan ini selama 18 saat!", "#f59e0b", 3500);
+            } else if (g === "magnet") {
+                if (!hasKeycard) {
+                    hasKeycard = true; cardHolderId = playerId; map[2][32] = 0;
+                    addContributionScore(XP_REWARDS.KEYCARD_PICKUP, "Magnet Kad");
+                    showCanvasBanner("🧲 SARUNG TANGAN MAGNET! Kad Akses 💳 ditarik terus ke tangan anda!", "#d97706", 4000);
+                } else showCanvasBanner("🧲 Magnet menarik +30 Kristal Kuantum!", "#0284c7", 2500);
+            } else if (g === "chrono") {
+                if (meltdownUntil > Date.now()) meltdownUntil += 15000;
+                chronoSlowUntil = Date.now() + 10000;
+                showCanvasBanner("⏰ JAM KRONO! Masa diperlahankan & +15s pada pemasa Meltdown!", "#38bdf8", 3500);
+            } else if (g === "portal") {
+                customPortals = [{ x: myX, y: myY }, { x: myX + TILE * 4, y: myY }];
+                showCanvasBanner("🌀 PISTOL PORTAL! Sepasang lubang cacing dibuka!", "#9333ea", 3500);
+            } else if (g === "sonic" || g === "defib") {
+                cryoCagedUntil = 0; empFreezeUntil = Date.now() + 6000;
+                spawnShockwave(myX, myY, "#38bdf8", 240);
+                showCanvasBanner("🔊 GELOMBANG SONIK / DEFIBRILATOR! Dron ditolak & pasukan dipulihkan!", "#059669", 3500);
+            }
+        };
+
+        // INTERACTIVE KSSM MINI-GAMES ENGINE (BAB 2, 3, 6, 7, 9, 10, 12)
+        function renderKssmMiniGame(container, onSuccess) {
+            const types = ["ph", "circuit", "speed", "solar", "foodweb", "sound", "foodtest"];
+            const pick = types[Math.floor(Math.random() * types.length)];
+            container.innerHTML = "";
+
+            if (pick === "ph") {
+                container.innerHTML = `<div class="minigame-box">
+                    <div style="color:#a3e635; font-weight:bold; font-size:0.86rem;">🧪 MINI-GAME BAB 6: PENNEUTRALAN ASID-ALKALI</div>
+                    <p style="font-size:0.82rem; margin:4px 0;">Tumpahan asid (pH 2) dikesan! Laraskan gelangsar sehingga mencapai <b>pH Neutral (7)</b>:</p>
+                    <input type="range" id="mgPhSlider" min="1" max="14" value="2" style="width:85%;" oninput="document.getElementById('mgPhVal').innerText=this.value">
+                    <div style="font-size:1.1rem; font-weight:bold; color:#fde047;">Nilai pH Semasa: <span id="mgPhVal">2</span></div>
+                    <button class="mg-chip active" style="margin-top:8px;" onclick="if(document.getElementById('mgPhSlider').value=='7'){window._mgPass();}else{alert('Belum neutral! Sasarkan pH 7.');}">Sahkan Penneutralan</button>
+                </div>`;
+            } else if (pick === "circuit") {
+                window._s1 = false; window._s2 = false;
+                container.innerHTML = `<div class="minigame-box">
+                    <div style="color:#facc15; font-weight:bold; font-size:0.86rem;">⚡ MINI-GAME BAB 7: LITAR ELEKTRIK BERSIRI</div>
+                    <p style="font-size:0.82rem; margin:4px 0;">Hidupkan kedua-dua Suis S1 dan S2 untuk melengkapkan aliran arus ke pintu:</p>
+                    <div class="mg-btn-row">
+                        <button class="mg-chip" onclick="window._s1=!window._s1; this.classList.toggle('active'); this.innerText='Suis S1: '+(window._s1?'ON':'OFF')">Suis S1: OFF</button>
+                        <button class="mg-chip" onclick="window._s2=!window._s2; this.classList.toggle('active'); this.innerText='Suis S2: '+(window._s2?'ON':'OFF')">Suis S2: OFF</button>
+                        <button class="mg-chip active" onclick="if(window._s1 && window._s2){window._mgPass();}else{alert('Litar masih terbuka!');}">💡 Uji Mentol</button>
+                    </div>
+                </div>`;
+            } else if (pick === "speed") {
+                const dist = 120, time = 6, ans = "20";
+                window._kpVal = "";
+                container.innerHTML = `<div class="minigame-box">
+                    <div style="color:#38bdf8; font-weight:bold; font-size:0.86rem;">🏎️ MINI-GAME BAB 9: KALKULATOR LAJU (v = s / t)</div>
+                    <p style="font-size:0.82rem; margin:4px 0;">Sebuah dron bergerak sejauh <b>${dist} m</b> dalam masa <b>${time} s</b>. Kira lajunya (m/s):</p>
+                    <div id="kpDisp" style="background:#020617; padding:6px; border-radius:6px; font-size:1.1rem; color:#fde047; width:140px; margin:auto;">_</div>
+                    <div class="keypad-grid">
+                        ${[1,2,3,4,5,6,7,8,9,"C",0,"OK"].map(k => `<button onclick="
+                            if('${k}'==='C'){window._kpVal='';}
+                            else if('${k}'==='OK'){if(window._kpVal==='${ans}'){window._mgPass();}else{alert('Salah! v = 120 / 6');window._kpVal='';}}
+                            else{window._kpVal+='${k}';}
+                            document.getElementById('kpDisp').innerText=window._kpVal||'_';
+                        ">${k}</button>`).join("")}
+                    </div>
+                </div>`;
+            } else if (pick === "solar") {
+                window._p3 = false;
+                container.innerHTML = `<div class="minigame-box">
+                    <div style="color:#c084fc; font-weight:bold; font-size:0.86rem;">🪐 MINI-GAME BAB 12: SUSUNAN SISTEM SURIA</div>
+                    <p style="font-size:0.82rem; margin:4px 0;">Klik planet ke-3 dan ke-4 dari Matahari mengikut urutan:</p>
+                    <div class="mg-btn-row">
+                        <button class="mg-chip" onclick="alert('Utarid ialah planet pertama!')">Utarid</button>
+                        <button class="mg-chip" onclick="window._p3=true; this.classList.add('active')">🌍 Bumi (Ke-3)</button>
+                        <button class="mg-chip" onclick="if(window._p3){window._mgPass();}else{alert('Pilih planet ke-3 (Bumi) dahulu!');}">🔴 Marikh (Ke-4)</button>
+                    </div>
+                </div>`;
+            } else if (pick === "foodweb") {
+                container.innerHTML = `<div class="minigame-box">
+                    <div style="color:#4ade80; font-weight:bold; font-size:0.86rem;">🌿 MINI-GAME BAB 2: PEMBINA SIRATAN MAKANAN</div>
+                    <p style="font-size:0.82rem; margin:4px 0;">Lengkapkan rantai makanan: <b>Padi → [ ? ] → Ular → Helang</b></p>
+                    <div class="mg-btn-row">
+                        <button class="mg-chip active" onclick="window._mgPass()">🐀 Tikus (Pengguna Primer)</button>
+                        <button class="mg-chip" onclick="alert('Singa tidak memakan padi!')">🦁 Singa</button>
+                        <button class="mg-chip" onclick="alert('Cendawan ialah pengurai!')">🍄 Cendawan</button>
+                    </div>
+                </div>`;
+            } else if (pick === "sound") {
+                container.innerHTML = `<div class="minigame-box">
+                    <div style="color:#f472b6; font-weight:bold; font-size:0.86rem;">🔊 MINI-GAME BAB 10: PENALA FREKUENSI BUNYI</div>
+                    <p style="font-size:0.82rem; margin:4px 0;">Talakan frekuensi gelombang ultrasonik kepada <b>25 kHz</b> untuk memecahkan kunci:</p>
+                    <input type="range" id="mgFreqSlider" min="15" max="35" value="18" style="width:85%;" oninput="document.getElementById('mgFreqVal').innerText=this.value+' kHz'">
+                    <div style="font-weight:bold; color:#f472b6;" id="mgFreqVal">18 kHz</div>
+                    <button class="mg-chip active" style="margin-top:6px;" onclick="if(document.getElementById('mgFreqSlider').value=='25'){window._mgPass();}else{alert('Sasarkan tepat 25 kHz!');}">Pancar Gelombang</button>
+                </div>`;
+            } else {
+                container.innerHTML = `<div class="minigame-box">
+                    <div style="color:#fbbf24; font-weight:bold; font-size:0.86rem;">🧫 MINI-GAME BAB 3: UJIAN MAKANAN MAYA</div>
+                    <p style="font-size:0.82rem; margin:4px 0;">Sampel bertukar <b>biru tua</b> apabila dititis larutan Iodin. Apakah kelas makanan ini?</p>
+                    <div class="mg-btn-row">
+                        <button class="mg-chip active" onclick="window._mgPass()">🍞 Kanji (Karbohidrat)</button>
+                        <button class="mg-chip" onclick="alert('Protein diuji dengan larutan Biuret!')">🥩 Protein</button>
+                        <button class="mg-chip" onclick="alert('Lemak diuji dengan ujian emulsi etanol!')">🧈 Lemak</button>
+                    </div>
+                </div>`;
+            }
+            window._mgPass = onSuccess;
+        }
+
+        function recordChapterStat(bab, correct) {
+            if (!chapterStats[bab]) chapterStats[bab] = { right: 0, wrong: 0 };
+            if (correct) chapterStats[bab].right++;
+            else chapterStats[bab].wrong++;
+        }
+
+        function openTerminalQuestion(r, c, isBoss = false) {
+            isPaused = true; isHacking = true;
+            activeDoorCoords = { x: (c + 0.5) * TILE, y: (r + 0.5) * TILE };
+            currentQuestionWrongCount = 0; questionOpenedAt = Date.now();
+
+            const q = drawNextQuestion();
+            currentQuestionObj = q;
+
+            const titleEl = document.getElementById("terminalModalTitle");
+            const boxEl = document.getElementById("terminalModalBox");
+            if (isBoss) {
+                titleEl.innerText = `👾 BOSS FIREWALL (${bossEntity.hp}/${bossEntity.maxHp} HP) — SERANG DENGAN ILMU!`;
+                titleEl.style.color = "#f87171"; boxEl.style.borderColor = "#ef4444";
+            } else {
+                titleEl.innerText = `🚪🔐 PINTU KUIZ (LEVEL ${currentStage}) — JAWAB UNTUK BUKA`;
+                titleEl.style.color = "#fde047"; boxEl.style.borderColor = "#f59e0b";
+            }
+
+            const topicEl = document.getElementById("qTopicTag");
+            const weakNote = (isBoss && q._bab === bossEntity.weaknessBab) ? " 🔥 KELEMAHAN BOSS (2X KEROSAKAN!)" : "";
+            topicEl.innerText = `📚 ${CHAPTER_TITLES[q._bab] || "Sains"}${weakNote}`;
+
+            document.getElementById("qPrompt").innerText = q.soalan;
+            const fb = document.getElementById("qFeedback");
+            fb.innerText = "";
+
+            const hackBtn = document.getElementById("btnHacker5050");
+            hackBtn.style.display = selectedRole === "hacker" ? "block" : "none";
+            hackBtn.disabled = false; hackBtn.style.opacity = "1";
+
+            const mgContainer = document.getElementById("miniGameContainer");
+            const optBox = document.getElementById("qOptions");
+            mgContainer.innerHTML = ""; optBox.innerHTML = "";
+
+            const handleSuccessAnswer = () => {
+                playSound(523, "triangle", 0.15);
+                setTimeout(() => playSound(659, "triangle", 0.25), 110);
+                recordChapterStat(q._bab || 1, true);
+
+                const fastSec = (Date.now() - questionOpenedAt) / 1000;
+                const lightning = fastSec <= 5.0;
+                if (currentQuestionWrongCount === 0) comboStreak++;
+                else comboStreak = 1;
+
+                ultimateCharge = Math.min(100, ultimateCharge + 40);
+                metaSave.dailyBountyCount++;
+                if (metaSave.dailyBountyCount >= 3 && !metaSave.dailyBountyClaimed) {
+                    metaSave.dailyBountyClaimed = true;
+                    metaSave.crystals += 50;
+                    addContributionScore(150, "Misi Harian!");
+                }
+                const cardName = `Kad Bab ${q._bab || 1}`;
+                if (!metaSave.specimens.includes(cardName) && Math.random() < 0.45) {
+                    metaSave.specimens.push(cardName);
+                }
+                saveMeta();
+
+                const baseBonus = (comboStreak >= 2 ? XP_REWARDS.QUIZ_COMBO : XP_REWARDS.QUIZ_CORRECT) + (lightning ? XP_REWARDS.LIGHTNING_BONUS : 0);
+                const actualBonus = getScaledXP(baseBonus);
+                fb.style.color = "#4ade80";
+                fb.innerText = `✅ Tepat (+${actualBonus} XP${lightning ? " | ⚡ KILAT <5s!" : ""}${comboStreak >= 2 ? ` | 🔥 COMBO x${comboStreak}` : ""})! ` + (q.nota || "");
+
+                if (!isBoss) {
+                    if (map[r][c] === 2) terminalsUnlocked++;
+                    if (activeGameMode === "horde") {
+                        spawnShockwave(17.5 * TILE, 11.5 * TILE, "#38bdf8", 350);
+                        empFreezeUntil = Date.now() + 5000;
+                        showCanvasBanner("⚡ MERIAM PLASMA TERAS MENEMBAK! Semua dron terhenti!", "#0284c7", 3000);
+                    }
+                    syncWorldTile(r, c, { terminalsUnlocked }, `🚪🔐 ${myName} membuka Pintu Kuiz (+${actualBonus} XP)!`);
+                } else {
+                    const dmg = (q._bab === bossEntity.weaknessBab) ? 700 : 400;
+                    bossEntity.hp = Math.max(0, bossEntity.hp - dmg);
+                    shakeUntil = Date.now() + 500;
+                    if (bossEntity.hp <= 0) {
+                        syncWorldTile(r, c, {}, `👾 ${myName} MEMUSNAHKAN BOSS FIREWALL (+${actualBonus} XP)!`);
+                    } else {
+                        fb.innerText += ` | 💥 Serangan ${dmg} DMG! Baki HP Boss: ${bossEntity.hp}/${bossEntity.maxHp}`;
+                    }
+                }
+
+                addContributionScore(baseBonus, lightning ? "⚡ KILAT" : `L${currentStage}`);
+                setTimeout(() => {
+                    document.getElementById("terminalModal").style.display = "none";
+                    isPaused = false; isHacking = false; activeDoorCoords = null;
+                }, 900);
+            };
+
+            if (!isBoss && Math.random() < 0.35) {
+                hackBtn.style.display = "none";
+                document.getElementById("qPrompt").innerText = "Selesaikan simulasi makmal interaktif KSSM di bawah untuk menyahkod pintu:";
+                renderKssmMiniGame(mgContainer, handleSuccessAnswer);
+            } else {
+                q.pilihan.forEach((opt, idx) => {
+                    const btn = document.createElement("button");
+                    btn.className = "opt-btn"; btn.dataset.idx = idx;
+                    btn.innerText = `${String.fromCharCode(65 + idx)}. ${opt}`;
+                    btn.onclick = () => {
+                        if (idx === q.jawapanBetul) handleSuccessAnswer();
+                        else {
+                            currentQuestionWrongCount++; comboStreak = 0;
+                            recordChapterStat(q._bab || 1, false);
+                            if (!missedQuestionsLog.some(m => m.soalan === q.soalan)) missedQuestionsLog.push(q);
+                            playSound(170, "sawtooth", 0.3);
+                            fb.style.color = "#f87171";
+                            fb.innerText = "❌ Salah! Cuba pilihan lain!";
+                        }
+                    };
+                    optBox.appendChild(btn);
+                });
+            }
+            document.getElementById("terminalModal").style.display = "flex";
+        }
+
+        window.useHacker5050 = function() {
+            if (!currentQuestionObj) return;
+            const hackBtn = document.getElementById("btnHacker5050");
+            hackBtn.disabled = true; hackBtn.style.opacity = "0.5";
+            const btns = Array.from(document.querySelectorAll("#qOptions .opt-btn"));
+            btns.filter(b => Number(b.dataset.idx) !== currentQuestionObj.jawapanBetul)
+                .sort(() => Math.random() - 0.5).slice(0, 2)
+                .forEach(b => { b.style.opacity = "0.25"; b.style.textDecoration = "line-through"; b.disabled = true; });
+        };
+
+        window.closeTerminalModal = function() {
+            document.getElementById("terminalModal").style.display = "none";
+            isPaused = false; isHacking = false; activeDoorCoords = null;
+        };
+
+        function triggerRoundVictory(winnerName, durationSec, isWinnerClient = false) {
+            roundWonShown = true; meltdownUntil = 0;
+            playSound(523, "triangle", 0.15);
+            setTimeout(() => playSound(659, "triangle", 0.15), 120);
+            setTimeout(() => playSound(784, "triangle", 0.3), 240);
+            spawnParticles(myX, myY, "#facc15", 65);
+            spawnShockwave(myX, myY, "#facc15", 300);
+
+            const isFinalStage = currentStage >= 6;
+            const nextStage = isFinalStage ? 1 : currentStage + 1;
+            const baseWinPts = isFinalStage ? XP_REWARDS.GRAND_CHAMPION_BONUS : XP_REWARDS.ESCAPE_BONUS;
+            const actualWinPts = getScaledXP(baseWinPts);
+
+            if (isWinnerClient || myRoundActions >= 1) addContributionScore(baseWinPts, isFinalStage ? "JUARA OMEGA 6-LEVEL!" : `TAMAT L${currentStage}`);
+
+            const timeTaken = durationSec || Math.max(1, Math.floor((Date.now() - roundStartTime) / 1000));
+            const totalCampaignSec = Math.max(timeTaken, Math.floor((Date.now() - campaignStartTime) / 1000));
+            const ranking = getAllPlayersRanking();
+            const topMVP = ranking[0];
+
+            document.getElementById("winTitle").innerText = isFinalStage
+                ? "🌌 JUARA AGUNG OMEGA GODLIKE (6/6 TAHAP)!"
+                : `🎉 LEVEL ${currentStage} BERJAYA DITEMBUSI!`;
+            document.getElementById("winNextWarning").innerText = isFinalStage
+                ? `🏆 TAHNIAH! Semua 6 tahap telah ditawan dalam ${formatTime(totalCampaignSec)}!`
+                : `⚠️ TAHAP SETERUSNYA: ${(STAGE_CONFIG[nextStage] || STAGE_CONFIG[1]).title} (${(STAGE_CONFIG[nextStage] || STAGE_CONFIG[1]).xpMult}x XP)!`;
+            document.getElementById("winDesc").innerText = `Saintis ${winnerName} membuka Kapsul Pelarian dalam ${formatTime(timeTaken)} (+${actualWinPts} XP)!`;
+            document.getElementById("winMvpLine").innerText = topMVP ? `👑 MVP Sesi: ${topMVP.name} (+${topMVP.score} XP)` : "";
+
+            const recBadge = document.getElementById("winRecordBadge");
+            if (totalCampaignSec < bestRecord.time) {
+                bestRecord = { time: totalCampaignSec, team: winnerName, path: myTelemetryPath.slice(-120) };
+                recBadge.innerText = `🔥 REKOD TERPANTAS BAHARU: ${formatTime(totalCampaignSec)}!`;
+                if (firebaseConnected && db && fbMod && isWinnerClient) fbMod.set(fbMod.ref(db, `${GLOBAL_ROOM}/best_record`), bestRecord).catch(() => {});
+            } else {
+                recBadge.innerText = bestRecord.time < 99999 ? `🏆 Rekod Terbaik: ${formatTime(bestRecord.time)} (${bestRecord.team})` : "";
+            }
+
+            const tCan = document.getElementById("telemetryCanvas");
+            if (tCan) {
+                const tCtx = tCan.getContext("2d");
+                tCtx.fillStyle = "#020617"; tCtx.fillRect(0, 0, tCan.width, tCan.height);
+                const sx = tCan.width / (map[0].length * TILE), sy = tCan.height / (map.length * TILE);
+                for (let r = 0; r < map.length; r++) for (let c = 0; c < map[r].length; c++) {
+                    if (map[r][c] === 1) { tCtx.fillStyle = "#312e81"; tCtx.fillRect(c * TILE * sx, r * TILE * sy, TILE * sx, TILE * sy); }
+                }
+                if (myTelemetryPath.length > 1) {
+                    tCtx.strokeStyle = "#facc15"; tCtx.lineWidth = 2; tCtx.beginPath();
+                    myTelemetryPath.forEach((pt, idx) => idx === 0 ? tCtx.moveTo(pt.x * sx, pt.y * sy) : tCtx.lineTo(pt.x * sx, pt.y * sy));
+                    tCtx.stroke();
+                }
+                tCtx.fillStyle = "#94a3b8"; tCtx.font = "10px sans-serif";
+                tCtx.fillText("📡 Telemetri Jejak Pergerakan Saintis", 8, 14);
+            }
+
+            const fcBox = document.getElementById("flashcardReviewBox");
+            if (missedQuestionsLog.length > 0) {
+                fcBox.style.display = "block";
+                fcBox.innerHTML = `<strong style="color:#f87171;">🃏 Kad Imbasan Ulang Kaji (${missedQuestionsLog.length} soalan):</strong><br>` +
+                    missedQuestionsLog.map(m => `• ${escapeHTML(m.soalan)} → <span style="color:#4ade80;">${escapeHTML(m.pilihan[m.jawapanBetul])}</span>`).join("<br>");
+            } else fcBox.style.display = "none";
+
+            document.getElementById("winCountdownText").innerText = `🔄 Memasuki LEVEL ${nextStage} dalam 6 saat...`;
+            document.getElementById("winModal").style.display = "flex";
+
+            if (isWinnerClient || !firebaseConnected) {
+                if (victoryResetTimer) clearTimeout(victoryResetTimer);
+                victoryResetTimer = setTimeout(() => resetLabDoorsAndGadgets(nextStage), 6000);
+            }
+        }
+
+        function canMoveTo(nx, ny) {
+            if (isSpectatorDrone) return nx > TILE && nx < (map[0].length - 1) * TILE && ny > TILE && ny < (map.length - 1) * TILE;
+            const radius = 14;
+            const corners = [{ x: nx - radius, y: ny - radius }, { x: nx + radius, y: ny - radius }, { x: nx - radius, y: ny + radius }, { x: nx + radius, y: ny + radius }];
+            for (let pt of corners) {
+                const c = Math.floor(pt.x / TILE), r = Math.floor(pt.y / TILE);
+                if (!map[r] || map[r][c] === undefined) return false;
+                const tile = map[r][c];
+                if (tile === 1 || tile === 10 || tile === 13 || tile === 18) return false;
+                if (tile === 4 && Date.now() > laserOffUntil) return false;
+                if (tile === 16 && ny < myY) return false;
+                if (tile === 17 && collapsedBridges[`${r}_${c}`] === "gone") return false;
+                if (tile === 2) { if (!isPaused) openTerminalQuestion(r, c, false); return false; }
+                if (tile === 12 && bossEntity.hp > 0) { if (!isPaused) openTerminalQuestion(r, c, true); return false; }
+                if (tile === 7) {
+                    if (hasKeycard) {
+                        playSound(700, "sine", 0.2);
+                        addContributionScore(XP_REWARDS.FINAL_DOOR, "Pintu Akhir");
+                        if (!meltdownUntil || meltdownUntil < Date.now()) {
+                            meltdownUntil = Date.now() + 60000; shakeUntil = Date.now() + 600;
+                            showCanvasBanner("☢️ AMARAN MELTDOWN 60 SAAT! Tewaskan Boss Firewall & lari!", "#dc2626", 5500);
+                        }
+                        syncWorldTile(r, c, { meltdownUntil }, `🚨 ${myName} membuka Pintu Akhir — MELTDOWN 60s!`);
+                    } else {
+                        showCanvasBanner("🔒 Pintu Akhir memerlukan Kad Akses 💳!", "#d97706", 2800);
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        function checkTileTriggers() {
+            if (isSpectatorDrone) return;
+            const c = Math.floor(myX / TILE), r = Math.floor(myY / TILE);
+            if (!map[r]) return;
+            const tile = map[r][c];
+
+            if (tile === 17 && !collapsedBridges[`${r}_${c}`]) {
+                collapsedBridges[`${r}_${c}`] = "cracking";
+                setTimeout(() => { collapsedBridges[`${r}_${c}`] = "gone"; }, 1800);
+                setTimeout(() => { delete collapsedBridges[`${r}_${c}`]; }, 9000);
+            }
+
+            if (tile === 3) {
+                const dur = selectedRole === "engineer" ? 25000 : 15000;
+                if (Date.now() > laserOffUntil - (dur - 3000)) {
+                    playSound(880, "sine", 0.12);
+                    if (laserXpClaimedRound !== roundId) { laserXpClaimedRound = roundId; addContributionScore(XP_REWARDS.LASER_SWITCH, "Suis Laser"); }
+                }
+                laserOffUntil = Date.now() + dur; updateHUD();
+                if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { laserOffUntil }).catch(() => {});
+            }
+
+            if (tile === 6 && !hasKeycard) {
+                playSound(980, "triangle", 0.2);
+                hasKeycard = true; cardHolderId = playerId;
+                addContributionScore(XP_REWARDS.KEYCARD_PICKUP, "Kad Akses");
+                spawnParticles(myX, myY, "#facc15", 35);
+                showCanvasBanner("💳 Kad Akses Berorbit Aktif! Tekan [G] untuk baling kepada rakan!", "#d97706", 4500);
+                syncWorldTile(r, c, { hasKeycard: true, cardHolderId: playerId }, `💳 ${myName} menemui Kad Akses!`);
+                updateHUD();
+            }
+
+            if (tile === 11) {
+                const picked = giveRandomGadget();
+                playSound(780, "triangle", 0.2);
+                addContributionScore(XP_REWARDS.GADGET_CRATE, "Peti Gajet");
+                showCanvasBanner(`📦 Dapat Gajet: ${GADGET_LABELS[picked]}!`, "#db2777", 4000);
+                syncWorldTile(r, c, {}, `📦 ${myName} membuka Peti Gajet (${GADGET_LABELS[picked]})!`);
+            }
+
+            if (tile === 8 && Date.now() > teleportCooldownUntil) {
+                teleportCooldownUntil = Date.now() + 4000;
+                playSound(880, "sine", 0.2);
+                myX = c < 10 ? 32.5 * TILE : 2.5 * TILE; myY = 11.5 * TILE;
+                spawnParticles(myX, myY, "#c084fc", 25);
+                showCanvasBanner("🌀 Teleportasi Kuantum Berjaya!", "#7c3aed", 2500);
+            }
+
+            if (map[3][23] === 10 && ((r === 2 && c === 26) || (r === 4 && c === 26))) {
+                addContributionScore(XP_REWARDS.COOP_PLATE, "Pad Kerjasama");
+                showCanvasBanner("🟦 PINTU BILIK KAD AKSES DIBUKA!", "#059669", 3500);
+                syncWorldTile(3, 23, {}, `🟦 Pintu Bilik Kad Akses dibuka!`);
+            }
+
+            if (tile === 5 && !roundWonShown) {
+                if (terminalsUnlocked >= REQUIRED_QUIZ_DOORS && bossEntity.hp <= 0) {
+                    myRoundActions++;
+                    const duration = Math.max(1, Math.floor((Date.now() - roundStartTime) / 1000));
+                    if (firebaseConnected && db && fbMod) {
+                        fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { escapedBy: myName, escapedWinnerId: playerId, escapedDuration: duration }).catch(() => {});
+                    }
+                    triggerRoundVictory(myName, duration, true);
+                } else {
+                    showCanvasBanner(`🔒 Buka ${REQUIRED_QUIZ_DOORS} Pintu Kuiz & tewaskan Boss Firewall dahulu!`, "#d97706", 2800);
+                }
+            }
+        }
+
+        function handleDroneCaught() {
+            if (isSpectatorDrone || Date.now() < spawnShieldUntil) return;
+            if (Date.now() < quantumShieldUntil) {
+                quantumShieldUntil = 0; spawnShieldUntil = Date.now() + 2500;
+                showCanvasBanner("🛡️ PERISAI KUANTUM MENANGKIS DRON!", "#0284c7", 3000);
+                return;
+            }
+            if (selectedRole === "engineer" && Date.now() > engineerShieldReadyAt) {
+                engineerShieldReadyAt = Date.now() + 25000; spawnShieldUntil = Date.now() + 3000;
+                showCanvasBanner("🛡️ PERISAI AEGIS ENGINEER MENANGKIS DRON!", "#0284c7", 3000);
+                return;
+            }
+
+            playSound(160, "sawtooth", 0.45, 0.16); shakeUntil = Date.now() + 350;
+            spawnParticles(myX, myY, "#ef4444", 30);
+
+            if (activeGameMode === "hardcore") {
+                isSpectatorDrone = true;
+                showCanvasBanner("💀 MOD HARDCORE: Anda bertukar menjadi Dron Suluh Penonton!", "#dc2626", 5000);
+                return;
+            }
+
+            if (Object.keys(visualPlayers).length > 0 && Date.now() > cryoCagedUntil) {
+                cryoCagedUntil = Date.now() + 12000;
+                spawnShieldUntil = Date.now() + 13000;
+                showCanvasBanner("🧊 TERPERANGKAP DALAM SEL KRIO (12s)! Rakan boleh datang menyelamat!", "#0284c7", 4500);
+            } else {
+                myX = TILE * 2.5; myY = TILE * 2.5; myVx = 0; myVy = 0;
+                spawnShieldUntil = Date.now() + 3000;
+                showCanvasBanner("🚨 DIKESAN DRON! Dihantar semula ke Zon Mula!", "#dc2626", 3500);
+            }
+
+            if (hasKeycard && cardHolderId === playerId) {
+                hasKeycard = false; cardHolderId = ""; map[2][32] = 6; updateHUD();
+                if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { hasKeycard: false, cardHolderId: "", "unlockedTiles/2_32": null }).catch(() => {});
+            }
+        }
+
+        // PANEL KUASA DEWA GURU (GOD-EYE)
+        window.openTeacherModal = function() {
+            refreshTeacherMVPTable();
+            renderChapterHeatmap();
+            drawSimpleQrCode();
+            document.getElementById("teacherModal").style.display = "flex";
+        };
+        window.unlockTeacherPanel = function() {
+            const pin = document.getElementById("teacherPinInput").value.trim();
+            if (pin === "1234" || pin.toLowerCase() === "cikgu") {
+                document.getElementById("teacherLockBox").style.display = "none";
+                document.getElementById("teacherControlsBox").style.display = "block";
+                refreshTeacherMVPTable(); renderChapterHeatmap(); drawSimpleQrCode();
+            } else alert("PIN salah! (PIN lalai: 1234)");
+        };
+
+        const godCanvas = document.getElementById("teacherGodCanvas");
+        if (godCanvas) {
+            godCanvas.addEventListener("click", e => {
+                const rect = godCanvas.getBoundingClientRect();
+                const c = Math.floor(((e.clientX - rect.left) / rect.width) * map[0].length);
+                const r = Math.floor(((e.clientY - rect.top) / rect.height) * map.length);
+                const act = document.getElementById("godSpawnType").value;
+                if (act === "crate" && map[r] && map[r][c] === 0) {
+                    map[r][c] = 11;
+                    showCanvasBanner("🛰️ CIKGU menjatuhkan Peti Gajet Bantuan di arena!", "#059669", 3500);
+                } else if (act === "drone") {
+                    PATROL_DRONES.push({ x1: Math.max(2, c - 3) * TILE, y1: (r + 0.5) * TILE, x2: Math.min(32, c + 3) * TILE, y2: (r + 0.5) * TILE, period: 4200, type: "normal" });
+                    showCanvasBanner("🛸 CIKGU memunculkan Dron Peronda tambahan!", "#dc2626", 3500);
+                } else if (act === "flare") {
+                    activeFlares.push({ x: (c + 0.5) * TILE, y: (r + 0.5) * TILE, until: Date.now() + 25000 });
+                    showCanvasBanner("🔦 CIKGU menyalakan Suar Cahaya Besar!", "#f59e0b", 3500);
+                }
+            });
+        }
+
+        window.toggleGlobalFreeze = function() {
+            globalFreeze = !globalFreeze;
+            document.getElementById("btnGlobalFreeze").innerText = globalFreeze ? "▶️ Sambung Kelas" : "⏸️ Jeda Kelas: OFF";
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { globalFreeze }).catch(() => {});
+        };
+
+        window.spinTeacherEventWheel = function() {
+            const events = [
+                () => { giveRandomGadget(); showCanvasBanner("🎡 RODA GURU: HUJAN PETI GAJET UNTUK SEMUA!", "#059669", 4500); },
+                () => { currentMutator = "DOUBLE XP"; mutatorUntil = Date.now() + 60000; showCanvasBanner("🎡 RODA GURU: DOUBLE XP SELAMA 60 SAAT!", "#d97706", 4500); },
+                () => { empFreezeUntil = Date.now() + 15000; showCanvasBanner("🎡 RODA GURU: SEMUA DRON DIBEKUKAN 15 SAAT!", "#0284c7", 4500); }
+            ];
+            events[Math.floor(Math.random() * events.length)]();
+        };
+
+        window.injectCustomQuestion = function() {
+            const qt = document.getElementById("customQText").value.trim();
+            const qr = document.getElementById("customQRight").value.trim();
+            const qw = document.getElementById("customQWrong").value.trim();
+            if (!qt || !qr || !qw) return;
+            const qObj = { id: Math.random().toString(36).slice(2), _bab: 1, soalan: "⚡ SOALAN KILAT GURU: " + qt, pilihan: [qr, qw], jawapanBetul: 0, nota: "Soalan langsung daripada guru!" };
+            customTeacherQuestion = qObj;
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { customQ: qObj }).catch(() => {});
+            showCanvasBanner("⚡ Soalan Kilat Guru berjaya disuntik ke pintu seterusnya!", "#059669", 3500);
+        };
+
+        function estimatePBD(score) {
+            if (score >= 450) return "TP6";
+            if (score >= 300) return "TP5";
+            if (score >= 180) return "TP4";
+            if (score >= 90) return "TP3";
+            if (score >= 30) return "TP2";
+            return "TP1";
+        }
+
+        function getAllPlayersRanking() {
+            const list = [{ id: playerId, name: myName, role: selectedRole, score: myScore }];
+            Object.entries(visualPlayers).forEach(([id, p]) => list.push({ id, name: p.name || "Saintis", role: p.role || "sprinter", score: p.score || 0 }));
+            return list.sort((a, b) => b.score - a.score);
+        }
+
+        function refreshTeacherMVPTable() {
+            const tbody = document.getElementById("mvpTableBody");
+            if (!tbody) return;
+            const list = getAllPlayersRanking();
+            tbody.innerHTML = list.map((p, idx) =>
+                `<tr><td>${idx === 0 ? "👑 " : ""}${escapeHTML(p.name)}</td><td>${escapeHTML(p.role).toUpperCase()}</td><td>+${p.score}</td><td><b>${estimatePBD(p.score)}</b></td><td><button style="padding:3px 6px; font-size:0.7rem; background:#0284c7;" onclick="giftShieldToStudent('${escapeHTML(p.name)}')">🛡️ Perisai</button></td></tr>`
+            ).join("");
+        }
+
+        window.giftShieldToStudent = function(targetName) {
+            if (targetName === myName) quantumShieldUntil = Date.now() + 15000;
+            showCanvasBanner(`🛡️ CIKGU menganugerahkan Perisai Kuantum kepada ${targetName}!`, "#0284c7", 3500);
+        };
+
+        function renderChapterHeatmap() {
+            const div = document.getElementById("chapterHeatmapDiv");
+            if (!div) return;
+            const keys = Object.keys(chapterStats);
+            if (keys.length === 0) return;
+            div.innerHTML = keys.map(b => {
+                const st = chapterStats[b];
+                const pct = Math.round((st.right / Math.max(1, st.right + st.wrong)) * 100);
+                return `<div>${CHAPTER_TITLES[b] || "Bab " + b}: <b style="color:${pct >= 70 ? '#4ade80' : '#f87171'};">${pct}% Tepat</b> (${st.right} betul, ${st.wrong} salah)</div>`;
+            }).join("");
+        }
+
+        function drawSimpleQrCode() {
+            const qc = document.getElementById("qrCanvas");
+            if (!qc) return;
+            const qx = qc.getContext("2d");
+            qx.fillStyle = "#ffffff"; qx.fillRect(0, 0, 120, 120);
+            qx.fillStyle = "#0f172a";
+            let seed = 42;
+            for (let r = 0; r < 12; r++) for (let c = 0; c < 12; c++) {
+                seed = (seed * 16807) % 2147483647;
+                if ((r < 3 && c < 3) || (r < 3 && c > 8) || (r > 8 && c < 3) || (seed % 3 === 0)) {
+                    qx.fillRect(10 + c * 8, 10 + r * 8, 7, 7);
+                }
+            }
+        }
+
+        window.exportMVPCSV = function() {
+            const list = getAllPlayersRanking();
+            let csv = "Kedudukan,Nama Saintis,Pangkat,Peranan,XP Sesi,Tahap Penguasaan PBD\n";
+            list.forEach((p, i) => csv += `${i + 1},"${p.name.replace(/"/g, '""')}","${getRankTitle(p.score)}",${p.role},${p.score},${estimatePBD(p.score)}\n`);
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a"); a.href = url; a.download = `Laporan_PBD_SciEscape_GODLIKE.csv`; a.click();
+        };
+
+        window.generateMvpCertificate = function() {
+            const top = getAllPlayersRanking()[0];
+            if (!top) return;
+            const w = window.open("", "_blank");
+            w.document.write(`<div style="font-family:Georgia,serif; border:10px double #d97706; padding:40px; text-align:center; background:#fffbeb;">
+                <h1 style="color:#b45309;">SIJIL PENGHARGAAN SAINTIS TERBAIK (MVP)</h1>
+                <p>Dengan ini dianugerahkan kepada</p>
+                <h2 style="font-size:2rem; color:#1e293b;">${escapeHTML(top.name)}</h2>
+                <p>Kerana mencapai <b>+${top.score} XP (${estimatePBD(top.score)})</b> dalam simulasi <b>Sci-Escape GODLIKE: Mega Lab</b>.</p>
+            </div>`);
+        };
+
+        window.teacherBroadcast = function() {
+            const msg = document.getElementById("broadcastInput").value.trim();
+            if (!msg) return;
+            document.getElementById("broadcastInput").value = "";
+            showCanvasBanner("📢 CIKGU: " + msg, "#0284c7", 7000);
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { broadcastMsg: msg, broadcastTime: Date.now() }).catch(() => {});
+        };
+
+        window.resetLabDoorsAndGadgets = function(targetStage = 1) {
+            if (victoryResetTimer) { clearTimeout(victoryResetTimer); victoryResetTimer = null; }
+            currentStage = Number(targetStage) || 1;
+            if (currentStage === 1) campaignStartTime = Date.now();
+            document.getElementById("teacherModal").style.display = "none";
+            document.getElementById("winModal").style.display = "none";
+            document.getElementById("terminalModal").style.display = "none";
+            isPaused = false; roundWonShown = false; myRoundActions = 0; isSpectatorDrone = false; cryoCagedUntil = 0;
+            map = activeMapType === "procedural" ? generateProceduralMap(Date.now() % 99999) : BASE_MAP.map(r => [...r]);
+            bossEntity.hp = bossEntity.maxHp;
+            terminalsUnlocked = 0; hasKeycard = false; cardHolderId = ""; meltdownUntil = 0;
+            roundStartTime = Date.now(); myX = TILE * 2.5; myY = TILE * 2.5; myVx = 0; myVy = 0;
+            myTelemetryPath = [{ x: myX, y: myY }];
+            spawnShieldUntil = Date.now() + 3000;
+            buildQuestionPool(activeChapter, activeLevel);
+            updateHUD(); announceCurrentStage();
+            if (firebaseConnected && db && fbMod) {
+                fbMod.set(fbMod.ref(db, `${GLOBAL_ROOM}/world`), {
+                    roundId: roundId + 1, stage: currentStage, campaignStartTime, roundStartTime: Date.now(),
+                    terminalsUnlocked: 0, hasKeycard: false, cardHolderId: "", laserOffUntil: 0,
+                    empFreezeUntil: 0, meltdownUntil: 0, globalFreeze: false, unlockedTiles: {},
+                    escapedBy: "", escapedWinnerId: "", ping: null,
+                    latestLog: { text: `🚩 Arena memasuki LEVEL ${currentStage}!`, id: Math.random().toString() }
+                }).catch(() => {});
+            }
+        };
+
+        window.sendEmote = function(emoji) {
+            myEmote = emoji; myEmoteTime = Date.now();
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/players/${playerId}`), { emote: emoji, emoteTime: myEmoteTime }).catch(() => {});
+        };
+        window.sendChatBubble = function() {
+            const inp = document.getElementById("chatInput");
+            const msg = inp.value.trim();
+            if (!msg) return;
+            inp.value = ""; inp.blur();
+            myChat = msg; myChatTime = Date.now();
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/players/${playerId}`), { chat: msg, chatTime: myChatTime }).catch(() => {});
+        };
+
+        function getDronePos(d, now) {
+            const speedMult = (STAGE_CONFIG[currentStage] || STAGE_CONFIG[1]).droneSpeedMult * (now < chronoSlowUntil ? 0.2 : 1);
+            const adjPeriod = d.period / speedMult;
+            const effectiveNow = now < empFreezeUntil ? (empFreezeUntil - 8000) : now;
+            const phase = (effectiveNow % adjPeriod) / adjPeriod;
+            const t = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+            return { x: d.x1 + (d.x2 - d.x1) * t, y: d.y1 + (d.y2 - d.y1) * t };
+        }
+
+        // ENJIN LUKISAN 2D CANVAS GODLIKE
+        const canvas = document.getElementById("mazeCanvas");
+        const ctx = canvas.getContext("2d");
+        let lastCamX = 0, lastCamY = 0;
+
+        function drawRoundRect(x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+        }
+
+        function drawOrbitingKeycard(px, py, timestamp, isFrontPass) {
+            const angle = timestamp / 340;
+            const ox = px + Math.cos(angle) * 34, oy = py - 2 + Math.sin(angle) * 14;
+            const depth = Math.sin(angle);
+            if ((isFrontPass && depth < 0) || (!isFrontPass && depth >= 0)) return;
+            const scale = 0.8 + (depth + 1) * 0.22;
+            ctx.save(); ctx.translate(ox, oy); ctx.scale(scale, scale);
+            ctx.fillStyle = "#facc15"; drawRoundRect(-11, -7, 22, 14, 3); ctx.fill();
+            ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.2; ctx.stroke();
+            ctx.fillStyle = "#0284c7"; ctx.fillRect(-11, -3, 22, 3);
+            ctx.restore();
+        }
+
+        canvas.addEventListener("click", e => {
+            if (isPaused || roundWonShown) return;
+            const rect = canvas.getBoundingClientRect();
+            const wx = (e.clientX - rect.left) * (canvas.width / rect.width) + lastCamX;
+            const wy = (e.clientY - rect.top) * (canvas.height / rect.height) + lastCamY;
+            const pingObj = { x: Math.round(wx), y: Math.round(wy), by: myName, time: Date.now() };
+            activePing = pingObj;
+            sonarWaves.push({ x: wx, y: wy, r: 10, maxR: 320, life: 1.0 });
+            playSound(1050, "sine", 0.12, 0.08);
+            if (firebaseConnected && db && fbMod) fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/world`), { ping: pingObj }).catch(() => {});
+        });
+
+        let lastSync = 0, lastFrameTime = performance.now(), lastSentX = 0, lastSentY = 0;
+
+        function gameLoop(timestamp) {
+            const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05) || 0.016;
+            lastFrameTime = timestamp;
+            const now = Date.now();
+            const stageCfg = STAGE_CONFIG[currentStage] || STAGE_CONFIG[1];
+
+            if (meltdownUntil > 0 && now > meltdownUntil && !roundWonShown) {
+                meltdownUntil = 0; shakeUntil = now + 700;
+                showCanvasBanner(`💥 REAKTOR MELEBUR! Level ${currentStage} ditetapkan semula!`, "#dc2626", 5000);
+                resetLabDoorsAndGadgets(currentStage);
+            }
+
+            let isMoving = false;
+            const hasAdrenaline = now < adrenalineUntil;
+            const isSprinting = (keys.sprint && stamina > 2) || hasAdrenaline;
+
+            if (!isPaused && !roundWonShown && !globalFreeze && now > cryoCagedUntil) {
+                const roleMult = (selectedRole === "sprinter" ? 1.15 : 1.0) + (metaSave.skills.boots || 0) * 0.04;
+                const mutMult = (currentMutator === "⚡ KELAJUAN 2X" && now < mutatorUntil) ? 1.5 : 1.0;
+                const baseSpeed = (isSprinting ? 430 : 270) * roleMult * (hasAdrenaline ? 1.25 : 1.0) * mutMult;
+
+                const curC = Math.floor(myX / TILE), curR = Math.floor(myY / TILE);
+                let convVx = 0;
+                if (map[curR] && map[curR][curC] === 15 && !isSpectatorDrone) convVx = 120;
+
+                if (stageCfg.zeroG && !isSpectatorDrone) {
+                    const accel = baseSpeed * 3.2;
+                    if (keys.up) myVy -= accel * dt;
+                    if (keys.down) myVy += accel * dt;
+                    if (keys.left) { myVx -= accel * dt; myMoveDirX = -1; }
+                    if (keys.right) { myVx += accel * dt; myMoveDirX = 1; }
+                    myVx *= Math.pow(0.28, dt); myVy *= Math.pow(0.28, dt);
+                    const nx = myX + (myVx + convVx) * dt, ny = myY + myVy * dt;
+                    if (canMoveTo(nx, myY)) myX = nx; else myVx = -myVx * 0.4;
+                    if (canMoveTo(myX, ny)) myY = ny; else myVy = -myVy * 0.4;
+                    isMoving = Math.hypot(myVx, myVy) > 25;
+                } else {
+                    const step = baseSpeed * dt;
+                    if (keys.up && canMoveTo(myX, myY - step)) { myY -= step; isMoving = true; }
+                    if (keys.down && canMoveTo(myX, myY + step)) { myY += step; isMoving = true; }
+                    if (keys.left && canMoveTo(myX - step, myY)) { myX -= step; isMoving = true; myMoveDirX = -1; }
+                    if (keys.right && canMoveTo(myX + step, myY)) { myX += step; isMoving = true; myMoveDirX = 1; }
+                    if (convVx !== 0 && canMoveTo(myX + convVx * dt, myY)) myX += convVx * dt;
+                    if (!keys.left && !keys.right) myMoveDirX = 0;
+                }
+
+                if (customPortals.length === 2 && now > teleportCooldownUntil) {
+                    if (Math.hypot(myX - customPortals[0].x, myY - customPortals[0].y) < 26) {
+                        myX = customPortals[1].x; myY = customPortals[1].y; teleportCooldownUntil = now + 3000;
+                    }
+                }
+
+                if (stageCfg.acidFlood && !isSpectatorDrone && selectedRole !== "alchemist") {
+                    const acidSurge = Math.sin(timestamp / 2200) > 0.45;
+                    const onAlkaliPad = map[curR] && map[curR][curC] === 14;
+                    if (acidSurge && !onAlkaliPad) {
+                        stamina = Math.max(0, stamina - 35 * dt);
+                        if (Math.random() < 0.2) spawnParticles(myX, myY, "#a3e635", 2);
+                    }
+                }
+
+                if (isMoving) {
+                    if (Math.random() < 0.15) myTelemetryPath.push({ x: myX, y: myY });
+                    if (activeGameMode === "sonar" && Math.random() < 0.08) sonarWaves.push({ x: myX, y: myY, r: 8, maxR: 260, life: 0.9 });
+                    checkTileTriggers();
+                    const rx = Math.round(myX), ry = Math.round(myY);
+                    if (firebaseConnected && db && fbMod && timestamp - lastSync > 50 && (rx !== lastSentX || ry !== lastSentY)) {
+                        lastSync = timestamp; lastSentX = rx; lastSentY = ry;
+                        fbMod.update(fbMod.ref(db, `${GLOBAL_ROOM}/players/${playerId}`), { x: rx, y: ry }).catch(() => {});
+                    }
+                }
+
+                if (hasAdrenaline) stamina = maxStamina;
+                else if (isMoving && isSprinting) stamina = Math.max(0, stamina - 34 * dt);
+                else stamina = Math.min(maxStamina, stamina + 26 * dt);
+
+                if (hunterDrone.active && now > empFreezeUntil) {
+                    const targetX = (decoyClone && now < decoyClone.until) ? decoyClone.x : myX;
+                    const targetY = (decoyClone && now < decoyClone.until) ? decoyClone.y : myY;
+                    const distH = Math.hypot(targetX - hunterDrone.x, targetY - hunterDrone.y);
+                    if (distH < 320) {
+                        const ang = Math.atan2(targetY - hunterDrone.y, targetX - hunterDrone.x);
+                        const hSpd = 125 * stageCfg.droneSpeedMult * (now < chronoSlowUntil ? 0.25 : 1);
+                        hunterDrone.x += Math.cos(ang) * hSpd * dt;
+                        hunterDrone.y += Math.sin(ang) * hSpd * dt;
+                    }
+                    if (Math.hypot(myX - hunterDrone.x, myY - hunterDrone.y) < 34) handleDroneCaught();
+                }
+
+                if (bossEntity.hp > 0 && Math.hypot(myX - bossEntity.x, myY - bossEntity.y) < 380) {
+                    const waveInterval = bossEntity.hp < bossEntity.maxHp * 0.3 ? 3500 : 6500;
+                    if (now - bossEntity.lastWaveTime > waveInterval) {
+                        bossEntity.lastWaveTime = now;
+                        spawnShockwave(bossEntity.x, bossEntity.y, "#ef4444", 210);
+                        if (Math.hypot(myX - bossEntity.x, myY - bossEntity.y) < 165) {
+                            stamina = Math.max(0, stamina - 30);
+                            spawnFloatingText(myX, myY, "💥 GELOMBANG BOSS!", "#f87171");
+                        }
+                    }
+                }
+
+                if (now > spawnShieldUntil && now > empFreezeUntil) {
+                    for (let d of PATROL_DRONES) {
+                        const dp = getDronePos(d, now);
+                        if (Math.hypot(myX - dp.x, myY - dp.y) < 36) { handleDroneCaught(); break; }
+                    }
+                }
+            }
+
+            const smoothFactor = 1 - Math.exp(-15 * dt);
+            Object.values(visualPlayers).forEach(vp => {
+                vp.vx += (vp.x - vp.vx) * smoothFactor;
+                vp.vy += (vp.y - vp.vy) * smoothFactor;
+            });
+
+            const mapW = map[0].length * TILE, mapH = map.length * TILE;
+            let camX = Math.max(0, Math.min(myX - canvas.width / 2, mapW - canvas.width));
+            let camY = Math.max(0, Math.min(myY - canvas.height / 2, mapH - canvas.height));
+            if (now < shakeUntil) { camX += (Math.random() - 0.5) * 14; camY += (Math.random() - 0.5) * 14; }
+            lastCamX = camX; lastCamY = camY;
+
+            const themeBg = { default: "#020617", space: "#050214", ocean: "#021824", neon: "#090214" };
+            ctx.fillStyle = themeBg[activeTheme] || "#020617";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(-camX, -camY);
+
+            const laserActive = now > laserOffUntil;
+            const podReady = terminalsUnlocked >= REQUIRED_QUIZ_DOORS && bossEntity.hp <= 0;
+            const acidSurgeNow = stageCfg.acidFlood && Math.sin(timestamp / 2200) > 0.45;
+
+            const startCol = Math.max(0, Math.floor(camX / TILE)), endCol = Math.min(map[0].length - 1, Math.ceil((camX + canvas.width) / TILE));
+            const startRow = Math.max(0, Math.floor(camY / TILE)), endRow = Math.min(map.length - 1, Math.ceil((camY + canvas.height) / TILE));
+
+            for (let r = startRow; r <= endRow; r++) {
+                for (let c = startCol; c <= endCol; c++) {
+                    const val = map[r][c];
+                    const x = c * TILE, y = r * TILE;
+
+                    ctx.fillStyle = (r + c) % 2 === 0 ? "#0f172a" : "#0c1324";
+                    ctx.fillRect(x, y, TILE, TILE);
+                    if (acidSurgeNow && val === 0) {
+                        ctx.fillStyle = "rgba(132, 204, 22, 0.24)";
+                        ctx.fillRect(x, y, TILE, TILE);
+                    }
+                    ctx.strokeStyle = "#1e293b"; ctx.lineWidth = 1; ctx.strokeRect(x, y, TILE, TILE);
+
+                    if (val === 1) {
+                        ctx.fillStyle = currentStage >= 5 ? "#3b0764" : "#312e81";
+                        ctx.fillRect(x + 1, y + 1, TILE - 2, TILE - 2);
+                        ctx.fillStyle = currentStage >= 5 ? "#6b21a8" : "#4338ca";
+                        ctx.fillRect(x + 4, y + 4, TILE - 8, 8);
+                    } else if (val === 2) {
+                        ctx.fillStyle = "#065f46"; ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+                        ctx.strokeStyle = "#34d399"; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, TILE - 4, TILE - 4);
+                        ctx.font = "21px sans-serif"; ctx.textAlign = "center";
+                        ctx.fillText("🚪🔐", x + TILE / 2, y + 34);
+                    } else if (val === 3) {
+                        ctx.fillStyle = "#eab308"; ctx.beginPath(); ctx.arc(x + TILE / 2, y + TILE / 2, 13, 0, Math.PI * 2); ctx.fill();
+                    } else if (val === 4) {
+                        if (laserActive) {
+                            ctx.fillStyle = "rgba(239, 68, 68, 0.92)"; ctx.fillRect(x + 2, y + 20, TILE - 4, 12);
+                            if (Math.random() < 0.15) spawnParticles(x + TILE / 2, y + 26, "#fca5a5", 1);
+                        } else {
+                            ctx.strokeStyle = "#475569"; ctx.setLineDash([4, 4]); ctx.strokeRect(x + 6, y + 20, TILE - 12, 12); ctx.setLineDash([]);
+                        }
+                    } else if (val === 5) {
+                        ctx.fillStyle = podReady ? "rgba(56, 189, 248, 0.35)" : "rgba(100, 116, 139, 0.25)";
+                        ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+                        ctx.font = "26px sans-serif"; ctx.textAlign = "center";
+                        ctx.fillText(podReady ? "🚀" : "🔒", x + TILE / 2, y + 35);
+                    } else if (val === 6) {
+                        ctx.font = "26px sans-serif"; ctx.textAlign = "center";
+                        ctx.fillText("💳", x + TILE / 2, y + 35 + Math.sin(timestamp / 220) * 4);
+                    } else if (val === 7) {
+                        ctx.fillStyle = "#b45309"; ctx.fillRect(x + 3, y + 3, TILE - 6, TILE - 6);
+                        ctx.font = "24px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🚪", x + TILE / 2, y + 35);
+                    } else if (val === 8) {
+                        ctx.font = "24px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🌀", x + TILE / 2, y + 35);
+                    } else if (val === 9) {
+                        ctx.font = "20px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🟦", x + TILE / 2, y + 33);
+                    } else if (val === 10) {
+                        ctx.fillStyle = "#1d4ed8"; ctx.fillRect(x + 3, y + 3, TILE - 6, TILE - 6);
+                        ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🛡️", x + TILE / 2, y + 35);
+                    } else if (val === 11) {
+                        ctx.font = "25px sans-serif"; ctx.textAlign = "center"; ctx.fillText("📦", x + TILE / 2, y + 35);
+                    } else if (val === 12 && bossEntity.hp > 0) {
+                        ctx.fillStyle = "rgba(220, 38, 38, 0.45)"; ctx.fillRect(x, y, TILE, TILE);
+                        ctx.font = "30px sans-serif"; ctx.textAlign = "center"; ctx.fillText("👾", x + TILE / 2, y + 36);
+                        ctx.fillStyle = "#020617"; ctx.fillRect(x - 10, y - 14, TILE + 20, 8);
+                        ctx.fillStyle = "#ef4444"; ctx.fillRect(x - 10, y - 14, (TILE + 20) * (bossEntity.hp / bossEntity.maxHp), 8);
+                    } else if (val === 13) {
+                        ctx.fillStyle = "#475569"; ctx.fillRect(x + 2, y + 2, TILE - 4, TILE - 4);
+                        ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🧱", x + TILE / 2, y + 34);
+                    } else if (val === 14) {
+                        ctx.fillStyle = "rgba(74, 222, 128, 0.25)"; ctx.fillRect(x + 4, y + 4, TILE - 8, TILE - 8);
+                        ctx.font = "18px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🧪", x + TILE / 2, y + 32);
+                    } else if (val === 15) {
+                        ctx.fillStyle = "#1e293b"; ctx.fillRect(x + 4, y + 10, TILE - 8, TILE - 20);
+                        ctx.font = "18px sans-serif"; ctx.textAlign = "center"; ctx.fillText("⏩", x + TILE / 2, y + 32);
+                    } else if (val === 16) {
+                        ctx.font = "20px sans-serif"; ctx.textAlign = "center"; ctx.fillText("⏬", x + TILE / 2, y + 33);
+                    } else if (val === 17) {
+                        const st = collapsedBridges[`${r}_${c}`];
+                        if (st === "gone") { ctx.fillStyle = "#020617"; ctx.fillRect(x, y, TILE, TILE); }
+                        else { ctx.fillStyle = st === "cracking" ? "#b45309" : "#334155"; ctx.fillRect(x + 3, y + 3, TILE - 6, TILE - 6); }
+                    } else if (val === 18) {
+                        ctx.font = "24px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🪞", x + TILE / 2, y + 35);
+                        ctx.strokeStyle = "#f43f5e"; ctx.lineWidth = 2; ctx.beginPath();
+                        ctx.moveTo(x + TILE / 2, y + TILE / 2);
+                        ctx.lineTo(mirrorAngle === 0 ? x + TILE / 2 : x + TILE * 3.5, mirrorAngle === 0 ? y - TILE * 2 : y + TILE / 2);
+                        ctx.stroke();
+                    } else if (val === 19) {
+                        ctx.font = "22px sans-serif"; ctx.textAlign = "center"; ctx.fillText(mirrorSolved ? "🟢" : "🎯", x + TILE / 2, y + 34);
+                    } else if (val === 20) {
+                        ctx.font = "24px sans-serif"; ctx.textAlign = "center"; ctx.fillText("🔄", x + TILE / 2, y + 35);
+                    } else if (val === 21) {
+                        ctx.font = "24px sans-serif"; ctx.textAlign = "center"; ctx.fillText("⚗️", x + TILE / 2, y + 35);
+                    }
+                }
+            }
+
+            // Tugu Juara Hologram di Zon Mula
+            ctx.save();
+            ctx.font = "bold 10px sans-serif"; ctx.fillStyle = "#fde047"; ctx.textAlign = "center";
+            ctx.fillText(`🏆 REKOD: ${bestRecord.team}`, 4.5 * TILE, 1.4 * TILE);
+            ctx.font = "24px sans-serif"; ctx.fillText("🗿", 4.5 * TILE, 2.0 * TILE);
+            ctx.restore();
+
+            // Turret Laser Berputar 360°
+            ROTATING_TURRETS.forEach(tu => {
+                const ang = (timestamp / 1000) * tu.speed;
+                const ex = tu.x + Math.cos(ang) * tu.length, ey = tu.y + Math.sin(ang) * tu.length;
+                ctx.strokeStyle = "rgba(244, 63, 94, 0.8)"; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.moveTo(tu.x, tu.y); ctx.lineTo(ex, ey); ctx.stroke();
+                ctx.fillStyle = "#f43f5e"; ctx.beginPath(); ctx.arc(tu.x, tu.y, 10, 0, Math.PI * 2); ctx.fill();
+            });
+
+            // Custom Wormhole Portals
+            customPortals.forEach(pt => {
+                ctx.strokeStyle = "#a855f7"; ctx.lineWidth = 3;
+                ctx.beginPath(); ctx.arc(pt.x, pt.y, 20 + Math.sin(timestamp / 150) * 3, 0, Math.PI * 2); ctx.stroke();
+            });
+
+            // Dron Peronda, Stealth Drone, Armored Drone & Hunter AI Drone
+            const dronesFrozen = now < empFreezeUntil;
+            PATROL_DRONES.forEach(d => {
+                const dp = getDronePos(d, now);
+                if (d.type === "stealth" && Math.hypot(dp.x - myX, dp.y - myY) > 165 && now > scannerUntil) return;
+                ctx.fillStyle = dronesFrozen ? "rgba(56, 189, 248, 0.22)" : "rgba(239, 68, 68, 0.22)";
+                ctx.beginPath(); ctx.arc(dp.x, dp.y, 38, 0, Math.PI * 2); ctx.fill();
+                ctx.font = "27px sans-serif"; ctx.textAlign = "center";
+                const icon = dronesFrozen ? "❄️" : (d.type === "armored" ? "🦾" : (d.type === "stealth" ? "👻" : "🛸"));
+                ctx.fillText(icon, dp.x, dp.y + 9);
+            });
+
+            if (hunterDrone.active) {
+                ctx.fillStyle = "rgba(220, 38, 38, 0.28)";
+                ctx.beginPath(); ctx.arc(hunterDrone.x, hunterDrone.y, 36, 0, Math.PI * 2); ctx.fill();
+                ctx.font = "28px sans-serif"; ctx.textAlign = "center";
+                ctx.fillText(dronesFrozen ? "❄️" : "🦅", hunterDrone.x, hunterDrone.y + 9);
+            }
+
+            if (decoyClone && now < decoyClone.until) {
+                decoyClone.x += decoyClone.vx * dt; decoyClone.y += decoyClone.vy * dt;
+                ctx.globalAlpha = 0.6; ctx.font = "30px sans-serif"; ctx.textAlign = "center";
+                ctx.fillText(selectedAvatar, decoyClone.x, decoyClone.y + 10);
+                ctx.globalAlpha = 1;
+            }
+
+            for (let i = shockwaves.length - 1; i >= 0; i--) {
+                const sw = shockwaves[i]; sw.life -= dt;
+                if (sw.life <= 0) { shockwaves.splice(i, 1); continue; }
+                const curR = sw.radius + (sw.maxRadius - sw.radius) * (1 - sw.life / sw.maxLife);
+                ctx.strokeStyle = sw.color; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(sw.x, sw.y, curR, 0, Math.PI * 2); ctx.stroke();
+            }
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const pt = particles[i]; pt.x += pt.vx * dt; pt.y += pt.vy * dt; pt.life -= dt;
+                if (pt.life <= 0) { particles.splice(i, 1); continue; }
+                ctx.fillStyle = pt.color; ctx.beginPath(); ctx.arc(pt.x, pt.y, 3.2, 0, Math.PI * 2); ctx.fill();
+            }
+
+            // Lukis Semua Pemain, Cyber-Pets, Reaksi Wajah & Kad Orbit 3D
+            const allPlayers = {};
+            Object.entries(visualPlayers).forEach(([id, vp]) => { allPlayers[id] = { ...vp, drawX: vp.vx, drawY: vp.vy }; });
+            allPlayers[playerId] = {
+                name: myName, avatar: selectedAvatar, aura: selectedAura, role: selectedRole, pet: metaSave.equippedPet,
+                score: myScore, combo: comboStreak, drawX: myX, drawY: myY, hacking: isHacking,
+                emote: myEmote, emoteTime: myEmoteTime, chat: myChat, chatTime: myChatTime
+            };
+
+            Object.entries(allPlayers).forEach(([id, p]) => {
+                const holdsCard = hasKeycard && cardHolderId === id;
+                if (holdsCard) drawOrbitingKeycard(p.drawX, p.drawY, timestamp, false);
+
+                if (p.pet && p.pet !== "none") {
+                    ctx.font = "17px sans-serif"; ctx.textAlign = "center";
+                    ctx.fillText(p.pet, p.drawX - 24, p.drawY - 14 + Math.sin(timestamp / 180) * 4);
+                }
+
+                if (id === playerId && now < cryoCagedUntil) {
+                    ctx.fillStyle = "rgba(56, 189, 248, 0.35)";
+                    ctx.fillRect(p.drawX - 22, p.drawY - 24, 44, 48);
+                }
+
+                ctx.font = "32px sans-serif"; ctx.textAlign = "center";
+                ctx.fillText(id === playerId && isSpectatorDrone ? "🛸" : (p.avatar || "👨‍🔬"), p.drawX, p.drawY + 10);
+
+                let expr = "";
+                if (meltdownUntil > now) expr = "😰";
+                else if (holdsCard) expr = "😎";
+                else if (Math.hypot(p.drawX - hunterDrone.x, p.drawY - hunterDrone.y) < 150) expr = "😱";
+                if (expr) { ctx.font = "14px sans-serif"; ctx.fillText(expr, p.drawX + 18, p.drawY - 12); }
+
+                if (holdsCard) drawOrbitingKeycard(p.drawX, p.drawY, timestamp, true);
+
+                ctx.fillStyle = id === playerId ? "#fde047" : "#f8fafc";
+                ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center";
+                ctx.fillText(`${p.name} [${getRankTitle(p.score || 0)}]`, p.drawX, p.drawY - 25);
+
+                if (p.chat && now - (p.chatTime || 0) < 4000) {
+                    ctx.font = "12px sans-serif";
+                    const tw = ctx.measureText(p.chat).width + 14;
+                    ctx.fillStyle = "#ffffff"; drawRoundRect(p.drawX - tw / 2, p.drawY - 60, tw, 20, 7); ctx.fill();
+                    ctx.fillStyle = "#0f172a"; ctx.fillText(p.chat, p.drawX, p.drawY - 46);
+                } else if (p.emote && now - (p.emoteTime || 0) < 2500) {
+                    ctx.font = "24px sans-serif"; ctx.fillText(p.emote, p.drawX, p.drawY - 40);
+                }
+            });
+
+            for (let i = floatingTexts.length - 1; i >= 0; i--) {
+                const ft = floatingTexts[i]; ft.y += ft.vy * dt; ft.life -= dt;
+                if (ft.life <= 0) { floatingTexts.splice(i, 1); continue; }
+                ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center"; ctx.fillStyle = ft.color;
+                ctx.fillText(ft.text, ft.x, ft.y);
+            }
+
+            ctx.restore();
+
+            const torchBonus = (metaSave.skills.torch || 0) * 12 + (now < scannerUntil ? 85 : 0);
+            if (isDarknessActive()) {
+                const screenPx = myX - camX, screenPy = myY - camY;
+                const innerR = activeGameMode === "sonar" ? 28 : Math.max(48, stageCfg.innerRadius + torchBonus);
+                const outerR = activeGameMode === "sonar" ? 75 : Math.max(135, stageCfg.outerRadius + torchBonus * 1.4);
+
+                const grad = ctx.createRadialGradient(screenPx, screenPy, innerR, screenPx, screenPy, outerR);
+                grad.addColorStop(0, "rgba(2, 6, 23, 0)");
+                grad.addColorStop(0.6, "rgba(2, 6, 23, 0.78)");
+                grad.addColorStop(1, "rgba(1, 3, 12, 0.985)");
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                for (let i = sonarWaves.length - 1; i >= 0; i--) {
+                    const sw = sonarWaves[i]; sw.life -= dt; sw.r += 260 * dt;
+                    if (sw.life <= 0) { sonarWaves.splice(i, 1); continue; }
+                    ctx.strokeStyle = `rgba(56, 189, 248, ${sw.life})`; ctx.lineWidth = 2.5;
+                    ctx.beginPath(); ctx.arc(sw.x - camX, sw.y - camY, sw.r, 0, Math.PI * 2); ctx.stroke();
+                }
+            }
+
+            if (meltdownUntil > now) {
+                ctx.fillStyle = `rgba(220, 38, 38, ${Math.abs(Math.sin(timestamp / 250)) * 0.22})`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            if (activityLogs.length > 0) {
+                ctx.fillStyle = "rgba(2, 6, 23, 0.78)";
+                drawRoundRect(12, 12, 330, 22 + activityLogs.length * 18, 10); ctx.fill();
+                ctx.font = "bold 11px sans-serif"; ctx.textAlign = "left";
+                activityLogs.forEach((log, idx) => { ctx.fillStyle = idx === 0 ? "#fde047" : "#cbd5e1"; ctx.fillText(log.text, 22, 30 + idx * 18); });
+            }
+
+            if (bannerText && now < bannerUntil) {
+                ctx.fillStyle = bannerColor;
+                drawRoundRect(canvas.width / 2 - 340, 14, 680, 36, 10); ctx.fill();
+                ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1.5; ctx.stroke();
+                ctx.fillStyle = "#ffffff"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center";
+                ctx.fillText(bannerText, canvas.width / 2, 37);
+            }
+
+            const mmScale = 4.5, mmW = map[0].length * mmScale, mmH = map.length * mmScale;
+            const mmX = canvas.width - mmW - 14, mmY = 14;
+            ctx.fillStyle = "rgba(2, 6, 23, 0.9)"; ctx.fillRect(mmX - 4, mmY - 4, mmW + 8, mmH + 8);
+            ctx.strokeStyle = "#f59e0b"; ctx.lineWidth = 2; ctx.strokeRect(mmX - 4, mmY - 4, mmW + 8, mmH + 8);
+
+            const myTileC = myX / TILE, myTileR = myY / TILE;
+            const radarLimit = isDarknessActive() ? (stageCfg.radarRangeTiles + (now < scannerUntil ? 6 : 0)) : 999;
+
+            for (let r = 0; r < map.length; r++) {
+                for (let c = 0; c < map[r].length; c++) {
+                    if (Math.hypot(c + 0.5 - myTileC, r + 0.5 - myTileR) > radarLimit) continue;
+                    const v = map[r][c];
+                    if (v === 1) continue;
+                    ctx.fillStyle = v === 2 ? "#10b981" : (v === 6 ? "#facc15" : (v === 5 ? "#38bdf8" : (v === 12 ? "#ef4444" : "#1e293b")));
+                    ctx.fillRect(mmX + c * mmScale, mmY + r * mmScale, mmScale, mmScale);
+                }
+            }
+            Object.entries(allPlayers).forEach(([id, p]) => {
+                ctx.fillStyle = id === playerId ? "#ffffff" : "#f472b6";
+                ctx.beginPath(); ctx.arc(mmX + (p.drawX / TILE) * mmScale, mmY + (p.drawY / TILE) * mmScale, 2.8, 0, Math.PI * 2); ctx.fill();
+            });
+
+            if (godCanvas && document.getElementById("teacherModal").style.display === "flex") {
+                const gCtx = godCanvas.getContext("2d");
+                const gx = godCanvas.width / map[0].length, gy = godCanvas.height / map.length;
+                gCtx.fillStyle = "#020617"; gCtx.fillRect(0, 0, godCanvas.width, godCanvas.height);
+                for (let r = 0; r < map.length; r++) for (let c = 0; c < map[r].length; c++) {
+                    const v = map[r][c];
+                    if (v === 1) { gCtx.fillStyle = "#312e81"; gCtx.fillRect(c * gx, r * gy, gx, gy); }
+                    else if (v === 2) { gCtx.fillStyle = "#10b981"; gCtx.fillRect(c * gx, r * gy, gx, gy); }
+                    else if (v === 11) { gCtx.fillStyle = "#ec4899"; gCtx.fillRect(c * gx, r * gy, gx, gy); }
+                }
+                Object.values(allPlayers).forEach(p => {
+                    gCtx.fillStyle = "#facc15"; gCtx.beginPath();
+                    gCtx.arc((p.drawX / TILE) * gx, (p.drawY / TILE) * gy, 4, 0, Math.PI * 2); gCtx.fill();
+                });
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>
